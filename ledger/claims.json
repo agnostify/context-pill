@@ -1,0 +1,482 @@
+{
+ "started": "2026-10-16",
+ "claims": [
+  {
+   "id": "2026-10-16-181e4182",
+   "date": "2026-10-16",
+   "category": "release",
+   "claim": "Fast mode for Claude Opus 5.5 no longer needs a beta header or access request. It costs $8 input and $40 output per million tokens.",
+   "why_it_matters": "Agent loops slowed down by output can opt in per request at a known premium price (per Anthropic's docs, not on the Batch API or Claude Platform on AWS). Anthropic's speedup figure is its own claim.",
+   "try_this": "Fast mode bills at premium rates and switching speed invalidates the prompt cache, so try it on one existing Opus 5.5 request: add speed: \"fast\" and check usage.speed in the response.",
+   "evidence": [
+    {
+     "url": "https://platform.claude.com/docs/en/build-with-claude/fast-mode",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Anthropic fast mode docs confirm no beta header for Opus 5.5 and $8/$40 pricing; 2.5x speed is Anthropic's own figure",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Fast mode runs the same model with a faster inference configuration. There is no change to intelligence or capabilities.",
+   "excerpt_url": "https://platform.claude.com/docs/en/build-with-claude/fast-mode",
+   "item_url": "https://www.latent.space/p/ainews-agents-disprove-polysemanticity",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "latentspace",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-16-5b9e5691",
+   "date": "2026-10-16",
+   "category": "tool",
+   "claim": "Claude Code v2.1.302 turns fork subagents on by default in claude -p, the Agent SDK, the desktop app and VS Code. Setting CLAUDE_CODE_FORK_SUBAGENT=0 turns them off.",
+   "why_it_matters": "Headless and SDK pipelines may now spawn fork subagents they did not before, which can change cost and behavior.",
+   "try_this": "If you run claude -p in CI, pin the version or set CLAUDE_CODE_FORK_SUBAGENT=0 until you have compared output and token use.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.302",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official GitHub release notes for v2.1.302; no sandbox run",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.302",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-16-789714cf",
+   "date": "2026-10-16",
+   "category": "release",
+   "claim": "Claude Code v2.1.302 adds a notice saying standalone Claude Design at claude.ai/design will close by December 14, 2026.",
+   "why_it_matters": "Teams using standalone Claude Design have a fixed date to move their work or workflows elsewhere.",
+   "try_this": "List any design work stored only in claude.ai/design and plan to export it before December 14, 2026.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.302",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Anthropic's own release notes state the closing date; scored at deadline",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Added a notice to /design-sync and /design-login that standalone Claude Design (claude.ai/design) closes by December 14, 2026",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.302",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.302",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "anthropic",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-16-6b985b38",
+   "date": "2026-10-16",
+   "category": "tool",
+   "claim": "Codex CLI 0.163.0 runs independent read-only tools in parallel, lets you send a follow-up to steer Codex while it is still responding, and adds a searchable /config panel.",
+   "why_it_matters": "Parallel lookups and steering mid-turn cut wait time and wasted turns in long agent sessions.",
+   "try_this": "After upgrading, send a short correction while a long Codex turn is running and see whether it changes course without restarting.",
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.163.0",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official openai/codex GitHub release notes for 0.163.0; no sandbox run",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Codex can run independent read-only tools in parallel, including skill, memory, and conversation-history lookups.",
+   "excerpt_url": "https://github.com/openai/codex/releases/tag/rust-v0.163.0",
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.163.0",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "openai",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-16-8b94aede",
+   "date": "2026-10-16",
+   "category": "tool",
+   "claim": "Cursor released an Environments API in beta for creating and managing cloud agent environments in code. Environments now hold up to 300 repos.",
+   "why_it_matters": "Teams can script agent environments for big multi-repo setups instead of configuring them by hand. Cursor's load-speed figure is its own claim.",
+   "try_this": "Read the Environments API beta docs and list which of your repos one shared agent environment would need.",
+   "evidence": [
+    {
+     "url": "https://cursor.com/changelog/cloud-agent-canvases-and-environments",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Cursor's changelog confirms API beta and 300-repo limit; 5x speed is Cursor's own figure",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Cloud agent environments now support up to 300 repositories.",
+   "excerpt_url": "https://cursor.com/changelog/cloud-agent-canvases-and-environments",
+   "item_url": "https://cursor.com/changelog/cloud-agent-canvases-and-environments",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "cursor",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-16-16176cd3",
+   "date": "2026-10-16",
+   "category": "tool",
+   "claim": "Claude Code Review, which reviews GitHub pull requests on Anthropic's infrastructure, is available on Team and Enterprise plans. It has Quick, Standard and Deep levels, and it never approves or blocks a PR.",
+   "why_it_matters": "Gives teams a managed reviewer with a cost dial per repo that cannot gate merges by itself.",
+   "try_this": "If an org Owner has enabled Code Review (each review is billed), add a REVIEW.md at the root of one repo's default branch describing what to flag, then comment @claude review (you need write access to the repo). If the repo also runs the Claude Code GitHub Action, that comment may trigger it too.",
+   "evidence": [
+    {
+     "url": "https://code.claude.com/docs/en/code-review",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Claude Code docs confirm Team/Enterprise availability and the three review levels; no hands-on run",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "A review never approves or blocks the pull request, so the decision to merge stays with your team.",
+   "excerpt_url": "https://code.claude.com/docs/en/code-review",
+   "item_url": "https://www.latent.space/p/ainews-agents-disprove-polysemanticity",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "latentspace",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-16-75be094c",
+   "date": "2026-10-16",
+   "category": "tool",
+   "claim": "Perplexity open-sourced SPACE under Apache 2.0. It is a sandbox platform that runs code in isolated Firecracker microVMs, meant for agent execution environments.",
+   "why_it_matters": "A permissively licensed, self-hostable option for isolating code your agents run.",
+   "try_this": "Read the SPACE README and compare its isolation model with the sandbox your agents use now; do not deploy without your own review.",
+   "evidence": [
+    {
+     "url": "https://github.com/perplexityai/space",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "GitHub repo exists, README and Apache 2.0 license confirmed; isolation not tested by us",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "a sandbox platform for running code in isolated Firecracker microVMs",
+   "excerpt_url": "https://github.com/perplexityai/space",
+   "item_url": "https://www.latent.space/p/ainews-agents-disprove-polysemanticity",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "latentspace",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-16-4ee62b0e",
+   "date": "2026-10-16",
+   "category": "tool",
+   "claim": "Claude Code v2.1.301 adds classifier_verdict and permission_mode to OpenTelemetry tool_decision events. This lets you tell auto mode classifier decisions apart from permission rule decisions.",
+   "why_it_matters": "Teams auditing agent permissions can now tell whether each tool decision came from the auto mode classifier or a permission rule.",
+   "try_this": "If you export Claude Code telemetry, add a dashboard filter on classifier_verdict to count classifier blocks separately from rule denials.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.301",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official GitHub release notes for v2.1.301; no sandbox run",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "so auto mode classifier decisions can be told apart from permission rules",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.301",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.301",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-16-51406f64",
+   "date": "2026-10-16",
+   "category": "technique",
+   "claim": "Anthropic replaced git for its monorepo with Scion, an in-house version control system built around a server that is always online. Merges rose from about 2,500 to over 30,000 per day between May and September 2026.",
+   "why_it_matters": "An early sign of where git setups strain when agents write most of the code, plus ideas for server-side repo APIs. Anthropic says Scion is not a suitable replacement for git for general use.",
+   "try_this": "Check whether your CI jobs do full clones just to answer history questions; see whether your git host's API can answer them, or use sparse checkouts for jobs that need only some directories.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/engineering/redesigning-source-control",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Anthropic engineering post confirms the system and figures; internal metrics are not independently checkable",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Our Scion infrastructure footprint is now 200x smaller than our previous git mirroring infrastructure in terms of CPU and memory requirements.",
+   "excerpt_url": "https://www.anthropic.com/engineering/redesigning-source-control",
+   "item_url": "https://www.anthropic.com/engineering/redesigning-source-control",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-10-16-77948875",
+   "date": "2026-10-16",
+   "category": "research",
+   "claim": "Anthropic says Claude, in a closed loop with an automated evaluator, designed better quantum circuits on eight tasks. The arXiv abstract reports significant reductions on seven of the eight. Anthropic's post says one point-addition design uses 12% more qubits but 17x fewer gates.",
+   "why_it_matters": "Shows a reusable pattern: a model iterating against a strict correctness checker and cost score, with little human input.",
+   "try_this": "For an optimization task you own, write an automated correctness check and cost score first, then let an agent iterate against them.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/designing-efficient-quantum-circuits",
+     "kind": "primary"
+    },
+    {
+     "url": "https://arxiv.org/abs/2610.22367",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Anthropic post and arXiv paper 2610.22367 exist; abstract does not name Claude; results not independently reproduced; an earlier draft of this summary (2026-10-16-57503e5e) failed the full audit and was corrected, then re-audited",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Anthropic post confirms closed loop, eight tasks, 12% more qubits/17x fewer gates; arXiv abstract confirms significant reductions on seven of eight."
+   },
+   "excerpt": "Compared with the smallest previous design, one circuit in the family uses 12% more qubits but 17x fewer gates.",
+   "excerpt_url": "https://www.anthropic.com/research/designing-efficient-quantum-circuits",
+   "item_url": "https://www.anthropic.com/research/designing-efficient-quantum-circuits",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-10-16-7bbecbe6",
+   "date": "2026-10-16",
+   "category": "research",
+   "claim": "Anthropic reports that Claude worked out how the NIST P-curve seeds were generated: lrand48 seeded with Unix timestamps from 1997 to 1998, not a hash. Anthropic published code to reproduce them.",
+   "why_it_matters": "A concrete example of a model cracking a long-open puzzle by recognizing weak generator output. Anthropic says no action is needed for curve users.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/ecdsa-curve-origins",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Anthropic research page confirms the claim and code; we did not run the reproduction",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Anthropic page confirms lrand48 seeded with Unix timestamps (May 1997–April 1998), not a hash, and published reproduction code."
+   },
+   "excerpt": "the output of the C library’s lrand48 random-number generator, seeded with a Unix timestamp!",
+   "excerpt_url": "https://www.anthropic.com/research/ecdsa-curve-origins",
+   "item_url": "https://www.anthropic.com/research/ecdsa-curve-origins",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-10-16-c5ba7374",
+   "date": "2026-10-16",
+   "category": "research",
+   "claim": "Anthropic gave six METR staff access roughly like its own risk teams have. METR will publish its risk assessments; Anthropic cannot veto publication but can require redactions in set categories, and decides what falls in them.",
+   "why_it_matters": "Sets a public reference point for how much access independent evaluators of frontier models get.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/news/an-update-on-independent-evaluators",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Anthropic's announcement page confirms six METR staff, publication rights and redaction terms",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "We’ve onboarded six METR employees with company hardware, office space, and access to internal tools and systems",
+   "excerpt_url": "https://www.anthropic.com/news/an-update-on-independent-evaluators",
+   "item_url": "https://www.anthropic.com/news/an-update-on-independent-evaluators",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "anthropic",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-16-cd172a7c",
+   "date": "2026-10-16",
+   "category": "tool",
+   "claim": "Google added a Biomolecular Structure Viewer to Antigravity. It is a shared 3D view: the agent can highlight regions of a protein structure, and the researcher's highlights and pinned notes sync back to the agent.",
+   "why_it_matters": "An example of agent tools with a shared visual state that syncs between the person and the agent.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://deepmind.google/blog/accelerating-antimicrobial-discovery/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Google DeepMind blog post confirms the viewer; no hands-on test",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "a 3D visualization tool embedded directly into Antigravity",
+   "excerpt_url": "https://deepmind.google/blog/accelerating-antimicrobial-discovery/",
+   "item_url": "https://deepmind.google/blog/accelerating-antimicrobial-discovery/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "deepmind",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-16-6cf48814",
+   "date": "2026-10-16",
+   "category": "tool",
+   "claim": "Simon Willison built Chirp Pong with Claude Code and Claude Opus 5.5 Extra. It is a static web pong game for two phones that sends game state as audio chirps between the phones' speakers and microphones.",
+   "why_it_matters": "Shows networking over sound in a static page: the tool page says no Wi-Fi, Bluetooth or accounts.",
+   "try_this": "Read the published prompt on Simon's post as a template for asking an agent to build a small static web app.",
+   "evidence": [
+    {
+     "url": "https://tools.simonwillison.net/chirp-pong",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Tool page exists and describes audio-chirp play between two phones; not run",
+    "checked_at": "2026-10-16T16:04-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Two phones. One ball.",
+   "excerpt_url": "https://tools.simonwillison.net/chirp-pong",
+   "item_url": "https://simonwillison.net/2026/Oct/15/chirp-pong/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-10-30",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
+  }
+ ],
+ "audits": [
+  {
+   "date": "2026-10-16",
+   "item_id": "2026-10-16-57503e5e",
+   "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "fail",
+   "cause": "our summary",
+   "superseded_by": "2026-10-16-77948875"
+  },
+  {
+   "date": "2026-10-16",
+   "item_id": "2026-10-16-7bbecbe6",
+   "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-10-16",
+   "item_id": "2026-10-16-77948875",
+   "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  }
+ ]
+}

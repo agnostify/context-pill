@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/agnostify/context-pill/main/schema/drop.schema.json",
+  "title": "Context Pill daily drop",
+  "type": "object",
+  "required": ["date", "scanner_day", "provisional", "items", "warning"],
+  "properties": {
+    "schema": {"type": "string"},
+    "date": {"type": "string", "format": "date"},
+    "scanner_day": {"type": "integer", "minimum": 1},
+    "provisional": {"type": "boolean"},
+    "items_read": {"type": "integer"},
+    "license": {"type": "string"},
+    "warning": {"type": "string"},
+    "items": {"type": "array", "items": {"$ref": "#/$defs/item"}}
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": ["id", "date", "category", "claim", "source", "evidence", "verification", "state", "recheck_on"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{8}$"},
+        "date": {"type": "string", "format": "date"},
+        "category": {"enum": ["release", "tool", "automation", "technique", "research", "prediction"]},
+        "claim": {"type": "string"},
+        "why_it_matters": {"type": ["string", "null"]},
+        "try_this": {"type": ["string", "null"]},
+        "source": {
+          "type": "object",
+          "required": ["id", "name", "home_url", "tier", "trust_mean", "lb10", "seed"],
+          "properties": {
+            "id": {"type": "string"}, "name": {"type": "string"}, "home_url": {"type": "string", "format": "uri"},
+            "tier": {"enum": ["T1", "T1-seed", "T2", "T2-provisional", "T3", "drop"]},
+            "trust_mean": {"type": "number"}, "lb10": {"type": "number"}, "seed": {"type": "boolean"}
+          }
+        },
+        "also_seen_in": {"type": "array", "items": {"type": "string"}},
+        "item_url": {"type": ["string", "null"]},
+        "evidence": {"type": "array", "items": {"type": "object", "required": ["url", "kind"],
+          "properties": {"url": {"type": "string", "format": "uri"}, "kind": {"enum": ["primary", "independent", "hands-on"]}}}},
+        "verification": {
+          "type": "object", "required": ["status", "method", "checked_at", "provisional"],
+          "properties": {
+            "status": {"enum": ["verified", "docs-verified", "vendor-claim", "face-value-T1", "unverified", "blocked"]},
+            "method": {"type": "string"}, "checked_at": {"type": "string"},
+            "provisional": {"type": "boolean"}, "t1_audit_sample": {"type": "boolean"},
+            "audit_verdict": {"enum": ["pass", "fail", "inconclusive", "not run", null]}, "audit_note": {"type": ["string", "null"]}
+          }
+        },
+        "excerpt": {"type": ["string", "null"], "maxLength": 300},
+        "excerpt_url": {"type": ["string", "null"]},
+        "scorable": {"type": "boolean"},
+        "prediction_deadline": {"type": ["string", "null"]},
+        "state": {"enum": ["pending", "resolved", "corrected", "closed-inconclusive"]},
+        "recheck_on": {"type": "string", "format": "date"}
+      }
+    }
+  }
+}

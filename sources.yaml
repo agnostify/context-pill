@@ -1,0 +1,673 @@
+# Context Pill source registry. Hand-edit names, feeds and criteria; the scanner rewrites the trust blocks.
+# No X handles in this public file. Caps: ~40 sources total.
+sources:
+- id: theo
+  name: Theo (t3.gg)
+  home_url: https://t3.gg
+  kind: expert
+  seed: true
+  enabled: true
+  feeds:
+  - type: youtube
+    channel_id: UCbRP3c757lWg9M-U7TyEkXA
+    url: https://www.youtube.com/channel/UCbRP3c757lWg9M-U7TyEkXA
+  research_criteria:
+  - 'Close to face value after day 14: confirm the tool/model/feature he names exists on its vendor''s page or repo'
+  - Benchmarks and 'best model' takes are labeled opinion or vendor claim
+  - Until Gemini video input is on, only the title/description is read; claims from the video body are not extracted
+  register:
+    route: YouTube Data API (not active yet)
+    basis: 'YouTube Data API v3 playlistItems.list on the uploads playlist (official API, API key from env, 1 unit/call). Channel RSS is NOT used:
+      youtube.com/robots.txt disallows /feeds/videos.xml (checked Oct 16, 2026). Video content only via Gemini public-URL input when a key is
+      configured'
+    terms: 'YouTube API Services Terms (to be quoted before the key goes live): metadata and links only; no video download or re-hosting'
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 'YouTube: 1 Data API call per channel per day'
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T1-seed
+    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: dario
+  name: Dario Amodei (essays)
+  home_url: https://darioamodei.com
+  kind: lab-leader
+  seed: true
+  enabled: true
+  feeds:
+  - type: sitemap_new
+    url: https://darioamodei.com/sitemap.xml
+    filter: /post/|/essay/
+  research_criteria:
+  - Face value for what he says Anthropic will do or believes; dated predictions are logged and scored at their deadline
+  - Capability or benchmark statements about Anthropic models are 'vendor claim'
+  register:
+    route: sitemap new-URL diff
+    basis: Public sitemap; robots.txt lists it (Oct 16, 2026)
+    terms: Site shows a privacy policy; no terms page found in the sitemap. Summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T1-seed
+    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: anthropic
+  name: Anthropic
+  home_url: https://www.anthropic.com
+  kind: lab
+  seed: true
+  enabled: true
+  feeds:
+  - type: sitemap_new
+    url: https://www.anthropic.com/sitemap.xml
+    filter: /news/|/engineering/|/research/
+    use_lastmod: true
+  - type: rss
+    url: https://github.com/anthropics/claude-code/releases.atom
+  - type: youtube
+    channel_id: UCrDwWp7EBBv4NwvScIpBDOA
+    url: https://www.youtube.com/channel/UCrDwWp7EBBv4NwvScIpBDOA
+  research_criteria:
+  - Primary for whether its own release exists
+  - Benchmark and 'best model' claims stay 'vendor claim' at every tier
+  register:
+    route: sitemap new-URL diff + GitHub releases Atom + YouTube Data API (not active yet)
+    basis: Public sitemap and GitHub Atom feed, robots.txt checked at fetch; YouTube via the Data API (see YT basis)
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: '1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; YouTube: 1 Data API call per channel per day'
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T1-seed
+    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
+    updated: '2026-10-16'
+    items_seen_by_date:
+      '2026-10-16': 10
+    items_seen: 10
+    scorable_claims: 7
+- id: openai
+  name: OpenAI (and Sam Altman's blog)
+  home_url: https://openai.com
+  kind: lab
+  seed: true
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://openai.com/news/rss.xml
+  - type: rss
+    url: https://github.com/openai/codex/releases.atom
+  - type: rss
+    url: https://blog.samaltman.com/posts.atom
+  - type: youtube
+    channel_id: UCXZCJLdBC09xxGZ6gcdrc6A
+    url: https://www.youtube.com/channel/UCXZCJLdBC09xxGZ6gcdrc6A
+  research_criteria:
+  - Primary for whether its own release exists
+  - Benchmark and 'best model' claims stay 'vendor claim'
+  - Sam Altman blog predictions are logged as dated predictions
+  register:
+    route: rss/atom + YouTube Data API (not active yet)
+    basis: 'Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; YouTube: YouTube Data API v3 playlistItems.list
+      on the uploads playlist (official API, API key from env, 1 unit/call). Channel RSS is NOT used: youtube.com/robots.txt disallows /feeds/videos.xml
+      (checked Oct 16, 2026). Video content only via Gemini public-URL input when a key is configured'
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: '1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; YouTube: 1 Data API call per channel per day'
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T1-seed
+    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
+    updated: '2026-10-16'
+    items_seen_by_date:
+      '2026-10-16': 7
+    items_seen: 7
+    scorable_claims: 1
+- id: deepmind
+  name: Google DeepMind / Google AI
+  home_url: https://deepmind.google
+  kind: lab
+  seed: true
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://deepmind.google/blog/rss.xml
+  - type: rss
+    url: https://blog.google/technology/ai/rss/
+  - type: rss
+    url: https://github.com/google-gemini/gemini-cli/releases.atom
+  - type: youtube
+    channel_id: UCP7jMXSY2xbc3KCAE0MHQ-A
+    url: https://www.youtube.com/channel/UCP7jMXSY2xbc3KCAE0MHQ-A
+  research_criteria:
+  - Primary for whether its own release exists
+  - Benchmark and 'best model' claims stay 'vendor claim'
+  register:
+    route: rss/atom + YouTube Data API (not active yet)
+    basis: 'Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; YouTube: YouTube Data API v3 playlistItems.list
+      on the uploads playlist (official API, API key from env, 1 unit/call). Channel RSS is NOT used: youtube.com/robots.txt disallows /feeds/videos.xml
+      (checked Oct 16, 2026). Video content only via Gemini public-URL input when a key is configured'
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: '1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; YouTube: 1 Data API call per channel per day'
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T1-seed
+    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
+    updated: '2026-10-16'
+    items_seen_by_date:
+      '2026-10-16': 2
+    items_seen: 2
+    scorable_claims: 1
+- id: karpathy
+  name: Andrej Karpathy
+  home_url: https://karpathy.ai
+  kind: expert
+  seed: true
+  enabled: true
+  feeds:
+  - type: youtube
+    channel_id: UCXUPKJO5MZQN11PqgIvyuvQ
+    url: https://www.youtube.com/channel/UCXUPKJO5MZQN11PqgIvyuvQ
+  - type: rss
+    url: https://karpathy.bearblog.dev/feed/
+  research_criteria:
+  - 'Techniques: check the linked repo/code exists and runs as described before ''try this'''
+  - 'Rare poster: dormant, not dropped, after 60 quiet days'
+  register:
+    route: rss/atom + YouTube Data API (not active yet)
+    basis: 'Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; YouTube: YouTube Data API v3 playlistItems.list
+      on the uploads playlist (official API, API key from env, 1 unit/call). Channel RSS is NOT used: youtube.com/robots.txt disallows /feeds/videos.xml
+      (checked Oct 16, 2026). Video content only via Gemini public-URL input when a key is configured'
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: '1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; YouTube: 1 Data API call per channel per day'
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: Seed status per the approved plan (Karpathy and Simon Willison as T1 seeds).
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T1-seed
+    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: simonw
+  name: Simon Willison
+  home_url: https://simonwillison.net
+  kind: expert
+  seed: true
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://simonwillison.net/atom/everything/
+  research_criteria:
+  - 'Tool notes: confirm the tool/version exists on its repo or PyPI/npm; tools stay docs-verified until a sandbox smoke test runs'
+  - Link-blog items quoting others are attributed to the original author, not Simon
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T1-seed
+    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
+    updated: '2026-10-16'
+    items_seen_by_date:
+      '2026-10-16': 2
+    items_seen: 2
+    scorable_claims: 1
+- id: ray
+  name: Ray Fu (RayCFU)
+  home_url: https://www.raycfu.com
+  kind: creator
+  seed: false
+  enabled: true
+  feeds:
+  - type: raycfu_guides
+    url: https://www.raycfu.com/sitemap.xml
+    filter: /guides/
+    listing_url: https://www.raycfu.com/guides
+  - type: youtube
+    channel_id: UCICk1RFsC2NpDSlvPR427VQ
+    url: https://www.youtube.com/channel/UCICk1RFsC2NpDSlvPR427VQ
+  research_criteria:
+  - Every guide and video researched before inclusion
+  - Each named model/tool/feature checked against the vendor's own page
+  - 'Trading, money-making and growth-hack claims are not repeated as facts; scraping, detection-evasion or DM/engagement automation guides are
+    listed as ''not recommended: terms risk'' with no steps'
+  - Only free guides listed on the public /guides page; keyword-gated guides only when the maintainer supplies the keyword; paid playbooks skipped
+  - Instagram is never fetched; reels enter only when the maintainer pastes the caption or keyword (manual lane), otherwise 'verification blocked'
+  register:
+    route: sitemap /guides/ diff + YouTube Data API (not active yet)
+    basis: 'robots.txt: ''User-Agent: * Allow: /'' (saved Oct 16, 2026); YouTube: YouTube Data API v3 playlistItems.list on the uploads playlist
+      (official API, API key from env, 1 unit/call). Channel RSS is NOT used: youtube.com/robots.txt disallows /feeds/videos.xml (checked Oct
+      16, 2026). Video content only via Gemini public-URL input when a key is configured'
+    terms: '/terms and /terms-of-service return 404 (Oct 16, 2026). Allowed crawling is not a license: summaries, links, <=25-word quotes only.
+      Ray can opt out via TAKEDOWN.md.'
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: '1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; YouTube: 1 Data API call per channel per day'
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: latentspace
+  name: Latent Space (swyx)
+  home_url: https://www.latent.space
+  kind: expert
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://www.latent.space/feed
+  research_criteria:
+  - Every claim checked against a primary source
+  - Podcast guest claims attributed to the guest
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date:
+      '2026-10-16': 2
+    items_seen: 2
+    scorable_claims: 3
+- id: mollick
+  name: Ethan Mollick (One Useful Thing)
+  home_url: https://www.oneusefulthing.org
+  kind: expert
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://www.oneusefulthing.org/feed
+  research_criteria:
+  - Research results checked against the cited paper
+  - Opinion logged as unscorable
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: huggingface
+  name: Hugging Face Blog
+  home_url: https://huggingface.co/blog
+  kind: vendor
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://huggingface.co/blog/feed.xml
+  research_criteria:
+  - Primary for its own releases; third-party model claims checked against the model card
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: cursor
+  name: Cursor Changelog
+  home_url: https://cursor.com/changelog
+  kind: vendor
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://cursor.com/changelog/rss.xml
+  research_criteria:
+  - Primary for its own release existing; performance claims are 'vendor claim'
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date:
+      '2026-10-16': 1
+    items_seen: 1
+    scorable_claims: 1
+- id: github-changelog
+  name: GitHub Changelog
+  home_url: https://github.blog/changelog/
+  kind: vendor
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://github.blog/changelog/feed/
+  research_criteria:
+  - Primary for its own release existing; AI-related entries only
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: fireship
+  name: Fireship
+  home_url: https://www.youtube.com/@Fireship
+  kind: creator
+  seed: false
+  enabled: true
+  feeds:
+  - type: youtube
+    channel_id: UCsBjURrPoezykLs9EqgamOA
+    url: https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA
+  research_criteria:
+  - Every claim checked against the vendor page; jokes and hype are unscorable
+  register:
+    route: YouTube Data API (not active yet)
+    basis: 'YouTube Data API v3 playlistItems.list on the uploads playlist (official API, API key from env, 1 unit/call). Channel RSS is NOT used:
+      youtube.com/robots.txt disallows /feeds/videos.xml (checked Oct 16, 2026). Video content only via Gemini public-URL input when a key is
+      configured'
+    terms: 'YouTube API Services Terms (to be quoted before the key goes live): metadata and links only'
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 'YouTube: 1 Data API call per channel per day'
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: aiexplained
+  name: AI Explained
+  home_url: https://www.youtube.com/@aiexplained-official
+  kind: creator
+  seed: false
+  enabled: true
+  feeds:
+  - type: youtube
+    channel_id: UCNJ1Ymd5yFuUPtn21xtRbbw
+    url: https://www.youtube.com/channel/UCNJ1Ymd5yFuUPtn21xtRbbw
+  research_criteria:
+  - Every claim checked against the vendor page or paper
+  register:
+    route: YouTube Data API (not active yet)
+    basis: 'YouTube Data API v3 playlistItems.list on the uploads playlist (official API, API key from env, 1 unit/call). Channel RSS is NOT used:
+      youtube.com/robots.txt disallows /feeds/videos.xml (checked Oct 16, 2026). Video content only via Gemini public-URL input when a key is
+      configured'
+    terms: 'YouTube API Services Terms (to be quoted before the key goes live): metadata and links only'
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 'YouTube: 1 Data API call per channel per day'
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: interconnects
+  name: Interconnects (Nathan Lambert)
+  home_url: https://www.interconnects.ai
+  kind: expert
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://www.interconnects.ai/feed
+  research_criteria:
+  - Research and open-model claims checked against the model card or paper
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: importai
+  name: Import AI (Jack Clark)
+  home_url: https://importai.substack.com
+  kind: expert
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://importai.substack.com/feed
+  research_criteria:
+  - Paper results checked against the paper; commentary unscorable
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. We republish summaries only.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-10-16'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: x-discovery
+  name: X (private discovery signal)
+  enabled: false
+  disabled_reason: Disabled until X approves this use case in writing. Nothing from X is ever published here.
+- id: instagram
+  name: Instagram
+  enabled: false
+  disabled_reason: 'Never fetched (login wall, automated-collection terms). Manual lane only: the maintainer pastes a caption or guide keyword.'
+- id: arxiv
+  name: arXiv API
+  enabled: false
+  disabled_reason: Disabled until registered (spaced-request etiquette, per-paper licenses).
+- id: hf-api
+  name: Hugging Face API
+  enabled: false
+  disabled_reason: Disabled until registered.
+- id: hn-algolia
+  name: Hacker News (Algolia)
+  enabled: false
+  disabled_reason: Disabled until registered.
+- id: github-search
+  name: GitHub REST search / Trending
+  enabled: false
+  disabled_reason: Disabled until registered.
+- id: reddit
+  name: Reddit (Arctic Shift)
+  enabled: false
+  disabled_reason: Disabled until registered.
+tightened: {}
