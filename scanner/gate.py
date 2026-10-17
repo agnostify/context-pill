@@ -7,7 +7,8 @@ import json, os, re
 from pathlib import Path
 
 ALLOWED_TOP = {"README.md", "llms.txt", "latest.md", "latest.json", "daily", "weekly", "scanner", "sources.yaml", "schema", "METHOD.md",
-               "CHANGELOG-sources.md", "TAKEDOWN.md", "skill", "LICENSE", "LICENSE-CONTENT", "ledger", "feedback", ".gitignore", ".git"}
+               "CHANGELOG-sources.md", "TAKEDOWN.md", "skill", "LICENSE", "LICENSE-CONTENT", "ledger", "feedback", ".gitignore", ".git",
+               ".claude-plugin", "plugin", "mcp"}
 SECRET = [r"sk-[A-Za-z0-9_-]{20,}", r"sk-ant-[A-Za-z0-9_-]{10,}", r"gh[pousr]_[A-Za-z0-9]{30,}", r"github_pat_[A-Za-z0-9_]{30,}", r"AIza[0-9A-Za-z_-]{35}",
           r"\bre_[A-Za-z0-9]{8}_[A-Za-z0-9]{16,}", r"AKIA[0-9A-Z]{16}", r"xox[abpr]-[A-Za-z0-9-]{10,}", r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
           r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*['\"][^'\"\s]{12,}['\"]"]

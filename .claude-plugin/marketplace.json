@@ -1,0 +1,14 @@
+{
+  "name": "context-pill",
+  "description": "Context Pill: new AI releases, tools and techniques, each labeled with how it was checked.",
+  "owner": {
+    "name": "Agnostify"
+  },
+  "plugins": [
+    {
+      "name": "context-pill",
+      "source": "./plugin",
+      "description": "Pull today's checked AI claims into Claude Code on demand, or check whether a specific release claim has been verified."
+    }
+  ]
+}

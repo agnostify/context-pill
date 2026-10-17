@@ -1,1 +1,1 @@
-"""Context Pill expert-verified AI scanner. Code: MIT. See METHOD.md."""
+"""Context Pill source-checked AI scanner. Code: MIT. See METHOD.md."""
