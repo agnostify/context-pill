@@ -5,7 +5,7 @@ Repo (public) = this checkout. Work dir (private, never pushed) = $CP_WORK or ..
 import argparse, json, os, hashlib, datetime as dt
 from pathlib import Path
 import yaml
-from . import fetch, extract, trust, render, gate, util
+from . import fetch, extract, trust, render, gate, util, repeats
 
 REPO = Path(__file__).resolve().parent.parent
 WORK = Path(os.environ.get("CP_WORK", REPO.parent / "context-pill-work"))
@@ -123,7 +123,11 @@ def main():
 
     # 4. publication checks: allowed source, cross-day dedupe, evidence alive, quote rules, tool ceiling, ids, recheck dates
     earlier_items = {c.get("item_url") for c in ledger["claims"] if c["date"] < date}
+    stories = repeats.earlier_stories(ledger, date, log=log)  # cross-day repeat-story check (same story, different URL)
+    same_day = repeats.SameDay()
+    removed = {t["id"] for t in ledger.get("removed", [])}         # scanner.remove tombstones survive rebuilds
     drop, rejected = [], []
+    maybe_repeats = []                                            # kept but flagged; the review step reads raw/<date>/repeat-flags.json
     for c in claims:
         s = srcs.get(c.get("source_id"))
         if not s or not s.get("enabled") or (s.get("trust") or {}).get("tier") == "drop":
@@ -133,6 +137,19 @@ def main():
         if c.get("item_url") and c["item_url"] in earlier_items:
             rejected.append(f"{c['source_id']}: item already covered on an earlier day"); continue
         c["evidence"] = [e for e in c.get("evidence", []) if e.get("url") and not util.blocked(e["url"])]
+        cid = date + "-" + format(_h(f"{s['id']}|{c.get('item_url')}|{c['claim']}"), "x")[:8]
+        if cid not in removed:                       # a tombstoned claim is dropped below and must not block another one
+            what = f"{cid} ({c.get('item_url')}) {(c.get('claim') or '')[:80]!r}"
+            rep = repeats.find_repeat(c, stories)
+            if rep and rep[2]:
+                rejected.append(f"{c['source_id']}: repeat story: {what}: {rep[1]}"); continue
+            dup = same_day.check(c)
+            if dup and dup[1]:
+                rejected.append(f"{c['source_id']}: same-day duplicate: {what}: {dup[0]}"); continue
+            for m in ([rep[1]] if rep else []) + ([dup[0]] if dup else []):
+                maybe_repeats.append({"id": cid, "item_url": c.get("item_url"), "claim": c.get("claim"), "match": m})
+                log(f"possible repeat (kept, for review): {what}: {m}")
+            same_day.add(c)
         alive = [util.url_alive(e["url"])[0] for e in c["evidence"]]
         v = c.setdefault("verification", {})
         if not c["evidence"] or any(x is False for x in alive):
@@ -148,7 +165,6 @@ def main():
         t = s["trust"]
         # METHOD.md: every specific, checkable claim (release, tool, technique, research number, dated prediction) is scorable
         c["scorable"] = True
-        cid = date + "-" + format(_h(f"{s['id']}|{c.get('item_url')}|{c['claim']}"), "x")[:8]
         base = dt.date.fromisoformat(c["prediction_deadline"]) if c.get("prediction_deadline") else today
         drop.append({
             "id": cid, "date": date, "category": c["category"], "claim": c["claim"], "why_it_matters": c.get("why_it_matters"),
@@ -162,11 +178,11 @@ def main():
             "excerpt": c.get("excerpt"), "excerpt_url": c.get("excerpt_url"),
             "scorable": True, "prediction_deadline": c.get("prediction_deadline"),
             "state": "pending", "recheck_on": (base + dt.timedelta(days=trust.RECHECK_DAYS)).isoformat()})
-    removed = {t["id"] for t in ledger.get("removed", [])}         # scanner.remove tombstones survive rebuilds
     rejected += [f"{d['source']['id']}: {d['id']} was removed by the maintainer" for d in drop if d["id"] in removed]
     drop = [d for d in drop if d["id"] not in removed]
     for r in rejected:
         log(f"rejected at publication: {r}")
+    (raw / "repeat-flags.json").write_text(json.dumps(maybe_repeats, indent=1, ensure_ascii=False))
 
     # 5. T1 full-audit sample (runs from day 1): deterministic 1-in-10 by id, at least one per day when T1 items exist.
     # Sampling uses each source's tier as of the start of the day, so a same-day rerun after a demotion audits the same items.

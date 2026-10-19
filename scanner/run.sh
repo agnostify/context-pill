@@ -7,4 +7,5 @@ PY="${CP_PYTHON:-python3}"
 [ -f "${CP_SECRETS:-/nonexistent}" ] && { set -a; . "$CP_SECRETS"; set +a; }
 "$PY" -m scanner.tests.test_trust
 "$PY" -m scanner.tests.test_tools
+"$PY" -m scanner.tests.test_repeats
 "$PY" -m scanner.run "$@"
