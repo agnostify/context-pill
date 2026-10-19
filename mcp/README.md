@@ -8,6 +8,8 @@ A small, read-only MCP server for the Context Pill feed. It is stateless (Stream
 claude mcp add --transport http context-pill https://contextpill.com/mcp
 ```
 
+Setup for Codex, Cursor and VS Code: see the setup snippets in the main [README](../README.md#setup-snippets-copy-and-paste). Which tool to call first: `get_latest` for what's new, `search_claims` to check one named tool or model, `list_sources` for how far to trust a source.
+
 ## Tools
 
 | Tool | What it returns |

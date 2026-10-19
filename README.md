@@ -36,11 +36,47 @@ Context Pill is meant to be read on demand, when you ask, not before every task.
 
 Then type `/context-pill:today` (optionally with a topic, e.g. `/context-pill:today coding agents`) for a summary of today's checked items, or `/context-pill:check <tool or model>` to see whether a specific claim has been checked and how. Both run only when you invoke them.
 
-**MCP server.** A read-only MCP endpoint with three tools (`get_latest`, `search_claims`, `list_sources`). No keys, no sessions. Once added, the tools are available for your agent to call when it decides they help; those calls follow your Claude Code permission settings. Details in [mcp/README.md](mcp/README.md).
+**MCP server.** A read-only MCP endpoint with three tools (`get_latest`, `search_claims`, `list_sources`). No keys, no sessions. Once added, the tools are available for your agent to call when it decides they help; those calls follow your client's permission settings. Details in [mcp/README.md](mcp/README.md).
+
+Setup for Claude Code, Codex, Cursor and VS Code is just below.
+
+### Setup snippets (copy and paste)
+
+The MCP endpoint is `https://contextpill.com/mcp` (Streamable HTTP, read-only, no key). Start with `get_latest` for "what's new", or `search_claims` to check one named tool or model.
+
+**Claude Code**
 
 ```
 claude mcp add --transport http context-pill https://contextpill.com/mcp
 ```
+
+**Codex CLI**
+
+```
+codex mcp add context-pill --url https://contextpill.com/mcp
+```
+
+**Cursor** (`~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project)
+
+```json
+{
+  "mcpServers": {
+    "context-pill": { "url": "https://contextpill.com/mcp" }
+  }
+}
+```
+
+**VS Code** (`.vscode/mcp.json` in your workspace)
+
+```json
+{
+  "servers": {
+    "context-pill": { "type": "http", "url": "https://contextpill.com/mcp" }
+  }
+}
+```
+
+Then ask your agent something like "What's new for coding agents today? Use Context Pill." or "Has Context Pill checked `<tool name>`?"
 
 **Copy by hand.** The same instructions as a single slash command, [`skill/commands/context-pill.md`](skill/commands/context-pill.md) (copy it to `~/.claude/commands/`), or as a skill, [`skill/context-pill/`](skill/context-pill/SKILL.md).
 
