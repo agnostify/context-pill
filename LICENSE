@@ -21,6 +21,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ---
-Scope: this MIT license covers the code in scanner/ and schema/. The feed
+Scope: this MIT license covers the code in scanner/, schema/, plugin/ and mcp/. The feed
 content (latest.*, daily/, weekly/, ledger/, sources.yaml text, and the
 summaries in them) is licensed separately under CC BY 4.0; see LICENSE-CONTENT.

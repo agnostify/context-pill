@@ -15,7 +15,7 @@ NOT covered by this license:
 - Linked pages, videos, images and product names, which belong to their owners.
 - Nothing from X (Twitter) is published in this repository.
 
-The code in scanner/ and schema/ is MIT-licensed; see LICENSE.
+The code in scanner/, schema/, plugin/ and mcp/ is MIT-licensed; see LICENSE.
 
 The full legal code of CC BY 4.0 follows.
 
