@@ -748,6 +748,106 @@
    "recheck_on": "2026-10-31",
    "source_id": "deepmind",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-19-6c3cb5e4",
+   "date": "2026-10-19",
+   "category": "release",
+   "claim": "OpenAI's videos say the new ChatGPT Voice is powered by GPT Live. GPT Live is OpenAI's real-time voice model, and GPT-Live-1 is already in the API. We could not load OpenAI's voice feature page to confirm rollout details.",
+   "why_it_matters": "If ChatGPT Voice runs on GPT Live, it previews how the API's GPT-Live-1 behaves in full-duplex conversation.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://openai.com/index/introducing-gpt-live-1-in-the-api",
+     "kind": "primary"
+    },
+    {
+     "url": "https://openai.com/index/continuous-voice-interaction-with-gpt-live",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "Video not analyzed; OpenAI RSS confirms GPT-Live exists; chatgpt.com voice page returned 403, so the ChatGPT Voice link is unconfirmed",
+    "checked_at": "2026-10-19T05:22-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=mEulEkuxCnM",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-02",
+   "source_id": "openai",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-10-19-c8e4fb74",
+   "date": "2026-10-19",
+   "category": "release",
+   "claim": "OpenAI published Codex CLI rust-v0.164.0-alpha.4 as a GitHub pre-release on Oct 19, 2026. It has no release notes beyond its title.",
+   "why_it_matters": "This alpha is unstable and its changes are undocumented, so it is only for people testing upcoming Codex CLI changes.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.164.0-alpha.4",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Fetched the GitHub release page: tagged pre-release, Oct 19, commit c108a58, no notes",
+    "checked_at": "2026-10-19T05:22-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.164.0-alpha.4",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-02",
+   "source_id": "openai",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-19-afcaccb4",
+   "date": "2026-10-19",
+   "category": "release",
+   "claim": "Google published Gemini CLI nightly v0.66.0-nightly.20261019 as a GitHub pre-release. It has a changelog diff but no written release notes.",
+   "why_it_matters": "This nightly build has no described changes, so stable Gemini CLI users can ignore it.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0-nightly.20261019.ged96faedf",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Read the snapshot of the GitHub release page: marked pre-release, dated Oct 19, compare link only",
+    "checked_at": "2026-10-19T05:22-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0-nightly.20261019.ged96faedf",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-02",
+   "source_id": "deepmind",
+   "status_at_publication": "verified"
   }
  ],
  "audits": [
@@ -780,6 +880,22 @@
    "source_id": "deepmind",
    "tier": "T1-seed",
    "verdict": "pass"
+  },
+  {
+   "date": "2026-10-18",
+   "item_id": "2026-10-18-15ad18f3",
+   "source_id": "simonw",
+   "tier": "T1-seed",
+   "verdict": "pass",
+   "removed": true
+  },
+  {
+   "date": "2026-10-19",
+   "item_id": "2026-10-19-de2858ec",
+   "source_id": "simonw",
+   "tier": "T1-seed",
+   "verdict": "pass",
+   "removed": true
   }
  ],
  "removed": [
@@ -802,6 +918,61 @@
    "id": "2026-10-17-45bb6eea",
    "date": "2026-10-17",
    "reason": "review: training method described as QAT; model card says quantization-aware distillation"
+  },
+  {
+   "id": "2026-10-18-589cfabc",
+   "date": "2026-10-18",
+   "reason": "review: repeats a claim already published on 2026-10-17"
+  },
+  {
+   "id": "2026-10-18-9069e2b2",
+   "date": "2026-10-18",
+   "reason": "review: repeats a claim already published on 2026-10-17"
+  },
+  {
+   "id": "2026-10-18-a4583696",
+   "date": "2026-10-18",
+   "reason": "review: repeats a claim already published on 2026-10-17"
+  },
+  {
+   "id": "2026-10-18-fc4adeff",
+   "date": "2026-10-18",
+   "reason": "review: wording not supported by the release page"
+  },
+  {
+   "id": "2026-10-18-11debb7b",
+   "date": "2026-10-18",
+   "reason": "review: price shown without the current sale price on Mistral's docs"
+  },
+  {
+   "id": "2026-10-18-15ad18f3",
+   "date": "2026-10-18",
+   "reason": "held: review"
+  },
+  {
+   "id": "2026-10-18-aefa62fa",
+   "date": "2026-10-18",
+   "reason": "held: review"
+  },
+  {
+   "id": "2026-10-18-ee77261f",
+   "date": "2026-10-18",
+   "reason": "held: review"
+  },
+  {
+   "id": "2026-10-19-5636f4c5",
+   "date": "2026-10-19",
+   "reason": "review: unsupported 'safe to take' / no-behavior-change assurance"
+  },
+  {
+   "id": "2026-10-19-dbd4d25c",
+   "date": "2026-10-19",
+   "reason": "review: credited the echo model to 0.5 (present since 0.1); unpinned untested try-this"
+  },
+  {
+   "id": "2026-10-19-de2858ec",
+   "date": "2026-10-19",
+   "reason": "review: unpinned untested try-this install step"
   }
  ]
 }
