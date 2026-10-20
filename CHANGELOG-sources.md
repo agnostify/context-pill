@@ -23,3 +23,7 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-10-19: removed 1 item(s) from 2026-10-19 (review: unsupported 'safe to take' / no-behavior-change assurance)
 - 2026-10-19: removed 1 item(s) from 2026-10-19 (review: credited the echo model to 0.5 (present since 0.1); unpinned untested try-this)
 - 2026-10-19: removed 1 item(s) from 2026-10-19 (review: unpinned untested try-this install step)
+- 2026-10-20: audit of 2026-10-20-894ba3de (Anthropic): pass (v2.1.304 release notes confirm the --worktree fix: it removed the worktree and branch without asking when HEAD was detached or elsewhere, risking lost commits.)
+- 2026-10-20: removed 1 item(s) from 2026-10-20 (review: GA date not in credited Hugging Face source (source-credit mismatch))
+- 2026-10-20: removed 1 item(s) from 2026-10-20 (review: human-review and suggested-fix wording broader than primary sources)
+- 2026-10-20: removed 1 item(s) from 2026-10-20 (review: macOS 15 and Python 3.11 requirements conflated as MPS-only)
