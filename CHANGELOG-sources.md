@@ -27,3 +27,8 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-10-20: removed 1 item(s) from 2026-10-20 (review: GA date not in credited Hugging Face source (source-credit mismatch))
 - 2026-10-20: removed 1 item(s) from 2026-10-20 (review: human-review and suggested-fix wording broader than primary sources)
 - 2026-10-20: removed 1 item(s) from 2026-10-20 (review: macOS 15 and Python 3.11 requirements conflated as MPS-only)
+- 2026-10-22: audit of 2026-10-22-abfd2241 (Anthropic): pass (v2.1.307 release notes confirm the claude_code.safety_event OpenTelemetry event and the fix for HTTP MCP calls sent twice when a connection closed mid-call.)
+- 2026-10-22: removed 1 item(s) from 2026-10-22 (review: wording broader than source (Codex round 1))
+- 2026-10-22: removed 1 item(s) from 2026-10-22 (review: wording broader than source (Codex round 1))
+- 2026-10-22: audit of 2026-10-22-6baede17 (Anthropic): pass (Anthropic page confirms Fable 5.1 in Claude Science, nine-loop six-particle planar N=4 SYM amplitude, ~$1–2k cost, Lance Dixon validation.)
+- 2026-10-22: removed 1 item(s) from 2026-10-22 (review: try-this misstated PHP backport support for 8.1 and older)
