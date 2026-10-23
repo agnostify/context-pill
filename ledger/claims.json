@@ -1536,6 +1536,210 @@
    "recheck_on": "2026-11-05",
    "source_id": "openai",
    "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-10-23-276c68b5",
+   "date": "2026-10-23",
+   "category": "release",
+   "claim": "Railway disclosed on Oct 21, 2026 that an unauthorized party may have accessed stored customer environment variables, some of them decrypted. Railway paused all deployments and told customers to rotate every stored variable.",
+   "why_it_matters": "Hosted AI apps keep LLM provider keys and database passwords in environment variables. Leaked keys can mean surprise model bills and data access.",
+   "try_this": "If you deploy on Railway, rotate every API key and database credential stored there, then check your LLM provider usage dashboards for unusual spend.",
+   "evidence": [
+    {
+     "url": "https://blog.railway.com/p/security-disclosure-wednesday-october-21st",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Railway's own disclosure post; outage duration from video not confirmed there",
+    "checked_at": "2026-10-23T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=USeyDcWyVCc",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-06",
+   "source_id": "theo",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-23-4fdf9482",
+   "date": "2026-10-23",
+   "category": "research",
+   "claim": "Wiz Research says it found the PHP2Shell RCE bugs (CVE-2026-109618/109619) using AI, naming Wiz Atlas, Gemini 4 Argon and GPT-5.6 Sol. It credits OpenAI, Calif and the PHP team, and reported the bugs to PHP on Aug 24, 2026.",
+   "why_it_matters": "This is a named, dated case of frontier models finding critical bugs in core internet software. Expect faster vulnerability waves and shorter patch windows.",
+   "try_this": "Search your web server logs for the exploitation signs Wiz lists: odd multipart requests followed by memory-limit errors, or oversized PHPSESSID cookies.",
+   "evidence": [
+    {
+     "url": "https://www.wiz.io/blog/php2shell-php-rce",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Wiz's own PHP2Shell post names CVEs, models used, credits and timeline",
+    "checked_at": "2026-10-23T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Immediate patching is strongly advised.",
+   "excerpt_url": "https://www.wiz.io/blog/php2shell-php-rce",
+   "item_url": "https://www.youtube.com/watch?v=USeyDcWyVCc",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-06",
+   "source_id": "theo",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-23-ac6aeeff",
+   "date": "2026-10-23",
+   "category": "release",
+   "claim": "On Oct 21, 2026, OpenAI announced Patch the Planet, a program that connects security researchers, maintainers and incident responders to fix critical open-source vulnerabilities found by AI agents.",
+   "why_it_matters": "Open-source maintainers whose code AI agents scan may start getting coordinated disclosures through this channel.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://openai.com/news/rss.xml",
+     "kind": "primary"
+    },
+    {
+     "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "OpenAI news RSS entry and summary; article page returned 403; PHP link not stated there",
+    "checked_at": "2026-10-23T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Patch the Planet connects security researchers, maintainers, and incident responders",
+   "excerpt_url": "https://openai.com/news/rss.xml",
+   "item_url": "https://www.youtube.com/watch?v=USeyDcWyVCc",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-06",
+   "source_id": "theo",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-23-adc4220c",
+   "date": "2026-10-23",
+   "category": "release",
+   "claim": "After a 1,000-person pilot, Uber is rolling out ChatGPT Work, OpenAI's agentic platform for knowledge work, to more than 30,000 employees, announced Oct 22, 2026.",
+   "why_it_matters": "A large enterprise is pushing agent workflows beyond engineering. That signals demand for agents that handle research, data analysis and slide work end to end.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://openai.com/news/rss.xml",
+     "kind": "primary"
+    },
+    {
+     "url": "https://openai.com/index/uber-chatgpt-work-rollout/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "OpenAI news RSS entry confirms 30,000+ rollout; article page 403; pilot size from video description only",
+    "checked_at": "2026-10-23T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "inconclusive",
+    "audit_note": "RSS confirms Oct 22 and 30,000+ employees; article returned 403, so 1,000-person pilot and 'agentic platform' wording are unverified."
+   },
+   "excerpt": "Uber is rolling out ChatGPT Work to more than 30,000 employees",
+   "excerpt_url": "https://openai.com/news/rss.xml",
+   "item_url": "https://www.youtube.com/watch?v=l16Gw7oVLNQ",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-06",
+   "source_id": "openai",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-23-ba6839b4",
+   "date": "2026-10-23",
+   "category": "release",
+   "claim": "ChatGPT has Intelligent UI, rolled out with GPT-6 on Oct 7, 2026. It can return interactive, step-by-step visuals, such as a 6-step chess opening with next and back controls, instead of plain text.",
+   "why_it_matters": "Answers can now be small interactive apps. Builders of tutorials and docs can see what users will start to expect from AI answers.",
+   "try_this": "In ChatGPT, ask: \"Based on what you know about me, teach me something new. Show me step by step.\" and inspect the interactive output.",
+   "evidence": [
+    {
+     "url": "https://openai.com/index/gpt-6-for-everyone",
+     "kind": "primary"
+    },
+    {
+     "url": "https://openai.com/news/rss.xml",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "OpenAI RSS entry 'GPT-6 and Intelligent UI for everyone' (Oct 7); chess demo details from video only",
+    "checked_at": "2026-10-23T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "GPT‑6 is rolling out globally in ChatGPT with Intelligent UI",
+   "excerpt_url": "https://openai.com/news/rss.xml",
+   "item_url": "https://www.youtube.com/watch?v=RLQR5_5fJDA",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-06",
+   "source_id": "openai",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-23-255c82f1",
+   "date": "2026-10-23",
+   "category": "release",
+   "claim": "A video lists 10 agent ideas built on Claude Opus 5.5, including inbox triage, meeting prep, spec writing with failing tests, and a token-cost auditor. Anthropic released Opus 5.5 on Sept 22, 2026.",
+   "why_it_matters": "This is a list of agent ideas, not tested builds. Only the model's existence is confirmed. Treat it as a menu of ideas.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/news/claude-opus-5-5",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Anthropic newsroom lists 'Introducing Claude Opus 5.5' (Sept 22, 2026); agent designs not tested",
+    "checked_at": "2026-10-23T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=M4jImIU-vQI",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-06",
+   "source_id": "ray",
+   "status_at_publication": "verified"
   }
  ],
  "audits": [
@@ -1606,6 +1810,21 @@
    "source_id": "anthropic",
    "tier": "T1-seed",
    "verdict": "pass"
+  },
+  {
+   "date": "2026-10-23",
+   "item_id": "2026-10-23-48394f85",
+   "source_id": "theo",
+   "tier": "T1-seed",
+   "verdict": "pass",
+   "removed": true
+  },
+  {
+   "date": "2026-10-23",
+   "item_id": "2026-10-23-adc4220c",
+   "source_id": "openai",
+   "tier": "T1-seed",
+   "verdict": "inconclusive"
   }
  ],
  "removed": [
@@ -1713,6 +1932,31 @@
    "id": "2026-10-22-62c8dbc2",
    "date": "2026-10-22",
    "reason": "review: try-this misstated PHP backport support for 8.1 and older"
+  },
+  {
+   "id": "2026-10-23-38e6d271",
+   "date": "2026-10-23",
+   "reason": "review: presents METR July 2025 result as current though METR calls it out of date (Opus round 1)"
+  },
+  {
+   "id": "2026-10-23-48394f85",
+   "date": "2026-10-23",
+   "reason": "review: exposure wording broader than advisory (Codex round 1)"
+  },
+  {
+   "id": "2026-10-23-52cc6a98",
+   "date": "2026-10-23",
+   "reason": "review: exposure wording broader than advisory (Codex round 1)"
+  },
+  {
+   "id": "2026-10-23-b06528d0",
+   "date": "2026-10-23",
+   "reason": "review: incident numbers not confirmed by a primary source (Codex round 1)"
+  },
+  {
+   "id": "2026-10-23-a416f100",
+   "date": "2026-10-23",
+   "reason": "review: try-this logging step lacked redaction care (Codex round 1)"
   }
  ]
 }
