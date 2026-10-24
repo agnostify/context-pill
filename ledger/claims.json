@@ -1740,6 +1740,234 @@
    "recheck_on": "2026-11-06",
    "source_id": "ray",
    "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-24-c98f14c8",
+   "date": "2026-10-24",
+   "category": "release",
+   "claim": "LiteLLM 1.107.0 was reported compromised in the project's own issue tracker. The report says it carried a credential-stealing .pth file and was built from a lookalike repo. The release is now gone from PyPI.",
+   "why_it_matters": "LiteLLM sits in many AI gateways and agent stacks. A poisoned install can leak every provider API key on that host.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/BerriAI/litellm/issues/47826",
+     "kind": "primary"
+    },
+    {
+     "url": "https://pypi.org/pypi/litellm/1.107.0/json",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "BerriAI issue #47826 title confirms compromise report; PyPI JSON for 1.107.0 returns 404. Maintainer comments not visible.; evidence link failed our check",
+    "checked_at": "2026-10-24T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=SMGg7iisHmc",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-07",
+   "source_id": "fireship",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-10-24-4f61f359",
+   "date": "2026-10-24",
+   "category": "tool",
+   "claim": "Claude Code v2.1.310 adds the Monitor tool and plugin monitors on Bedrock, Vertex and Foundry. When a gateway rejects the effort beta value or mid-conversation system messages, it now retries without them.",
+   "why_it_matters": "Teams running Claude Code through cloud providers or proxy gateways get background monitoring and fewer failed requests.",
+   "try_this": "If you run Claude Code via Bedrock, Vertex, Foundry or a compatible gateway, update to v2.1.310 and check that requests that used to fail now go through.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.310",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official GitHub release notes for v2.1.310. No sandbox run today.",
+    "checked_at": "2026-10-24T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Added the Monitor tool and plugin monitors on Bedrock, Vertex, and Foundry",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.310",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.310",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-07",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-24-6bb618bf",
+   "date": "2026-10-24",
+   "category": "tool",
+   "claim": "The GitHub Copilot usage metrics API has a new totals_by_client array. It breaks out requests, sessions and tokens per client, such as opencode, claude_code, codex, zed and copilot_cli, plus model selection mode.",
+   "why_it_matters": "Orgs can now see Copilot model usage from third-party agents and CLIs that never sent IDE telemetry.",
+   "try_this": "Enterprise or org owners: pull the 28-day Copilot usage metrics report and compare totals_by_client against totals_by_ide.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-23-usage-metrics-api-adds-usage-from-tools-like-opencode",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read the GitHub changelog entry describing the fields, scope and access requirements.",
+    "checked_at": "2026-10-24T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "A new totals_by_client array is available in the enterprise, organization, enterprise-user, and organization-user 1-day and 28-day reports.",
+   "excerpt_url": "https://github.blog/changelog/2026-10-23-usage-metrics-api-adds-usage-from-tools-like-opencode",
+   "item_url": "https://github.blog/changelog/2026-10-23-usage-metrics-api-adds-usage-from-tools-like-opencode",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-07",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-24-c4684c53",
+   "date": "2026-10-24",
+   "category": "tool",
+   "claim": "ChatGPT dots are always-on agents with their own cloud computer and browser. They can start Codex tasks. They are rolling out to Pro, Business Premium and Enterprise plans, where Enterprise has them off by default.",
+   "why_it_matters": "This is a persistent background agent tied to Codex. It changes how long-running triage and bug-fix loops can be delegated inside ChatGPT.",
+   "try_this": "Enterprise admins: review the dots docs before enabling the feature, since it is off by default and its Codex tasks count toward Codex limits.",
+   "evidence": [
+    {
+     "url": "https://learn.chatgpt.com/docs/dots",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read OpenAI's dots documentation for capabilities, plan availability and default settings. Video demo specifics not checked.",
+    "checked_at": "2026-10-24T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Docs confirm: always-on cloud agent with its own computer and browser, can create Codex tasks; rolling out to Pro, Business Premium, Enterprise; Enterprise off by default."
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=6f7ojkd4_Wc",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-07",
+   "source_id": "openai",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-24-161a1c39",
+   "date": "2026-10-24",
+   "category": "tool",
+   "claim": "Gemini CLI nightly v0.67.0-nightly.20261024 adds a models command and a --list-models flag for model discovery. It also fixes Claude hook timeouts being migrated as seconds instead of milliseconds.",
+   "why_it_matters": "You can see which models your account can use from the terminal. Anyone migrating Claude Code hooks to Gemini CLI gets correct timeouts.",
+   "try_this": "If you are on Gemini CLI nightly builds, run gemini --list-models to see which models are available to you.",
+   "evidence": [
+    {
+     "url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261024.gcd1b45c2d",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official GitHub nightly pre-release notes. No sandbox run.",
+    "checked_at": "2026-10-24T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "feat(cli): add models command and --list-models flag for model discovery",
+   "excerpt_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261024.gcd1b45c2d",
+   "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261024.gcd1b45c2d",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-07",
+   "source_id": "deepmind",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-24-316e4acb",
+   "date": "2026-10-24",
+   "category": "release",
+   "claim": "The consolidated GitHub app for Microsoft Teams lets you @mention GitHub to investigate an issue and open a fix PR. The legacy GitHub app will be retired on November 16.",
+   "why_it_matters": "Teams users can hand bug reports to Copilot without leaving chat. Anyone on the legacy app loses Copilot in Teams after the cutoff.",
+   "try_this": "If your workspace uses the legacy GitHub app in Teams, install the consolidated GitHub app before November 16.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-23-turn-notifications-into-code-with-github-copilot-in-teams",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read the GitHub changelog entry for the feature and the legacy app retirement date.",
+    "checked_at": "2026-10-24T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.blog/changelog/2026-10-23-turn-notifications-into-code-with-github-copilot-in-teams",
+   "scorable": true,
+   "prediction_deadline": "2026-11-16",
+   "state": "pending",
+   "recheck_on": "2026-11-30",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-24-fb021948",
+   "date": "2026-10-24",
+   "category": "research",
+   "claim": "Ai2 and UPenn's LitPivot splits a research idea into problem, contribution and evaluation, then critiques each against papers you select. In a 17-researcher study, experts rated its output as better grounded in the literature than the baseline's.",
+   "why_it_matters": "It shows a concrete pattern for literature-grounded AI critique, where the user controls which sources the model uses. This is useful for research assistants and RAG design.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/allenai/litpivot",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Read Ai2's own blog post. Study results are the authors' claims; the paper itself was not read.",
+    "checked_at": "2026-10-24T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "In a study with 17 researchers, domain experts rated research ideas developed with LitPivot as better grounded in the literature",
+   "excerpt_url": "https://huggingface.co/blog/allenai/litpivot",
+   "item_url": "https://huggingface.co/blog/allenai/litpivot",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-07",
+   "source_id": "huggingface",
+   "status_at_publication": "vendor-claim"
   }
  ],
  "audits": [
@@ -1825,6 +2053,13 @@
    "source_id": "openai",
    "tier": "T1-seed",
    "verdict": "inconclusive"
+  },
+  {
+   "date": "2026-10-24",
+   "item_id": "2026-10-24-c4684c53",
+   "source_id": "openai",
+   "tier": "T1-seed",
+   "verdict": "pass"
   }
  ],
  "removed": [
@@ -1957,6 +2192,31 @@
    "id": "2026-10-23-a416f100",
    "date": "2026-10-23",
    "reason": "review: try-this logging step lacked redaction care (Codex round 1)"
+  },
+  {
+   "id": "2026-10-24-ef72a345",
+   "date": "2026-10-24",
+   "reason": "review: repeats 2026-10-23-4fdf9482 (same PHP CVEs)"
+  },
+  {
+   "id": "2026-10-24-17f0ffc0",
+   "date": "2026-10-24",
+   "reason": "review: 'pushed malicious code' overstates a rejected pull request"
+  },
+  {
+   "id": "2026-10-24-28264c40",
+   "date": "2026-10-24",
+   "reason": "review: 'always-on thinking' unconfirmed; speed figure is vendor-only"
+  },
+  {
+   "id": "2026-10-24-d84c6de2",
+   "date": "2026-10-24",
+   "reason": "review: unsupported superlative and unconfirmed 2.8T parameter count"
+  },
+  {
+   "id": "2026-10-24-c3ec2502",
+   "date": "2026-10-24",
+   "reason": "review: 'reporter was an AI security agent' goes beyond the advisory credit"
   }
  ]
 }
