@@ -66,18 +66,23 @@ tmp, repo, work = setup()
 try:
     # 1. normalization: X raw counts ~100x Reddit's still give a mixed ranking (per-platform percentiles)
     xs, rs = mixed()
-    code, b = go(repo, work, {"x": const(xs), "reddit": const(rs), "company": const([])}, dry=True)
+    # X never titles a story, so every story here has a company post; Reddit posts link theirs too, for a fair comparison
+    comps = [comp(f"https://openai.com/index/story-{n}", f"Company post {n}") for n in range(len(xs))]
+    rs = [dict(r, links=r["links"] + [f"https://openai.com/index/r-story-{n}"]) for n, r in enumerate(rs)]
+    comps += [comp(f"https://openai.com/index/r-story-{n}", f"Company post r{n}") for n in range(len(rs))]
+    code, b = go(repo, work, {"x": const(xs), "reddit": const(rs), "company": const(comps)}, dry=True)
     assert code == 0, code
-    top4 = {p for s in b["stories"][:4] for p in s["platforms"]}
+    top4 = {p for s in b["stories"][:4] for p in s["platforms"]} - {"company"}
     assert top4 == {"x", "reddit"}, [(s["title"], s["platforms"], s["score"]) for s in b["stories"]]
     assert b["ranking_basis"]["reddit"].startswith("within-day"), b["ranking_basis"]
     s = next(s for s in b["stories"] if "reddit" in s["platforms"])
-    assert s["counts"]["reddit"]["upvotes_understated"] is True and s["primary_kind"] == "reddit"
+    assert s["counts"]["reddit"]["upvotes_understated"] is True and s["primary_kind"] == "company"
+    xs, rs = mixed()
     assert all(not B.util.blocked(l["url"]) for s in b["stories"] for l in s["links"]) and all(s["primary_url"] for s in b["stories"])
 
     # 2. threshold and cap (env overrides), empty on a quiet day
     os.environ["BREAKING_MAX"] = "3"
-    code, b = go(repo, work, {"x": const(xs), "reddit": const(rs), "company": const([])}, dry=True)
+    code, b = go(repo, work, {"x": const(xs), "reddit": const(rs), "company": const(comps)}, dry=True)
     assert len(b["stories"]) == 3 and [s["rank"] for s in b["stories"]] == [1, 2, 3]
     del os.environ["BREAKING_MAX"]
     os.environ["BREAKING_MIN_SCORE"] = "5"
@@ -124,7 +129,7 @@ try:
     xs, rs = mixed()
     code, b = go(repo, work, {"x": const([], "no X API credentials and no connector file"), "reddit": boom, "company": boom}, dry=True)
     assert code == 4 and b is None, "nothing fetched at all -> keep the last good section"
-    code, b = go(repo, work, {"x": const(xs), "reddit": boom, "company": const([])}, dry=True)
+    code, b = go(repo, work, {"x": const(xs), "reddit": boom, "company": const(comps[:len(xs)])}, dry=True)
     assert code == 0 and b["stories"] and {m["platform"] for m in b["platforms_missing"]} == {"Reddit"}
     assert "Missing from this update: Reddit" in render.breaking_md(b)
 
@@ -196,6 +201,32 @@ try:
     assert "## Breaking AI News" not in (repo / "latest.md").read_text()
     # markdown in titles can't break the link
     assert "\\[" in render.breaking_md(dict(lj["breaking"], stories=[dict(lj["breaking"]["stories"][0], title="Odd [title] here")]))
+    # review fixes: downvoted posts don't crash; X text never becomes a title; a marker in a title can't break the splice
+    assert B.raw_engagement(red("neg", "Downvoted OpenAI launch thread", -3, 0, link="https://openai.com/index/x")) == 0
+    code, b = go(repo, work, {"x": const([]), "reddit": const(rs + [red("neg", "Downvoted OpenAI launch thread", -3, 0, link="https://openai.com/index/x")]), "company": const([])}, dry=True)
+    assert code == 0
+    code, b = go(repo, work, {"x": const([xp("t1", "SECRET X TEXT about OpenAI", 90000, link="https://openai.com/index/t1")]), "reddit": const(rs), "company": const([])}, dry=True)
+    assert "SECRET X TEXT" not in json.dumps(b), "X post text is never published"
+    evil = dict(lj["breaking"], stories=[dict(lj["breaking"]["stories"][0], title="Qwen launches <!-- breaking:end --> new model")])
+    render.write(repo, DATE, 10, [], {}, 0, 0)
+    (repo / "breaking.json").write_text(json.dumps(dict(evil, updated_at=NOW.isoformat())))
+    render.splice_breaking(repo, evil)
+    render.splice_breaking(repo, lj["breaking"])
+    md5 = (repo / "latest.md").read_text()
+    assert md5.count(render.B_END) == 1 and "new model" not in md5, md5[:800]
+    # ids survive a source dropping out for one refresh ({A,B} -> {A} -> {B}); every story featured today is remembered
+    shutil.rmtree(work / "breaking", ignore_errors=True)
+    ua, ub = "https://openai.com/index/aa", "https://openai.com/index/bb"
+    A = red("ia", "OpenAI GPT-7 announced at a live event today", 3000, 900, link=ua)
+    Bp = red("ib", "Totally different words entirely here please", 3000, 900, link=ub)
+    Bp2 = dict(Bp, links=[ub, ua])
+    ids = []
+    for n, its in enumerate(([A, Bp2], [A], [Bp])):
+        code, b = go(repo, work, {"x": const([]), "reddit": const(its), "company": const([])}, now=NOW + dt.timedelta(minutes=n))
+        ids.append({s["id"] for s in b["stories"]})
+    assert ids[0] == ids[1] == ids[2], ids
+    arch = json.loads((work / "breaking" / "archive" / f"{DATE}.json").read_text())["keys"]
+    assert any("reddit:ia" in ks for ks in arch.values()) and any("reddit:ib" in ks for ks in arch.values()), arch
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 print("breaking tests: OK")

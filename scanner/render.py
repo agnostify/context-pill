@@ -67,7 +67,7 @@ def breaking_md(b, standalone=False):
     if not stories:
         md += ["_Nothing cleared the engagement bar in this update._", ""]
     for s in stories:
-        title = re.sub(r"([\[\]*_`])", r"\\\1", " ".join(s["title"].split()))
+        title = re.sub(r"([\[\]*_`])", r"\\\1", " ".join(s["title"].split())).replace("<", "&lt;").replace(">", "&gt;")
         md.append(f"{s['rank']}. **[{title}]({s['primary_url']})**" + (f": {s['why_it_matters']}" if s.get("why_it_matters") else ""))
         md.append(f"   - {breaking_counts(s)} · source: {s['primary_name']}")
         other = [f"[{l['kind']}]({l['url']})" for l in s["links"] if l["url"] != s["primary_url"]]

@@ -208,6 +208,11 @@ def keep(i):
 
 
 def raw_engagement(i):
+    """Never negative (a downvoted post scores 0); the real counts are still shown."""
+    return max(0.0, _raw(i))
+
+
+def _raw(i):
     r = i["raw"]
     if i["platform"] == "x":
         return r["likes"] + 2 * r["reposts"] + 2 * r["replies"] + 0.01 * r["views"]
@@ -329,7 +334,9 @@ def build_story(members, c, sid, refs):
         primary, kind, name = top_reddit["url"], "reddit", f"r/{top_reddit['subreddit']}"
     else:
         return None                            # X-only with no public non-X link: X links are never published
-    title_from = comp[0] if comp else max(members, key=lambda i: i["score"])
+    title_from = comp[0] if comp else top_reddit
+    if title_from is None:
+        return None                            # an X post's text is never published as a title: X only ranks
     counts = {}
     if reddit:
         counts["reddit"] = {"upvotes": sum(i["raw"]["upvotes"] for i in reddit), "comments": sum(i["raw"]["comments"] for i in reddit),
@@ -467,13 +474,17 @@ def run(date, hours, dry_run, repo=REPO, work=WORK, log=print, fetchers=None, ch
     log("breaking gate: PASS")
     out = bw / "dry-run" if dry_run else repo
     out.mkdir(exist_ok=True)
-    (out / "breaking.json").write_text(json.dumps(b, indent=1, ensure_ascii=False))
-    (out / "breaking.md").write_text(render.breaking_md(b, standalone=True))
+    files = {"breaking.json": json.dumps(b, indent=1, ensure_ascii=False), "breaking.md": render.breaking_md(b, standalone=True)}
+    for name, text in files.items():           # write every file first, then swap them in, so a failed write leaves the old set
+        (out / f".{name}.tmp").write_text(text)
+    for name in files:
+        os.replace(out / f".{name}.tmp", out / name)
     if dry_run:
         return 0, b
     # private state: today's ids (stable across refreshes), engagement history, archive for the cross-day check
     sp.parent.mkdir(exist_ok=True)
-    prev_keys.update({s["id"]: sorted(m[0]) for s, m in cands})
+    for s, m in cands:                         # union, so a story keeps its id after a source drops out for one refresh
+        prev_keys[s["id"]] = sorted(set(prev_keys.get(s["id"], [])) | m[0])
     sp.write_text(json.dumps(prev_keys))
     hp = bw / "history" / f"{date}.json"; hp.parent.mkdir(exist_ok=True)
     h = json.loads(hp.read_text()) if hp.exists() else {}
@@ -482,7 +493,11 @@ def run(date, hours, dry_run, repo=REPO, work=WORK, log=print, fetchers=None, ch
             h.setdefault(i["platform"], {})[i["id"]] = i["norm"]
     hp.write_text(json.dumps(h))
     (bw / "archive").mkdir(exist_ok=True)
-    (bw / "archive" / f"{date}.json").write_text(json.dumps({"breaking": b, "keys": {s["id"]: sorted(m[0]) for s, m in chosen}}, ensure_ascii=False))
+    ap = bw / "archive" / f"{date}.json"       # keys of every story featured today (not just the last refresh) for tomorrow's check
+    feat = json.loads(ap.read_text()).get("keys", {}) if ap.exists() else {}
+    for s, m in chosen:
+        feat[s["id"]] = sorted(set(feat.get(s["id"], [])) | m[0])
+    ap.write_text(json.dumps({"breaking": b, "keys": feat}, ensure_ascii=False))
     render.splice_breaking(repo, b)
     return 0, b
 
