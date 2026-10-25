@@ -137,5 +137,26 @@ with mock.patch.dict(os.environ, {"GEMINI_API_KEY": "fixture", "CP_GEMINI_APPROV
      mock.patch.object(extract.requests, "post") as post:
     extract.gemini_video_notes(vid, work, "2026-10-20", lambda m: None)
 assert post.call_count == 0 and "off" in vid[0]["video_status"], vid
+# gemini: the default model is a live one, and a 404 stops the run loudly after the first call
+assert extract.GEMINI_DEFAULT_MODEL != "gemini-2.5-flash" and extract.GEMINI_DEFAULT_MODEL == "gemini-3.8-flash"
+vids = [{"kind": "youtube", "url": f"https://www.youtube.com/watch?v={x}"} for x in "abc"]
+logs = []
+fake404 = mock.Mock(status_code=404)
+env = {"GEMINI_API_KEY": "fixture", "CP_GEMINI_APPROVED": "1"}
+with mock.patch.dict(os.environ, env), mock.patch.object(extract.requests, "post", return_value=fake404) as post:
+    os.environ.pop("GEMINI_MODEL", None); os.environ.pop("CP_GEMINI_FROM", None)
+    extract.gemini_video_notes(vids, Path(tempfile.mkdtemp()), "2026-10-23", logs.append)
+assert post.call_count == 1, post.call_count
+assert any("HTTP 404" in m and extract.GEMINI_DEFAULT_MODEL in m and "GEMINI_MODEL" in m for m in logs), logs
+assert all("404" in v["video_status"] for v in vids), vids
 shutil.rmtree(tmp.parent)
+# health flags: thin day, one source dominating, a source gone quiet (review only, never blocks)
+srcs_h = {"a": {"name": "A", "enabled": True, "feeds": [{}], "trust": {"items_seen_by_date": {"2026-10-24": 3}}},
+          "b": {"name": "B", "enabled": True, "feeds": [{}], "trust": {"items_seen_by_date": {"2026-10-10": 5}}},
+          "c": {"name": "C", "enabled": False, "feeds": [{}]}}
+drop_h = [{"source": {"name": "A"}}] * 4 + [{"source": {"name": "B"}}]
+fl = runmod.health("2026-10-25", 3, drop_h, srcs_h)
+assert any(f.startswith("thin day: 3") for f in fl) and any("4 of 5 items from A" in f for f in fl), fl
+assert any(f.startswith("quiet") and "B" in f and "C" not in f and "A," not in f for f in fl), fl
+assert runmod.health("2026-10-25", 40, drop_h[3:], srcs_h | {"b": dict(srcs_h["b"], trust={"items_seen_by_date": {"2026-10-25": 1}})}) == []
 print("tool tests: OK")

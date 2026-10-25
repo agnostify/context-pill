@@ -19,6 +19,30 @@ def _h(s):
     return int(hashlib.sha1(s.encode()).hexdigest(), 16)
 
 
+THIN_ITEMS = 10           # fewer new items than this across all feeds is a thin day
+CONCENTRATION = 0.6       # one source behind more than 60% of a drop of 3+ items
+QUIET_DAYS = 7            # an enabled feed source with no items in 7 days may have gone stale
+
+
+def health(date, items_read, drop, srcs):
+    """Flags for the review step (never blocks the drop): thin day, one source dominating, sources gone quiet."""
+    flags = []
+    if items_read < THIN_ITEMS:
+        flags.append(f"thin day: {items_read} new items read (under {THIN_ITEMS})")
+    by = {}
+    for d in drop:
+        by[d["source"]["name"]] = by.get(d["source"]["name"], 0) + 1
+    if len(drop) >= 3 and by and max(by.values()) / len(drop) > CONCENTRATION:
+        top = max(by, key=by.get)
+        flags.append(f"source concentration: {by[top]} of {len(drop)} items from {top}")
+    lo = (dt.date.fromisoformat(date) - dt.timedelta(days=QUIET_DAYS)).isoformat()
+    quiet = sorted(s["name"] for s in srcs.values() if s.get("enabled") and s.get("feeds")
+                   and not any(lo < k <= date and v for k, v in ((s.get("trust") or {}).get("items_seen_by_date") or {}).items()))
+    if quiet:
+        flags.append(f"quiet {QUIET_DAYS}+ days (check the feeds): {', '.join(quiet)}")
+    return flags
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default=dt.date.today().isoformat())
@@ -276,6 +300,10 @@ def main():
     lp.write_text(json.dumps(ledger, indent=1, ensure_ascii=False))
     save_registry()
     render.write(REPO, date, day_no, drop, srcs, len(items), len(per_src))
+    flags = health(date, len(items), drop, srcs)
+    (raw / "health.json").write_text(json.dumps(flags, indent=1, ensure_ascii=False))
+    for f in flags:
+        log(f"health (for review): {f}")
     problems = gate.check(REPO, require_private=os.environ.get("CP_REQUIRE_PRIVATE") == "1")
     log("gate: PASS" if not problems else "gate: FAIL\n  " + "\n  ".join(problems))
     log(f"done: {len(drop)} items in latest.md; stopped hosts today: {util.stopped_hosts() or 'none'}")

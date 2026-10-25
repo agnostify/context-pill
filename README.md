@@ -19,6 +19,17 @@ https://contextpill.com/latest.md
 - **Source** with its tier, trust score (posterior mean) and LB10 (a conservative lower bound), and whether it's a maintainer-assigned seed.
 - **Evidence** links (primary, independent or hands-on), a re-check date (14 days out; for predictions, 14 days after the deadline), and at most one short quote.
 
+## Breaking AI News (top section, not verified)
+
+Above the checked claims, `latest.md` and `latest.json` (key `breaking`) carry a short **Breaking AI News** list: the day's biggest AI stories ranked by engagement, refreshed every 3 hours. It is labeled "Ranked by engagement, not verified." Nothing in it is a checked claim, and it never changes trust scores. Every story links its primary source: the company's own page when there is one, otherwise the Reddit thread. There is no fixed count: a story shows only if its score clears a bar (0.6 by default, at most 10 stories), and the section is hidden on a quiet day.
+
+- **Reddit:** r/LocalLLaMA, r/MachineLearning, r/OpenAI, r/ClaudeAI, r/singularity and r/ChatGPTCoding, through the Arctic Shift archive API (reddit.com's robots.txt disallows crawlers). Arctic Shift often records upvotes soon after posting, so they're understated (shown with *), and comments weigh more.
+- **Company releases:** the lab feeds already in `sources.yaml`. They count when Reddit (or X) picks them up.
+- **X:** off for now (see `x-discovery` in `sources.yaml`). When it's on, X counts help rank stories, but X links are never published.
+- **Score:** raw engagement (Reddit: upvotes + 5 × comments on Arctic Shift snapshots) is summed per platform for each story, put on a log scale against the platform's reference (the 99th percentile of the last 14 days), and weighted by platform. Then: best platform + half of the others, +20% per extra platform, halved every 48 hours of age. Raw counts are published next to every story.
+
+Files: `breaking.json` (schema: `schema/breaking.schema.json`) and `breaking.md`. Code: `scanner/breaking.py`. Refresh: `scanner/breaking.sh`.
+
 ## How trust works (short version)
 
 Every source starts at a neutral Beta(2,2). Fourteen days after a claim is published, we re-check it against its primary source, independently of whoever made it. Good tips raise the source's score, bad ones lower it, and older evidence fades with a 90-day half-life. Tier 1 (taken at face value) needs a lower bound of 0.80 with 15 or more resolved tips; new sources start at Tier 3, where every claim is checked. Full details: [METHOD.md](METHOD.md).
@@ -89,6 +100,7 @@ Then ask your agent something like "What's new for coding agents today? Use Cont
 | Path | What |
 |---|---|
 | `latest.md`, `latest.json` | Today's drop |
+| `breaking.json`, `breaking.md` | Breaking AI News (engagement-ranked, not verified; refreshed every 3 hours) |
 | `daily/YYYY/MM/` | Archive |
 | `sources.yaml` | Every source: feeds, research criteria, access register, current trust |
 | `ledger/claims.json` | Every published claim and its resolution |
@@ -106,6 +118,7 @@ pip install -r scanner/requirements.txt
 python -m scanner.tests.test_trust
 python -m scanner.tests.test_tools
 python -m scanner.run --hours 36
+python -m scanner.breaking --dry-run   # Breaking AI News preview; writes only to the private work dir
 python -m scanner.gate      # pre-publication checks on the working tree
 python -m scanner.prepush   # maintainers only: needs the private patterns file (CP_PRIVATE_PATTERNS)
 ```

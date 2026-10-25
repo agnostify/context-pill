@@ -6,7 +6,7 @@ daily/weekly archive JSON against schema/drop.schema.json, quote length/attribut
 import json, os, re
 from pathlib import Path
 
-ALLOWED_TOP = {"README.md", "llms.txt", "latest.md", "latest.json", "daily", "weekly", "scanner", "sources.yaml", "schema", "METHOD.md",
+ALLOWED_TOP = {"README.md", "llms.txt", "latest.md", "latest.json", "breaking.json", "breaking.md", "daily", "weekly", "scanner", "sources.yaml", "schema", "METHOD.md",
                "CHANGELOG-sources.md", "TAKEDOWN.md", "skill", "LICENSE", "LICENSE-CONTENT", "ledger", "feedback", ".gitignore", ".git",
                ".claude-plugin", "plugin", "mcp"}
 SECRET = [r"sk-[A-Za-z0-9_-]{20,}", r"sk-ant-[A-Za-z0-9_-]{10,}", r"gh[pousr]_[A-Za-z0-9]{30,}", r"github_pat_[A-Za-z0-9_]{30,}", r"AIza[0-9A-Za-z_-]{35}",
@@ -133,7 +133,19 @@ def check(repo, require_private=False):
     for f in [repo / "latest.json", *sorted((repo / "daily").rglob("*.json")), *sorted((repo / "weekly").rglob("*.json"))]:
         if f.exists():
             problems += check_drop(f, schema, f.relative_to(repo))
-    lp = repo / "ledger" / "claims.json"
+    bschema = json.loads((repo / "schema" / "breaking.schema.json").read_text())
+    for rel, get in (("breaking.json", lambda d: d), ("latest.json", lambda d: d.get("breaking"))):
+        f = repo / rel
+        if f.exists():
+            try:
+                b = get(json.loads(f.read_text()))
+            except Exception as e:
+                problems.append(f"{rel}: unreadable JSON ({type(e).__name__})"); continue
+            if b is not None:
+                errs = []
+                _validate(b, bschema, bschema, f"{rel}:breaking", errs)
+                problems += errs[:20]
+    lp =repo / "ledger" / "claims.json"
     if lp.exists():
         for c in json.loads(lp.read_text()).get("claims", []):
             if c.get("excerpt") and (len(c["excerpt"].split()) > 25 or not c.get("excerpt_url")):

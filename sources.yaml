@@ -721,4 +721,69 @@ sources:
   name: Reddit (Arctic Shift)
   enabled: false
   disabled_reason: Disabled until registered.
+breaking:
+  note: Breaking AI News (scanner/breaking.py). Engagement-ranked, never verified, never touches trust. Env overrides BREAKING_MIN_SCORE,
+    BREAKING_MAX, BREAKING_REFRESH_HOURS.
+  min_score: 0.6
+  max_stories: 10
+  refresh_hours: 3
+  x:
+    enabled: false
+    weight: 1.0
+    note: Off while the x-discovery source above stays disabled. Handles live outside this public file (WORK/breaking/x_accounts.txt);
+      X links are never published, X counts only rank stories.
+  reddit:
+    weight: 0.9
+    route: Arctic Shift API (reddit.com/robots.txt disallows all crawlers); upvotes are an early snapshot, so comments weigh more
+    subreddits:
+    - LocalLLaMA
+    - MachineLearning
+    - OpenAI
+    - ClaudeAI
+    - singularity
+    - ChatGPTCoding
+  company:
+    weight: 0.8
+    prior: 0.55
+    sources:
+    - anthropic
+    - openai
+    - deepmind
+  company_domains:
+  - anthropic.com
+  - claude.com
+  - openai.com
+  - deepmind.google
+  - blog.google
+  - x.ai
+  - ai.meta.com
+  - mistral.ai
+  - nvidia.com
+  - perplexity.ai
+  - deepseek.com
+  - qwen.ai
+  outlets:
+  - reuters.com
+  - bloomberg.com
+  - apnews.com
+  - theverge.com
+  - techcrunch.com
+  - wsj.com
+  - nytimes.com
+  - washingtonpost.com
+  - cnbc.com
+  - arstechnica.com
+  - wired.com
+  - ft.com
+  - axios.com
+  - theinformation.com
+  - semafor.com
+  - bbc.com
+  - bbc.co.uk
+  - theguardian.com
+  - cnn.com
+  - businessinsider.com
+  - venturebeat.com
+  - engadget.com
+  - 404media.co
 tightened: {}

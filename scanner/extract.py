@@ -2,7 +2,7 @@
 
 Backends:
 - Claim extraction/verification: the `claude` CLI on the box (read-only tools: Read, WebFetch). Set CP_LLM_CMD to swap.
-- Video understanding: Gemini API with public YouTube URLs, only when GEMINI_API_KEY is set in the environment AND
+- Video understanding: Gemini API (default model gemini-3.8-flash, override with GEMINI_MODEL) with public YouTube URLs, only when GEMINI_API_KEY is set in the environment AND
   CP_GEMINI_APPROVED=1 (set only after the maintainer approves the route) AND the date is on/after 2026-10-23 (CP_GEMINI_FROM can only move that later)
   (never in the repo). Caps: <=20 videos/day and <=7.5 h/day (estimated from reported tokens at ~100 tokens/s).
 All source text is untrusted data: the prompt tells the model to ignore instructions inside it."""
@@ -50,6 +50,7 @@ def run_llm(prompt, cwd, **kw):
 
 
 GEMINI_EARLIEST = "2026-10-23"          # phase 2 starts Oct 23 at the earliest (maintainer decision)
+GEMINI_DEFAULT_MODEL = "gemini-3.8-flash"   # gemini-2.5-flash is retired (HTTP 404); override with GEMINI_MODEL
 
 
 def gemini_video_notes(items, work, date, log):
@@ -66,7 +67,7 @@ def gemini_video_notes(items, work, date, log):
                else "off until " + start)
         log(f"gemini: skipped ({why}); {len(vids)} videos read by title/description only")
         return
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+    model = os.environ.get("GEMINI_MODEL", GEMINI_DEFAULT_MODEL)
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     used_s, n, fails = 0, 0, 0
     for i in vids:
@@ -81,6 +82,12 @@ def gemini_video_notes(items, work, date, log):
             r = requests.post(url, headers={"x-goog-api-key": key}, json=body, timeout=600)
             if r.status_code == 429:
                 fails += 1; i["video_status"] = "not analyzed (429)"; continue
+            if r.status_code == 404:                 # retired or misspelled model: every video would fail the same way
+                log(f"gemini: model {model} returned HTTP 404 (retired or wrong name); set GEMINI_MODEL to a live model")
+                i["video_status"] = "not analyzed (Gemini model 404)"
+                for k in vids[vids.index(i) + 1:]:
+                    k["video_status"] = "not analyzed (Gemini model 404)"
+                return
             r.raise_for_status()
             j = r.json(); n += 1
             i["video_notes"] = "".join(p.get("text", "") for p in j["candidates"][0]["content"]["parts"])[:6000]
