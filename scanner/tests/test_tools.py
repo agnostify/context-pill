@@ -150,4 +150,13 @@ assert post.call_count == 1, post.call_count
 assert any("HTTP 404" in m and extract.GEMINI_DEFAULT_MODEL in m and "GEMINI_MODEL" in m for m in logs), logs
 assert all("404" in v["video_status"] for v in vids), vids
 shutil.rmtree(tmp.parent)
+# health flags: thin day, one source dominating, a source gone quiet (review only, never blocks)
+srcs_h = {"a": {"name": "A", "enabled": True, "feeds": [{}], "trust": {"items_seen_by_date": {"2026-10-24": 3}}},
+          "b": {"name": "B", "enabled": True, "feeds": [{}], "trust": {"items_seen_by_date": {"2026-10-10": 5}}},
+          "c": {"name": "C", "enabled": False, "feeds": [{}]}}
+drop_h = [{"source": {"name": "A"}}] * 4 + [{"source": {"name": "B"}}]
+fl = runmod.health("2026-10-25", 3, drop_h, srcs_h)
+assert any(f.startswith("thin day: 3") for f in fl) and any("4 of 5 items from A" in f for f in fl), fl
+assert any(f.startswith("quiet") and "B" in f and "C" not in f and "A," not in f for f in fl), fl
+assert runmod.health("2026-10-25", 40, drop_h[3:], srcs_h | {"b": dict(srcs_h["b"], trust={"items_seen_by_date": {"2026-10-25": 1}})}) == []
 print("tool tests: OK")
