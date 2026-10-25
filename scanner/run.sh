@@ -8,4 +8,5 @@ PY="${CP_PYTHON:-python3}"
 "$PY" -m scanner.tests.test_trust
 "$PY" -m scanner.tests.test_tools
 "$PY" -m scanner.tests.test_repeats
+"$PY" -m scanner.tests.test_breaking || echo "breaking tests failed; the daily drop continues (Breaking AI News never blocks it)"
 "$PY" -m scanner.run "$@"

@@ -12,7 +12,8 @@
     "items_read": {"type": "integer"},
     "license": {"type": "string"},
     "warning": {"type": "string"},
-    "items": {"type": "array", "items": {"$ref": "#/$defs/item"}}
+    "items": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "breaking": {"type": "object", "description": "Breaking AI News (engagement-ranked, not verified); shape: breaking.schema.json. Absent when there are no stories."}
   },
   "$defs": {
     "item": {
