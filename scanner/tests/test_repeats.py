@@ -185,4 +185,34 @@ for old, new in [("Acme Rocket does not support streaming responses.", "Acme Roc
     assert not FR(claim("k1", D, new, ["https://acme.example/k"]), o), new
     sk = SD(); sk.add(claim("k2", D, old, ["https://acme.example/k"], "https://a.example"))
     assert not sk.check(claim("k3", D, new, ["https://acme.example/k"], "https://b.example")), new
+# identifier match: a shared CVE / GHSA id or package+version is the same story, whatever the wording or evidence URL
+# (the repeat texts below are reconstructed: real texts live in the box work dir; earlier texts and evidence are real)
+D2 = "2026-10-25"
+php_old = claim("2026-10-23-4fdf9482", "2026-10-23", "Wiz Research says it found the PHP2Shell RCE bugs (CVE-2026-109618/109619) using AI, naming Wiz Atlas, Gemini 4 Argon and GPT-5.6 Sol. It credits OpenAI, Calif and the PHP team, and reported the bugs to PHP on Aug 24, 2026.",
+                ["https://www.wiz.io/blog/php2shell-php-rce"])
+lit_old = claim("2026-10-24-c98f14c8", "2026-10-24", "LiteLLM 1.107.0 was reported compromised in the project's own issue tracker. The report says it carried a credential-stealing .pth file and was built from a lookalike repo. The release is now gone from PyPI.",
+                ["https://github.com/BerriAI/litellm/issues/47826", "https://pypi.org/pypi/litellm/1.107.0/json"])
+idst = R.earlier_stories({"claims": [php_old, lit_old]}, D2)
+idflag = lambda text, urls: R.find_repeat(claim("n", D2, text, urls), idst)
+for text, urls in [("PHP patched two remote code execution flaws, CVE-2026-109618 and CVE-2026-109619, that Wiz found with AI-assisted bug hunting.", ["https://www.php.net/ChangeLog-8.php"]),
+                   ("Two critical PHP RCE vulnerabilities (CVE-2026-109619 and CVE-2026-109618) were disclosed; PHP shipped fixes.", ["https://news.example/php-rce-fixes"]),
+                   ("A malicious LiteLLM release, version 1.107.0, stole credentials via a .pth file before PyPI pulled it.", ["https://www.bleepingcomputer.com/news/security/litellm-pypi-compromise/"]),
+                   ("Backdoored builds hit PyPI this week.", ["https://pypi.org/project/litellm/1.107.0/"])]:
+    r = idflag(text, urls); assert r and r[2] is False, text          # flagged and kept, not dropped
+# one shared CVE is enough even when other numbers differ; shorthand expands to both ids
+assert idflag("CVE-2026-109618 now scores 9.8 under CVSS.", ["https://nvd.example/cve-1"])
+assert R.analyze("bugs (CVE-2026-109618/109619)")[8] >= {"cve-2026-109618", "cve-2026-109619"}
+assert R.analyze("see GHSA-abcd-1234-wxyz")[8] == {"ghsa-abcd-1234-wxyz"}
+assert R.analyze("LiteLLM 1.107.0 broke")[8] == {"litellm@1.107.0"}
+assert R.url_ids("https://pypi.org/pypi/litellm/1.107.0/json") == {"litellm@1.107.0"}
+assert R.url_ids("https://github.com/BerriAI/litellm/releases/tag/v1.107.0") == {"litellm@1.107.0"}
+# an exact duplicate is still a sure drop
+assert FR(claim("n", D2, php_old["claim"], ["https://x.example/a"]), idst)
+# must not match: a different CVE from another product, or another version of the same package
+assert not idflag("Zlibco fixed CVE-2026-200001, a heap overflow in its decoder.", ["https://zlibco.example/sec"])
+assert not idflag("LiteLLM 1.108.0 released with a new router option.", ["https://github.com/BerriAI/litellm/releases/tag/v1.108.0"])
+# same-day: a shared CVE from a different page is flagged; an unrelated CVE is not
+sdc = R.SameDay(); sdc.add(claim("i1", D2, "Wiz found CVE-2026-109618 in PHP.", ["https://a.example/1"], "https://a.example"))
+assert R.SameDay.check(sdc, claim("i2", D2, "PHP fixes CVE-2026-109618.", ["https://b.example/2"], "https://b.example"))
+assert R.SameDay.check(sdc, claim("i3", D2, "Zlibco fixes CVE-2026-200001.", ["https://c.example/3"], "https://c.example")) is None
 print("test_repeats: all passed")

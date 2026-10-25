@@ -4,7 +4,10 @@ conflict, either
   (a) they cite the same specific evidence URL (index, docs, package and repo-home pages don't count) and share a name or
       2+ distinctive words, or
   (b) they share a name (a product, model or company word that isn't boilerplate) and their distinctive words
-      overlap strongly.
+      overlap strongly, or
+  (c) they share a strong identifier: a CVE or GHSA id, or a package name with the same version ("LiteLLM 1.107.0", or
+      pypi.org/pypi/<name>/<ver>, github.com/<owner>/<repo>/releases/tag/<ver> in the evidence). Wording, evidence URLs and
+      other numbers don't matter; two versions of one package are two stories.
 Earlier stories: ledger claims from the last WINDOW_DAYS days, plus an optional JSONL history named by the
 CP_STORY_HISTORY env var (one {"date", "text"|"headline", "urls"} object per line; bad lines are skipped).
 It is a heuristic, so it only drops an exact duplicate (same text apart from letter case and whitespace). A match that
@@ -39,6 +42,11 @@ BOILERPLATE = {"apache", "mit", "bsd", "gpl", "agpl", "lgpl", "mpl", "cc", "lice
 LICENSES = {"apache", "mit", "bsd", "gpl", "agpl", "lgpl", "mpl", "cc"}
 _TOK = re.compile(r"[A-Za-z0-9][A-Za-z0-9.\-_/+']*[A-Za-z0-9]|[A-Za-z0-9]")
 _VER = re.compile(r"v?(\d+(?:\.\d+)+(?:[.\-][a-z0-9]+)*)", re.I)
+_CVE = re.compile(r"CVE-(\d{4})-(\d{4,})((?:/\d{4,})*)", re.I)         # CVE-2026-109618/109619 means both
+_GHSA = re.compile(r"GHSA(?:-[a-z0-9]{4}){3}", re.I)
+_PKGVER = re.compile(r"(?<![\w.\-])([A-Za-z][A-Za-z0-9_\-]{1,40})(?:(?:\s+(?:release|build|package))?,?(?:\s+version)?\s+v?|==|@)(\d+\.\d+\.\d+(?:[.\-][a-z0-9]+)*)(?![\w.]*\d)", re.I)
+NOT_PKG = {"python", "node", "nodejs", "java", "ios", "macos", "windows", "android", "ubuntu", "linux", "go", "rust", "php", "ruby", "swift",
+           "version", "versions", "v", "release", "build", "and", "or", "to", "from", "in", "of", "at"}
 
 
 def norm_url(u):
@@ -104,8 +112,43 @@ def _ver(t):
     return None
 
 
+def text_ids(text):
+    """Strong identifiers in free text: CVE ids, GHSA ids, and name+version pairs with a 3-part version (litellm@1.107.0)."""
+    ids = set()
+    for m in _CVE.finditer(text):
+        for n in [m.group(2)] + [x for x in m.group(3).split("/") if x]:
+            ids.add(f"cve-{m.group(1)}-{n}")
+    ids |= {m.group(0).lower() for m in _GHSA.finditer(text)}
+    for m in _PKGVER.finditer(text):
+        name = m.group(1).lower()
+        if name not in NOT_PKG and name not in STOP and name not in BOILERPLATE and name not in LICENSES:
+            ids.add(f"{name}@{m.group(2).lower()}")
+    return ids
+
+
+def url_ids(u):
+    """Strong identifiers in a URL: CVE and GHSA ids anywhere, pypi.org/pypi/<name>/<ver>, github.com/<o>/<repo>/releases/tag/<ver>."""
+    if not isinstance(u, str):
+        return set()
+    ids = {m.group(0).lower() for m in _GHSA.finditer(u)} | {f"cve-{m.group(1)}-{m.group(2)}" for m in _CVE.finditer(u)}
+    n = norm_url(u)
+    host, _, path = n.partition("/")
+    segs = [x for x in path.split("?", 1)[0].split("/") if x]
+    name = ver = None
+    if host == "pypi.org" and len(segs) >= 3 and segs[0] in ("pypi", "project"):
+        name, ver = segs[1], segs[2]
+    elif host == "github.com" and len(segs) >= 5 and [x.lower() for x in segs[2:4]] == ["releases", "tag"]:
+        name, ver = segs[1], segs[4]
+    elif host == "npmjs.com" and len(segs) >= 4 and segs[0] == "package" and segs[-2] == "v":
+        name, ver = segs[1], segs[-1]
+    v = _ver(ver.lower()) if ver else None
+    if name and v and v.count(".") >= 2:
+        ids.add(f"{name.lower()}@{v}")
+    return ids
+
+
 def analyze(text):
-    """Return (words, names, versions, numbers, status labels, money/percent figures, unused, exact text) for a claim text.
+    """Return (words, names, versions, numbers, status labels, money/percent figures, unused, exact text, ids) for a claim text.
     A version right after a license name, with only "License"/"Version" between (Apache 2.0, Apache License,
     Version 2.0), and hyphenated licenses (apache-2.0) are ignored. A bare integer after a capitalized name (Opus 4,
     GPT-5) is a version. Figures after '$' or before '%' are numbers, not versions."""
@@ -160,7 +203,7 @@ def analyze(text):
         elif len(tl) >= 4:
             words.add(tl)
     exact = " ".join(text.casefold().split())    # only case and whitespace: <, >, +, -, unicode all count
-    return words, names, vers, nums, status, figs, None, exact   # slot 6 unused (kept for tuple shape)
+    return words, names, vers, nums, status, figs, None, exact, text_ids(text)   # slot 6 unused (kept for tuple shape)
 
 
 # status changes, matched by stem and mapped to one label so "deprecated" and "deprecates" agree
@@ -251,6 +294,7 @@ def earlier_stories(ledger, date, history_path=None, log=lambda m: None):
         out += _load_history(hp, lo, date, log)
     for s in out:
         s["_a"] = analyze(s["text"]); s["_urls"] = {norm_url(u) for u in s["urls"] if specific(u)}
+        s["_ids"] = s["_a"][8].union(*(url_ids(u) for u in s["urls"]))
     log(f"repeat check: {n_ledger} ledger stories and {len(out) - n_ledger} history stories in the last {WINDOW_DAYS} days")
     return out
 
@@ -258,6 +302,11 @@ def earlier_stories(ledger, date, history_path=None, log=lambda m: None):
 def _evidence_urls(claim):
     ev = claim.get("evidence") or []
     return {norm_url(e.get("url")) for e in ev if isinstance(e, dict) and specific(e.get("url"))}
+
+
+def _claim_ids(claim, a):
+    ev = claim.get("evidence") or []
+    return a[8].union(*(url_ids(e.get("url")) for e in ev if isinstance(e, dict)))
 
 
 def novel(a, b):
@@ -290,6 +339,14 @@ def find_repeat(claim, stories):
             if not novel(a, s["_a"]):
                 return s["ref"], why, True
             maybe = maybe or (s["ref"], why, False)
+    ids = _claim_ids(claim, a)
+    for s in stories:                            # shared CVE/GHSA id or package+version: same story whatever the wording (flag, keep)
+        shared = ids & s["_ids"]
+        if shared:
+            why = f"same identifier as {s['ref']} ({', '.join(sorted(shared)[:4])})"
+            if not novel(a, s["_a"]):
+                return s["ref"], why, True
+            maybe = maybe or (s["ref"], why, False)
     return maybe
 
 
@@ -298,7 +355,7 @@ class SameDay:
     conflict and some text agreement (a shared name or 2+ shared words), but spotted on different pages (item_url), are one story credited twice. Claims spotted
     on the same page may share a URL (several facts from one release note), so those are kept."""
     def __init__(self):
-        self.seen = []          # (urls, page, analysis)
+        self.seen = []          # (urls, page, analysis, ids)
 
     def check(self, claim):
         """Return (why, sure) like find_repeat, else None."""
@@ -306,7 +363,13 @@ class SameDay:
         urls = _evidence_urls(claim)
         a = analyze(claim.get("claim"))
         maybe = None
-        for u2, p2, a2 in self.seen:
+        ids = _claim_ids(claim, a)
+        for u2, p2, a2, i2 in self.seen:
+            if ids & i2 and p2 != page:
+                why = f"same identifier as an earlier item today ({', '.join(sorted(ids & i2)[:4])})"
+                if not novel(a, a2):
+                    return why, True
+                maybe = maybe or (why, False)
             same = urls & u2 if urls and urls <= u2 else set()
             if same and p2 != page and not conflict(a, a2, numbers=False) and ((a[1] & a2[1]) or len(a[0] & a2[0]) >= 2):
                 why = f"same evidence URL as an earlier item today ({sorted(same)[0]})"
@@ -316,4 +379,5 @@ class SameDay:
         return maybe
 
     def add(self, claim):
-        self.seen.append((_evidence_urls(claim), claim.get("item_url"), analyze(claim.get("claim"))))
+        a = analyze(claim.get("claim"))
+        self.seen.append((_evidence_urls(claim), claim.get("item_url"), a, _claim_ids(claim, a)))
