@@ -1968,6 +1968,166 @@
    "recheck_on": "2026-11-07",
    "source_id": "huggingface",
    "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-10-25-234255f5",
+   "date": "2026-10-25",
+   "category": "technique",
+   "claim": "LiteLLM's root cause: a master key committed to a public repo on May 27, 2026 was force-pushed over but never revoked. An attacker used it on Oct 10 to read agent configs holding an org owner's GitHub token.",
+   "why_it_matters": "Rewriting git history does not kill a leaked key. Agent configs that store broad personal tokens become a path to your release pipeline.",
+   "try_this": "Revoke any key that ever reached a public commit, even after a force-push. Give agents scoped service-account tokens instead of an owner's personal GitHub token.",
+   "evidence": [
+    {
+     "url": "https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Read LiteLLM's attack-chain postmortem; dates and token path confirmed there",
+    "checked_at": "2026-10-25T05:29-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-08",
+   "source_id": "interconnects",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-25-53c5cd3b",
+   "date": "2026-10-25",
+   "category": "release",
+   "claim": "Moonshot released Kimi K3.1 Pro, a 3T-class model with a 1M-token context window. It is on the Kimi API as kimi-k3.1-pro and kimi-k3.1-pro-highspeed, and in Kimi Code.",
+   "why_it_matters": "This is a new very large model you can call through an API today. The highspeed variant is listed as 2 to 3 times faster.",
+   "try_this": "Run a few of your own coding tasks against kimi-k3.1-pro on the Kimi API Platform and compare cost and latency with your current model.",
+   "evidence": [
+    {
+     "url": "https://www.kimi.com/blog/kimi-k3-1-pro",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Kimi's announcement blog confirms release, size class, context window, API model IDs and products",
+    "checked_at": "2026-10-25T05:29-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-08",
+   "source_id": "interconnects",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-25-ba3c5be6",
+   "date": "2026-10-25",
+   "category": "research",
+   "claim": "Moonshot says it removed cyber-related data from mid-training and RL for K3.1 Pro. It reports 81.0% pass@3 on its internal xdev-bench-hard, against 90.5% for a checkpoint without that removal.",
+   "why_it_matters": "A lab is cutting one capability out of an open-weight model on purpose. Expect weaker results on security-heavy agent tasks.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.kimi.com/blog/kimi-k3-1-pro",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Numbers and method read on Kimi's own blog; internal benchmark, not independently reproduced",
+    "checked_at": "2026-10-25T05:29-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-08",
+   "source_id": "interconnects",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-10-25-b6651c86",
+   "date": "2026-10-25",
+   "category": "research",
+   "claim": "Artificial Analysis gives Kimi K3.1 Pro a score of 55 on its Intelligence Index, ranking it 4th of 215 models listed.",
+   "why_it_matters": "This is a third-party score, not the vendor's. The podcast notes that longer, exploratory benchmarks such as ProgramBench show weaker results.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://artificialanalysis.ai/models/kimi-k3-1-pro",
+     "kind": "independent"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Read score and rank on the Artificial Analysis model page; models above it not named there",
+    "checked_at": "2026-10-25T05:29-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-08",
+   "source_id": "interconnects",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-25-3bedbe12",
+   "date": "2026-10-25",
+   "category": "release",
+   "claim": "Gemini CLI published nightly pre-release v0.67.0-nightly.20261025 on Oct 25, 2026. It has no written release notes, only a compare link to the previous nightly.",
+   "why_it_matters": "This is a routine nightly build. The page does not list any new features.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261025.gcd1b45c2d",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "GitHub release page shows the tag, date and pre-release status",
+    "checked_at": "2026-10-25T05:29-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "GitHub release page shows v0.67.0-nightly.20261025 pre-release dated 25 Oct; body has only a Full Changelog compare link to the 20261024 nightly."
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261025.gcd1b45c2d",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-08",
+   "source_id": "deepmind",
+   "status_at_publication": "verified"
   }
  ],
  "audits": [
@@ -2058,6 +2218,13 @@
    "date": "2026-10-24",
    "item_id": "2026-10-24-c4684c53",
    "source_id": "openai",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-10-25",
+   "item_id": "2026-10-25-3bedbe12",
+   "source_id": "deepmind",
    "tier": "T1-seed",
    "verdict": "pass"
   }
@@ -2217,6 +2384,26 @@
    "id": "2026-10-24-c3ec2502",
    "date": "2026-10-24",
    "reason": "review: 'reporter was an AI security agent' goes beyond the advisory credit"
+  },
+  {
+   "id": "2026-10-25-75e4f00c",
+   "date": "2026-10-25",
+   "reason": "review: repeats 2026-10-24-c98f14c8"
+  },
+  {
+   "id": "2026-10-25-712c5dd5",
+   "date": "2026-10-25",
+   "reason": "review: repeats 2026-10-23-4fdf9482"
+  },
+  {
+   "id": "2026-10-25-ecef3122",
+   "date": "2026-10-25",
+   "reason": "review: 'one prompt' overstates the source, which calls it the initial prompt"
+  },
+  {
+   "id": "2026-10-25-fc64a24b",
+   "date": "2026-10-25",
+   "reason": "review: 'available only through Kimi's own apps and API' not stated by the source"
   }
  ]
 }

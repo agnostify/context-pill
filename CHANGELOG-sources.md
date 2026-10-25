@@ -44,3 +44,8 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-10-24: removed 1 item(s) from 2026-10-24 (review: 'always-on thinking' unconfirmed; speed figure is vendor-only)
 - 2026-10-24: removed 1 item(s) from 2026-10-24 (review: unsupported superlative and unconfirmed 2.8T parameter count)
 - 2026-10-24: removed 1 item(s) from 2026-10-24 (review: 'reporter was an AI security agent' goes beyond the advisory credit)
+- 2026-10-25: audit of 2026-10-25-3bedbe12 (Google DeepMind / Google AI): pass (GitHub release page shows v0.67.0-nightly.20261025 pre-release dated 25 Oct; body has only a Full Changelog compare link to the 20261024 nightly.)
+- 2026-10-25: removed 1 item(s) from 2026-10-25 (review: repeats 2026-10-24-c98f14c8)
+- 2026-10-25: removed 1 item(s) from 2026-10-25 (review: repeats 2026-10-23-4fdf9482)
+- 2026-10-25: removed 1 item(s) from 2026-10-25 (review: 'one prompt' overstates the source, which calls it the initial prompt)
+- 2026-10-25: removed 1 item(s) from 2026-10-25 (review: 'available only through Kimi's own apps and API' not stated by the source)

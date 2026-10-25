@@ -35,7 +35,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-23': 1
@@ -73,7 +73,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -114,7 +114,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-16': 10
       '2026-10-19': 2
@@ -164,7 +164,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-16': 7
       '2026-10-17': 2
@@ -214,7 +214,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -224,8 +224,9 @@ sources:
       '2026-10-22': 1
       '2026-10-23': 2
       '2026-10-24': 1
-    items_seen: 10
-    scorable_claims: 5
+      '2026-10-25': 1
+    items_seen: 11
+    scorable_claims: 6
 - id: karpathy
   name: Andrej Karpathy
   home_url: https://karpathy.ai
@@ -261,7 +262,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -295,7 +296,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -305,7 +306,8 @@ sources:
       '2026-10-22': 2
       '2026-10-23': 3
       '2026-10-24': 2
-    items_seen: 15
+      '2026-10-25': 1
+    items_seen: 16
     scorable_claims: 2
 - id: ray
   name: Ray Fu (RayCFU)
@@ -350,7 +352,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 2
@@ -387,7 +389,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -428,7 +430,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -462,7 +464,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-22': 5
@@ -500,7 +502,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-16': 1
     items_seen: 1
@@ -535,7 +537,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-20': 3
@@ -577,7 +579,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 1
@@ -616,7 +618,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -650,11 +652,12 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-18': 1
-    items_seen: 1
-    scorable_claims: 0
+      '2026-10-25': 1
+    items_seen: 2
+    scorable_claims: 4
 - id: importai
   name: Import AI (Jack Clark)
   home_url: https://importai.substack.com
@@ -685,7 +688,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-24'
+    updated: '2026-10-25'
     items_seen_by_date:
       '2026-10-20': 1
     items_seen: 1
