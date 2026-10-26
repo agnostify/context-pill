@@ -35,13 +35,14 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-23': 1
       '2026-10-24': 1
-    items_seen: 3
-    scorable_claims: 3
+      '2026-10-26': 1
+    items_seen: 4
+    scorable_claims: 10
 - id: dario
   name: Dario Amodei (essays)
   home_url: https://darioamodei.com
@@ -73,7 +74,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -114,7 +115,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-16': 10
       '2026-10-19': 2
@@ -164,7 +165,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-16': 7
       '2026-10-17': 2
@@ -214,7 +215,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -262,7 +263,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -296,7 +297,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -307,8 +308,9 @@ sources:
       '2026-10-23': 3
       '2026-10-24': 2
       '2026-10-25': 1
-    items_seen: 16
-    scorable_claims: 2
+      '2026-10-26': 1
+    items_seen: 17
+    scorable_claims: 3
 - id: ray
   name: Ray Fu (RayCFU)
   home_url: https://www.raycfu.com
@@ -352,7 +354,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 2
@@ -389,7 +391,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -430,7 +432,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -464,7 +466,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-22': 5
@@ -502,7 +504,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-16': 1
     items_seen: 1
@@ -537,7 +539,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-20': 3
@@ -579,7 +581,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 1
@@ -618,7 +620,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -652,7 +654,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-18': 1
       '2026-10-25': 1
@@ -688,7 +690,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-25'
+    updated: '2026-10-26'
     items_seen_by_date:
       '2026-10-20': 1
     items_seen: 1
@@ -722,16 +724,16 @@ sources:
   enabled: false
   disabled_reason: Disabled until registered.
 breaking:
-  note: Breaking AI News (scanner/breaking.py). Engagement-ranked, never verified, never touches trust. Env overrides BREAKING_MIN_SCORE,
-    BREAKING_MAX, BREAKING_REFRESH_HOURS.
+  note: Breaking AI News (scanner/breaking.py). Engagement-ranked, never verified, never touches trust. Env overrides BREAKING_MIN_SCORE, BREAKING_MAX,
+    BREAKING_REFRESH_HOURS.
   min_score: 0.6
   max_stories: 10
   refresh_hours: 3
   x:
     enabled: false
     weight: 1.0
-    note: Off while the x-discovery source above stays disabled. Handles live outside this public file (WORK/breaking/x_accounts.txt);
-      X links are never published, X counts only rank stories.
+    note: Off while the x-discovery source above stays disabled. Handles live outside this public file (WORK/breaking/x_accounts.txt); X links
+      are never published, X counts only rank stories.
   reddit:
     weight: 0.9
     route: Arctic Shift API (reddit.com/robots.txt disallows all crawlers); upvotes are an early snapshot, so comments weigh more

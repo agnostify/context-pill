@@ -2128,6 +2128,262 @@
    "recheck_on": "2026-11-08",
    "source_id": "deepmind",
    "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-26-ab022244",
+   "date": "2026-10-26",
+   "category": "tool",
+   "claim": "Theo has published tstack, an MIT-licensed GitHub repo of his daily agent skills for Claude Code and Codex. It includes full-send, full-stop, sol-loop, council, takeover, babysit-pr, modernize, file-pr and leaving-pr-comments.",
+   "why_it_matters": "You can read how a heavy agent user structures reusable skills for PR work and borrow the parts that fit your own workflow.",
+   "try_this": "Read the full-stop skill file in the tstack repo and compare its steps with your own PR checklist before adopting anything.",
+   "evidence": [
+    {
+     "url": "https://github.com/t3dotgg/tstack",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Repo fetched: exists, MIT license, README lists the named skills; no sandbox run",
+    "checked_at": "2026-10-26T05:27-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Repo t3dotgg/tstack: MIT license, 'agent skills I use every day', for Claude Code and Codex; all nine skills listed."
+   },
+   "excerpt": "The agent skills I use every day, cleaned up so anyone can use them.",
+   "excerpt_url": "https://github.com/t3dotgg/tstack",
+   "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-09",
+   "source_id": "theo",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-26-35d3b69c",
+   "date": "2026-10-26",
+   "category": "technique",
+   "claim": "In a Claude Code skill's frontmatter, the description field is what Claude reads to decide when to load the skill, and disable-model-invocation: true stops Claude from loading it on its own, so it only runs when you invoke it.",
+   "why_it_matters": "If you write descriptions as triggers and lock skills with side effects, agents stop firing deploy or merge workflows by surprise.",
+   "try_this": "Add disable-model-invocation: true to any of your skills that merges, deploys or sends messages.",
+   "evidence": [
+    {
+     "url": "https://code.claude.com/docs/en/skills",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Claude Code skills docs frontmatter table confirms both fields and their behavior",
+    "checked_at": "2026-10-26T05:27-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Claude can't invoke the skill on its own.",
+   "excerpt_url": "https://code.claude.com/docs/en/skills",
+   "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-09",
+   "source_id": "theo",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-26-db52b859",
+   "date": "2026-10-26",
+   "category": "technique",
+   "claim": "Theo's full-send skill has an agent take a change all the way to a merged PR: prove it works, review it, file the PR, watch CI and review bots, then merge. full-stop does the same but stops before merging.",
+   "why_it_matters": "It shows a concrete merge gate and proof step for autonomous agents. full-stop is the safer version if you want a human to merge.",
+   "try_this": "Start with a full-stop style flow, where the agent prepares a PR and a person merges it, before allowing any agent to merge.",
+   "evidence": [
+    {
+     "url": "https://github.com/t3dotgg/tstack",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "tstack README describes full-send and full-stop as stated; skill not executed",
+    "checked_at": "2026-10-26T05:27-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Same as full-send, but stops when the PR is ready for you to merge.",
+   "excerpt_url": "https://github.com/t3dotgg/tstack",
+   "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-09",
+   "source_id": "theo",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-26-d9803b8d",
+   "date": "2026-10-26",
+   "category": "technique",
+   "claim": "tstack includes cross-model review skills. sol-loop has a GPT Sol model review a change in a loop until both agents agree, and council gets reviews from three models from different providers until they agree.",
+   "why_it_matters": "Pairing an authoring model with a reviewer from another vendor is a cheap way to catch mistakes that one model misses.",
+   "try_this": "On one non-critical PR, ask a model from a different vendor to review your main agent's diff and compare what each one finds.",
+   "evidence": [
+    {
+     "url": "https://github.com/t3dotgg/tstack",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "README lists sol-loop and council as described; the 3 to 5 round budget is only in the video",
+    "checked_at": "2026-10-26T05:27-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-09",
+   "source_id": "theo",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-26-5b17e141",
+   "date": "2026-10-26",
+   "category": "tool",
+   "claim": "T3 Code is an open-source control surface for coding agents, with desktop, web and mobile apps. It drives Claude Code, Codex, Cursor and other harnesses on your own machine and supports remote access.",
+   "why_it_matters": "One interface for several agent harnesses across machines can make it easier to manage parallel agent threads.",
+   "try_this": "Read the T3 Code README and its remote-access doc to see whether it fits your setup before installing anything.",
+   "evidence": [
+    {
+     "url": "https://github.com/pingdotgg/t3code",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "T3 Code GitHub README confirms the harness list and the mobile/remote apps; not run",
+    "checked_at": "2026-10-26T05:27-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-09",
+   "source_id": "theo",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-26-49c9a624",
+   "date": "2026-10-26",
+   "category": "release",
+   "claim": "T3 Code nightly builds include a Working section that holds threads whose background work the agent is waiting on, and threads settle once their PR is merged.",
+   "why_it_matters": "This keeps finished or waiting agent threads out of your active inbox when many agents run at once.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/pingdotgg/t3code/releases",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Oct 25 nightly notes mention Working and thread settling after a merge; Theo's 'every 6 hours' cadence claim not confirmed",
+    "checked_at": "2026-10-26T05:27-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-09",
+   "source_id": "theo",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-26-a2dcc780",
+   "date": "2026-10-26",
+   "category": "release",
+   "claim": "Theo says T3 Code Nightly added Orchestrator v2, where a main agent thread hands work to subagents running in other harnesses and models, each in its own worktree, which report back.",
+   "why_it_matters": "If shipped, it would allow mixed-vendor subagent review inside one tool, but this is not confirmed yet.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/pingdotgg/t3code/releases",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "Release notes and README checked; no mention of Orchestrator v2 or cross-harness subagents",
+    "checked_at": "2026-10-26T05:27-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-09",
+   "source_id": "theo",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-10-26-b3619b07",
+   "date": "2026-10-26",
+   "category": "tool",
+   "claim": "Simon Willison released Seam Cutter, a browser tool that cuts an image horizontally or vertically and slides the two halves together, removing a strip from the middle, for example to redact a prompt from a stitched transcript screenshot.",
+   "why_it_matters": "It is a quick way to remove irrelevant or sensitive prompt text from long agent-transcript screenshots before you share them.",
+   "try_this": "Open the Seam Cutter page in your browser and remove one section from a long screenshot of an agent transcript.",
+   "evidence": [
+    {
+     "url": "https://tools.simonwillison.net/seam-cutter",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Tool page fetched: exists and accepts an image for a seam cut; behavior taken from the blog post, not tested",
+    "checked_at": "2026-10-26T05:27-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Tool page lacks details; directory entry and Simon's 25 Oct blog post confirm the cut, slide and transcript-redaction example."
+   },
+   "excerpt": "it lets you create a horizontal or vertical cut across an image, then slide the two sides relative to each other.",
+   "excerpt_url": "https://simonwillison.net/2026/Oct/25/seam-cutter/",
+   "item_url": "https://simonwillison.net/2026/Oct/25/seam-cutter/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-09",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -2225,6 +2481,20 @@
    "date": "2026-10-25",
    "item_id": "2026-10-25-3bedbe12",
    "source_id": "deepmind",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-10-26",
+   "item_id": "2026-10-26-ab022244",
+   "source_id": "theo",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-10-26",
+   "item_id": "2026-10-26-b3619b07",
+   "source_id": "simonw",
    "tier": "T1-seed",
    "verdict": "pass"
   }
@@ -2404,6 +2674,16 @@
    "id": "2026-10-25-fc64a24b",
    "date": "2026-10-25",
    "reason": "review: 'available only through Kimi's own apps and API' not stated by the source"
+  },
+  {
+   "id": "2026-10-26-a1f1a2ca",
+   "date": "2026-10-26",
+   "reason": "review: 42.9% figure drops its project-specific denominator"
+  },
+  {
+   "id": "2026-10-26-cfae7e44",
+   "date": "2026-10-26",
+   "reason": "review: 'popular' not supported by a source"
   }
  ]
 }

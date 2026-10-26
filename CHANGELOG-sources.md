@@ -49,3 +49,7 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-10-25: removed 1 item(s) from 2026-10-25 (review: repeats 2026-10-23-4fdf9482)
 - 2026-10-25: removed 1 item(s) from 2026-10-25 (review: 'one prompt' overstates the source, which calls it the initial prompt)
 - 2026-10-25: removed 1 item(s) from 2026-10-25 (review: 'available only through Kimi's own apps and API' not stated by the source)
+- 2026-10-26: audit of 2026-10-26-ab022244 (Theo (t3.gg)): pass (Repo t3dotgg/tstack: MIT license, 'agent skills I use every day', for Claude Code and Codex; all nine skills listed.)
+- 2026-10-26: audit of 2026-10-26-b3619b07 (Simon Willison): pass (Tool page lacks details; directory entry and Simon's 25 Oct blog post confirm the cut, slide and transcript-redaction example.)
+- 2026-10-26: removed 1 item(s) from 2026-10-26 (review: 42.9% figure drops its project-specific denominator)
+- 2026-10-26: removed 1 item(s) from 2026-10-26 (review: 'popular' not supported by a source)
