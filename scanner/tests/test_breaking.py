@@ -227,6 +227,59 @@ try:
     assert ids[0] == ids[1] == ids[2], ids
     arch = json.loads((work / "breaking" / "archive" / f"{DATE}.json").read_text())["keys"]
     assert any("reddit:ia" in ks for ks in arch.values()) and any("reddit:ib" in ks for ks in arch.values()), arch
+    # company feeds fix: a fresh first-party AI announcement with no pickup gets a capped slot after engagement stories
+    shutil.rmtree(work / "breaking", ignore_errors=True)
+    fresh = [comp(f"https://openai.com/index/fresh-{n}", f"OpenAI releases GPT model update {n}", h=2 + n) for n in range(5)]
+    stale = comp("https://openai.com/index/stale", "OpenAI announces a new reasoning model for agents", h=20)
+    offtopic = comp("https://openai.com/index/careers", "Our new office opening in Dublin", h=1)
+    outsider = dict(comp("https://example.com/ai-launch", "Startup launches an AI agent model", h=1), company="Example")
+    loud = red("loud", "Anthropic launches Claude Opus 6 for enterprise agents today", 5000, 1500, link="https://www.theverge.com/ai/opus6")
+    code, b = go(repo, work, {"x": const([]), "reddit": const([loud]), "company": const(fresh + [stale, offtopic, outsider])}, dry=True)
+    assert code == 0, code
+    titles = [s["title"] for s in b["stories"]]
+    assert titles[0] == loud["title"], titles
+    comp_only = [s for s in b["stories"] if s["platforms"] == ["company"]]
+    assert len(comp_only) == 3, titles
+    assert all(s["score"] < b["min_score"] for s in comp_only), "fresh slots keep their real score"
+    assert [s["title"] for s in comp_only] == [f"OpenAI releases GPT model update {n}" for n in range(3)], titles
+    assert stale["title"] not in titles and offtopic["title"] not in titles and outsider["title"] not in titles, titles
+    # the fresh slots never push an engagement story out: a full page of them leaves no room
+    many = [red(f"m{n}", t, 4000, 900, link=f"https://www.theverge.com/ai/m{n}") for n, t in enumerate(X_TITLES + R_TITLES)]
+    code, b = go(repo, work, {"x": const([]), "reddit": const(many), "company": const(fresh)}, dry=True)
+    assert code == 0 and not [s for s in b["stories"] if s["platforms"] == ["company"]], [s["title"] for s in b["stories"]]
+    # company feeds use their own window (company_hours, default 36) and a first sitemap run only seeds the seen set
+    calls = []
+    real_feed, real_sitemap = B.fetch.feed_items, B.fetch.sitemap_items
+    def fake_feed(src, f, since):
+        return []
+    def fake_sitemap(src, f, since, seen):
+        first = f["url"] not in seen
+        seen[f["url"]] = ["https://www.anthropic.com/news/a"]
+        calls.append(first)
+        return [{"title": "Anthropic launches a new Claude model", "url": f"https://www.anthropic.com/news/n{len(calls)}",
+                 "published": NOW.isoformat()}], first, 1
+    B.fetch.feed_items, B.fetch.sitemap_items = fake_feed, fake_sitemap
+    try:
+        c = B.cfg(repo)
+        assert c["company"]["hours"] == 36 and c["company"]["cap"] == 3 and c["company"]["fresh_hours"] == 12, c["company"]
+        got1, _ = B.fetch_company(c, NOW - dt.timedelta(hours=36), repo, work, lambda m: None)
+        got2, _ = B.fetch_company(c, NOW - dt.timedelta(hours=36), repo, work, lambda m: None)
+        assert calls and calls[0] is True and not got1, (calls, got1)
+        assert got2 and all(i["platform"] == "company" for i in got2), got2
+        windows = {}
+        real = B.fetch_x, B.fetch_reddit, B.fetch_company
+        B.fetch_x = lambda c, since, w, log: (windows.setdefault("x", since), ([], None))[1]
+        B.fetch_reddit = lambda c, since, log: (windows.setdefault("reddit", since), ([], None))[1]
+        B.fetch_company = lambda c, since, r, w, log: (windows.setdefault("company", since), ([], None))[1]
+        try:
+            B.run(DATE, 24, True, repo=repo, work=work, log=lambda m: None, check_links=False, now=NOW)
+        finally:
+            B.fetch_x, B.fetch_reddit, B.fetch_company = real
+        assert windows["reddit"] == NOW - dt.timedelta(hours=24) and windows["company"] == NOW - dt.timedelta(hours=36), windows
+        names = {f["name"] for f in c["company"]["feeds"]}
+        assert {"NVIDIA", "Google"} <= names, names
+    finally:
+        B.fetch.feed_items, B.fetch.sitemap_items = real_feed, real_sitemap
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 print("breaking tests: OK")
