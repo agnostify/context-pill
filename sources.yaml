@@ -35,14 +35,15 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-23': 1
       '2026-10-24': 1
       '2026-10-26': 1
-    items_seen: 4
-    scorable_claims: 10
+      '2026-10-27': 1
+    items_seen: 5
+    scorable_claims: 12
 - id: dario
   name: Dario Amodei (essays)
   home_url: https://darioamodei.com
@@ -74,7 +75,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -115,7 +116,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-16': 10
       '2026-10-19': 2
@@ -123,8 +124,9 @@ sources:
       '2026-10-22': 8
       '2026-10-23': 4
       '2026-10-24': 56
-    items_seen: 81
-    scorable_claims: 15
+      '2026-10-27': 2
+    items_seen: 83
+    scorable_claims: 18
 - id: openai
   name: OpenAI (and Sam Altman's blog)
   home_url: https://openai.com
@@ -165,7 +167,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-16': 7
       '2026-10-17': 2
@@ -174,8 +176,9 @@ sources:
       '2026-10-22': 14
       '2026-10-23': 2
       '2026-10-24': 9
-    items_seen: 45
-    scorable_claims: 8
+      '2026-10-27': 19
+    items_seen: 64
+    scorable_claims: 9
 - id: deepmind
   name: Google DeepMind / Google AI
   home_url: https://deepmind.google
@@ -215,7 +218,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -226,8 +229,9 @@ sources:
       '2026-10-23': 2
       '2026-10-24': 1
       '2026-10-25': 1
-    items_seen: 11
-    scorable_claims: 6
+      '2026-10-27': 2
+    items_seen: 13
+    scorable_claims: 7
 - id: karpathy
   name: Andrej Karpathy
   home_url: https://karpathy.ai
@@ -263,7 +267,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -297,7 +301,7 @@ sources:
     resolved_tips: 0
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -309,8 +313,9 @@ sources:
       '2026-10-24': 2
       '2026-10-25': 1
       '2026-10-26': 1
-    items_seen: 17
-    scorable_claims: 3
+      '2026-10-27': 3
+    items_seen: 20
+    scorable_claims: 4
 - id: ray
   name: Ray Fu (RayCFU)
   home_url: https://www.raycfu.com
@@ -354,7 +359,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 2
@@ -391,7 +396,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -399,7 +404,8 @@ sources:
       '2026-10-22': 2
       '2026-10-23': 4
       '2026-10-24': 2
-    items_seen: 12
+      '2026-10-27': 1
+    items_seen: 13
     scorable_claims: 15
 - id: mollick
   name: Ethan Mollick (One Useful Thing)
@@ -432,7 +438,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -466,7 +472,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-22': 5
@@ -504,7 +510,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-16': 1
     items_seen: 1
@@ -539,15 +545,16 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-20': 3
       '2026-10-22': 1
       '2026-10-23': 7
       '2026-10-24': 5
-    items_seen: 17
-    scorable_claims: 4
+      '2026-10-27': 2
+    items_seen: 19
+    scorable_claims: 6
 - id: fireship
   name: Fireship
   home_url: https://www.youtube.com/@Fireship
@@ -581,12 +588,13 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 1
-    items_seen: 2
-    scorable_claims: 1
+      '2026-10-27': 1
+    items_seen: 3
+    scorable_claims: 2
 - id: aiexplained
   name: AI Explained
   home_url: https://www.youtube.com/@aiexplained-official
@@ -620,7 +628,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -654,7 +662,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-18': 1
       '2026-10-25': 1
@@ -690,11 +698,12 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-26'
+    updated: '2026-10-27'
     items_seen_by_date:
       '2026-10-20': 1
-    items_seen: 1
-    scorable_claims: 0
+      '2026-10-27': 1
+    items_seen: 2
+    scorable_claims: 2
 - id: x-discovery
   name: X (private discovery signal)
   enabled: false

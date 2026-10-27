@@ -2384,6 +2384,369 @@
    "recheck_on": "2026-11-09",
    "source_id": "simonw",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-27-789335ea",
+   "date": "2026-10-27",
+   "category": "release",
+   "claim": "OpenAI released GPT-6.1 Terra, API id gpt-6.1-terra, priced at $1 per million input tokens, $0.05 cached input and $5 output, with a context window of about 1.05M tokens.",
+   "why_it_matters": "A midrange option for computer use, vision and writing at roughly half the price of GPT-5.6 Terra ($2/$12).",
+   "try_this": "Rerun one of your own vision or computer-use evals on gpt-6.1-terra and compare cost per task against your current model.",
+   "evidence": [
+    {
+     "url": "https://developers.openai.com/api/docs/models/gpt-6.1-terra",
+     "kind": "primary"
+    },
+    {
+     "url": "https://developers.openai.com/api/docs/models/gpt-5.6-terra",
+     "kind": "primary"
+    },
+    {
+     "url": "https://simonwillison.net/2026/Oct/26/gpt-61-terra/",
+     "kind": "independent"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "OpenAI API model docs confirm model id, pricing and context window; GPT-5.6 Terra docs page checked for comparison",
+    "checked_at": "2026-10-27T05:35-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "GPT-6.1 Terra is priced at $1/million input tokens and $5/million output",
+   "excerpt_url": "https://simonwillison.net/2026/Oct/26/gpt-61-terra/",
+   "item_url": "https://www.youtube.com/watch?v=tTuk4pGnT0A",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "openai",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-27-393ec241",
+   "date": "2026-10-27",
+   "category": "release",
+   "claim": "GPT-6.1 Terra is generally available in GitHub Copilot for Pro, Pro+, Max, Business and Enterprise users. It is billed at provider list pricing under usage-based billing, and the rollout is gradual.",
+   "why_it_matters": "Copilot users can try a cheaper agentic coding model than GPT-6.1 Sol. Business and Enterprise admins control access through model policy.",
+   "try_this": "Copilot admins: check the model policy in Copilot settings, since new models are enabled by default unless the global default is off.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-26-gpt-6-1-terra-in-github-copilot",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Read GitHub's own changelog entry (primary for its release): plans, billing and admin policy confirmed",
+    "checked_at": "2026-10-27T05:35-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "This model is billed at provider list pricing under usage-based billing.",
+   "excerpt_url": "https://github.blog/changelog/2026-10-26-gpt-6-1-terra-in-github-copilot",
+   "item_url": "https://github.blog/changelog/2026-10-26-gpt-6-1-terra-in-github-copilot",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "github-changelog",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-27-89459c15",
+   "date": "2026-10-27",
+   "category": "tool",
+   "claim": "GitHub Copilot assisted permissions are GA in Copilot CLI, the Copilot app and VS Code. An LLM reviews permission requests for commands, file paths and URLs; requests it judges clearly safe run without asking.",
+   "why_it_matters": "Fewer approval prompts for agents. GitHub's docs warn the reviewer model can approve dangerous actions and is not a substitute for sandboxing.",
+   "try_this": "In Copilot CLI run /permissions and select assisted, but only inside a sandbox; avoid combining it with --allow-all.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-26-github-copilot-assisted-permissions-generally-available",
+     "kind": "primary"
+    },
+    {
+     "url": "https://docs.github.com/copilot/concepts/customizations/allowing-safe-commands",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Changelog and GitHub docs checked for behavior, enablement steps and caveats; not run in a sandbox",
+    "checked_at": "2026-10-27T05:35-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Requests classified as clearly safe automatically proceed. Other requests require your approval.",
+   "excerpt_url": "https://github.blog/changelog/2026-10-26-github-copilot-assisted-permissions-generally-available",
+   "item_url": "https://github.blog/changelog/2026-10-26-github-copilot-assisted-permissions-generally-available",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-27-83b7ff34",
+   "date": "2026-10-27",
+   "category": "tool",
+   "claim": "Claude Code v2.1.311 makes the ultrathink keyword run its turn at xhigh effort on Opus 5.5, Sonnet 5.5, Haiku 5.5 and Fable 5.1 through Anthropic's API. Typed while Claude is working, it raises the rest of that turn.",
+   "why_it_matters": "Gives a predictable way to raise reasoning effort per turn without changing session settings.",
+   "try_this": "After updating Claude Code, use ultrathink on one hard turn and compare usage in /usage against a normal turn.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official GitHub release notes for v2.1.311; behavior not tested in a sandbox",
+    "checked_at": "2026-10-27T05:35-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Changed ultrathink in the interactive terminal to run its turn at xhigh effort on Opus 5.5",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-27-693183fe",
+   "date": "2026-10-27",
+   "category": "tool",
+   "claim": "On Bedrock, Mantle, Vertex and Foundry, Claude Code v2.1.311 now loads model settings from a signed file on downloads.claude.ai. Setting CLAUDE_CODE_MODEL_CATALOG=off turns this off.",
+   "why_it_matters": "A new outbound request that locked-down or air-gapped enterprise setups may need to allow or disable.",
+   "try_this": "If you run Claude Code through a cloud provider behind a strict firewall, decide whether to allowlist downloads.claude.ai or set CLAUDE_CODE_MODEL_CATALOG=off.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official GitHub release notes for v2.1.311; not tested in a sandbox",
+    "checked_at": "2026-10-27T05:35-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "The v2.1.311 release notes confirm the signed-file loading from downloads.claude.ai on all four platforms and the CLAUDE_CODE_MODEL_CATALOG=off opt-out."
+   },
+   "excerpt": "set CLAUDE_CODE_MODEL_CATALOG=off to turn this off",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-27-8099cfc6",
+   "date": "2026-10-27",
+   "category": "tool",
+   "claim": "Claude Code v2.1.311 fixes standard-context sessions stopping with \"Usage credits required for 1M context\" when a request ran over 200K tokens; it now compacts the conversation and continues.",
+   "why_it_matters": "Long agent sessions on standard context should no longer halt unexpectedly at the 200K boundary.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official GitHub release notes for v2.1.311; not reproduced",
+    "checked_at": "2026-10-27T05:35-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Claude Code now compacts the conversation and continues",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-27-e913a936",
+   "date": "2026-10-27",
+   "category": "prediction",
+   "claim": "Theo predicts that token spend of about $100k per month today will cost around $100 per month within a year for equivalent model capability.",
+   "why_it_matters": "A falsifiable cost-curve forecast that affects build-versus-wait decisions for token-heavy agent products.",
+   "try_this": null,
+   "evidence": [],
+   "verification": {
+    "status": "unverified",
+    "method": "Dated prediction from video notes (Gemini-analyzed); logged for scoring at deadline",
+    "checked_at": "2026-10-27T05:35-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=FHGfSjDGUIw",
+   "scorable": true,
+   "prediction_deadline": "2027-10-27",
+   "state": "pending",
+   "recheck_on": "2027-11-10",
+   "source_id": "theo",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-10-27-257f59ff",
+   "date": "2026-10-27",
+   "category": "tool",
+   "claim": "webframe (tractordev) is an MIT-licensed Go CLI that runs a web page in a hidden system webview, sending console.log to stdout and exceptions to stderr, without bundling a browser engine.",
+   "why_it_matters": "A lightweight option for scripted page JavaScript and scraping without Playwright, though Simon's evaluation found real rough edges.",
+   "try_this": "Read Simon's evaluation and the repo README to see whether the listed rough edges block your use case before trying it.",
+   "evidence": [
+    {
+     "url": "https://github.com/tractordev/webframe",
+     "kind": "primary"
+    },
+    {
+     "url": "https://simonwillison.net/2026/Oct/26/webframe-evaluation/",
+     "kind": "independent"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Repo README confirms purpose, Go, MIT license, system webview engines; not run in a sandbox",
+    "checked_at": "2026-10-27T05:35-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "CSP failures, a 0×0 viewport, hanging loads, missing HTTP metadata, and limited browser controls",
+   "excerpt_url": "https://simonwillison.net/2026/Oct/26/webframe-evaluation/",
+   "item_url": "https://simonwillison.net/2026/Oct/26/webframe-evaluation/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-27-8e03f2e9",
+   "date": "2026-10-27",
+   "category": "research",
+   "claim": "ProgramBench (arXiv 2605.03546, May 2026) asks agents to rebuild 200 programs such as FFmpeg, SQLite and the PHP interpreter from only an executable and its docs. At launch, no tested model fully solved any task.",
+   "why_it_matters": "A hard end-to-end software-building benchmark. Import AI reports a much higher later Opus 5.5 score, not yet confirmed from a primary source.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://arxiv.org/abs/2605.03546",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "arXiv abstract confirms 200 tasks, setup and launch results; the newer 18.5% Opus 5.5 score was not found on a primary source",
+    "checked_at": "2026-10-27T05:36-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://importai.substack.com/p/import-ai-478-math-for-alignment",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "importai",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-27-11a50222",
+   "date": "2026-10-27",
+   "category": "prediction",
+   "claim": "Jack Clark predicts ProgramBench will be saturated, meaning a very high resolved score, by the end of 2027.",
+   "why_it_matters": "A dated forecast on autonomous end-to-end software building that can be scored against public results.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://arxiv.org/abs/2605.03546",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "Prediction logged from newsletter; benchmark existence checked on arXiv",
+    "checked_at": "2026-10-27T05:36-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "My expectation is ProgramBench is saturated by the end of 2027",
+   "excerpt_url": "https://importai.substack.com/p/import-ai-478-math-for-alignment",
+   "item_url": "https://importai.substack.com/p/import-ai-478-math-for-alignment",
+   "scorable": true,
+   "prediction_deadline": "2027-12-31",
+   "state": "pending",
+   "recheck_on": "2028-01-14",
+   "source_id": "importai",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-10-27-9b0ede8b",
+   "date": "2026-10-27",
+   "category": "tool",
+   "claim": "Gemini CLI nightly v0.67.0-nightly.20261027 includes MCP server and tool metadata in ACP permission requests and classifies project spending cap errors as terminal quota errors.",
+   "why_it_matters": "ACP clients can show which MCP server and tool is asking for permission, and runs stop cleanly on spending caps.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261027.g363a13119",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read official GitHub pre-release notes; nightly build, not tested",
+    "checked_at": "2026-10-27T05:36-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "fix(acp): include MCP server and tool metadata in permission requests",
+   "excerpt_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261027.g363a13119",
+   "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261027.g363a13119",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-10",
+   "source_id": "deepmind",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -2495,6 +2858,13 @@
    "date": "2026-10-26",
    "item_id": "2026-10-26-b3619b07",
    "source_id": "simonw",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-10-27",
+   "item_id": "2026-10-27-693183fe",
+   "source_id": "anthropic",
    "tier": "T1-seed",
    "verdict": "pass"
   }
@@ -2684,6 +3054,16 @@
    "id": "2026-10-26-cfae7e44",
    "date": "2026-10-26",
    "reason": "review: 'popular' not supported by a source"
+  },
+  {
+   "id": "2026-10-27-658c73f5",
+   "date": "2026-10-27",
+   "reason": "review: repeats 2026-10-25-53c5cd3b (same Kimi K3.1 Pro announcement)"
+  },
+  {
+   "id": "2026-10-27-568a5cfd",
+   "date": "2026-10-27",
+   "reason": "review: Verified label overstated; blended cost and cache-read rate unchecked"
   }
  ]
 }

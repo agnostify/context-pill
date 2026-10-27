@@ -53,3 +53,6 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-10-26: audit of 2026-10-26-b3619b07 (Simon Willison): pass (Tool page lacks details; directory entry and Simon's 25 Oct blog post confirm the cut, slide and transcript-redaction example.)
 - 2026-10-26: removed 1 item(s) from 2026-10-26 (review: 42.9% figure drops its project-specific denominator)
 - 2026-10-26: removed 1 item(s) from 2026-10-26 (review: 'popular' not supported by a source)
+- 2026-10-27: audit of 2026-10-27-693183fe (Anthropic): pass (The v2.1.311 release notes confirm the signed-file loading from downloads.claude.ai on all four platforms and the CLAUDE_CODE_MODEL_CATALOG=off opt-out.)
+- 2026-10-27: removed 1 item(s) from 2026-10-27 (review: repeats 2026-10-25-53c5cd3b (same Kimi K3.1 Pro announcement))
+- 2026-10-27: removed 1 item(s) from 2026-10-27 (review: Verified label overstated; blended cost and cache-read rate unchecked)
