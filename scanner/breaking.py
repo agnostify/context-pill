@@ -38,6 +38,8 @@ AI_RE = re.compile(r"(?i)\b(a\.?i\.?|artificial intelligence|llms?|gpt[-\w.]*|ch
 NEWS_RE = re.compile(r"(?i)\b(launch\w*|releas\w*|announc\w*|unveil\w*|introduc\w*|ships?|open[- ]sourc\w*|acquir\w*|raises?|"
                      r"funding|valuation|lawsuit|sues?|ban\w*|block\w*|leak\w*|outage|breach|ceo|reports?|reported|says|available|"
                      r"benchmark|model|weights|update|deal|partner\w*|billion|policy|regulat\w*)\b")
+NAME_RE = re.compile(r"(?i)\b(openai|anthropic|nvidia|deepmind|google|meta|microsoft|mistral|xai|hugging ?face|perplexity|deepseek|"
+                     r"altman|amodei|hassabis|musk)\b")   # names alone don't make a fresh company post AI news
 SELF_DOMAINS = ("reddit.com", "redd.it", "i.redd.it", "v.redd.it", "self.")
 
 
@@ -197,7 +199,8 @@ def fetch_company(c, since, repo, work, log):
         for i in got:
             items.append({"platform": "company", "id": "url:" + repeats.norm_url(i["url"]), "title": (i["title"] or _slug_title(i["url"]))[:300],
                           "url": i["url"], "created": i.get("published") or dt.datetime.now(dt.timezone.utc).isoformat(),
-                          "raw": {}, "links": [i["url"]], "company": s["name"], "aggregator": False})
+                          "raw": {}, "links": [i["url"]], "company": s["name"], "aggregator": False,
+                      "dated": bool(i.get("published"))})   # undated: collected-at time, never fresh
     seen_p.parent.mkdir(parents=True, exist_ok=True); seen_p.write_text(json.dumps(seen))
     log(f"company: {len(items)} items from {ok} feeds" + (f"; {seeded} sitemaps seeded (first run)" if seeded else "") + (f"; errors: {', '.join(errors)}" if errors else ""))
     if errors and not ok:
@@ -377,11 +380,13 @@ def assign_ids(groups, prev_keys, date):
 
 
 def fresh_company(g, s, c, now):
-    """A company-only story from a first-party host, about AI, whose newest item is within company_fresh_hours."""
-    if any(i["platform"] != "company" for i in g) or not domain_in(s["primary_url"], tuple(c.get("company_domains", []))):
+    """A story led by a dated first-party post from a company_domains host, newest within company_fresh_hours, about AI once
+    company and people names are taken out of the title. Pickup that still leaves it under min_score doesn't disqualify it."""
+    comp = [i for i in g if i["platform"] == "company" and i.get("dated", True)]
+    if not comp or not domain_in(s["primary_url"], tuple(c.get("company_domains", []))):
         return False
-    age_h = (now - max(dt.datetime.fromisoformat(i["created"]) for i in g)).total_seconds() / 3600
-    return age_h <= c["company"]["fresh_hours"] and is_ai(s["title"])
+    age_h = (now - max(dt.datetime.fromisoformat(i["created"]) for i in comp)).total_seconds() / 3600
+    return age_h <= c["company"]["fresh_hours"] and is_ai(NAME_RE.sub(" ", s["title"]))
 
 
 def select(cands, c, fresh=()):

@@ -233,16 +233,24 @@ try:
     stale = comp("https://openai.com/index/stale", "OpenAI announces a new reasoning model for agents", h=20)
     offtopic = comp("https://openai.com/index/careers", "Our new office opening in Dublin", h=1)
     outsider = dict(comp("https://example.com/ai-launch", "Startup launches an AI agent model", h=1), company="Example")
+    office = dict(comp("https://nvidianews.nvidia.com/news/office", "NVIDIA opens a new office in London", h=1), company="NVIDIA")
+    undated = dict(comp("https://openai.com/index/undated", "OpenAI launches a new AI agent", h=0), dated=False)
+    picked = comp("https://openai.com/index/picked", "OpenAI ships a smaller open-weights model", h=1)
+    quiet = red("quiet", "OpenAI ships a smaller open-weights model", 0, 0, link="https://openai.com/index/picked")
     loud = red("loud", "Anthropic launches Claude Opus 6 for enterprise agents today", 5000, 1500, link="https://www.theverge.com/ai/opus6")
-    code, b = go(repo, work, {"x": const([]), "reddit": const([loud]), "company": const(fresh + [stale, offtopic, outsider])}, dry=True)
+    code, b = go(repo, work, {"x": const([]), "reddit": const([loud, quiet]), "company": const(fresh[:2] + [stale, offtopic, outsider, office, undated, picked])}, dry=True)
     assert code == 0, code
     titles = [s["title"] for s in b["stories"]]
     assert titles[0] == loud["title"], titles
-    comp_only = [s for s in b["stories"] if s["platforms"] == ["company"]]
-    assert len(comp_only) == 3, titles
-    assert all(s["score"] < b["min_score"] for s in comp_only), "fresh slots keep their real score"
-    assert [s["title"] for s in comp_only] == [f"OpenAI releases GPT model update {n}" for n in range(3)], titles
+    slots = b["stories"][1:]
+    assert len(slots) == 3, titles
+    assert all(s["score"] < b["min_score"] for s in slots), "fresh slots keep their real score"
     assert stale["title"] not in titles and offtopic["title"] not in titles and outsider["title"] not in titles, titles
+    assert office["title"] not in titles and undated["title"] not in titles, "a name alone isn't AI news; undated is never fresh"
+    assert picked["title"] in titles, "a little pickup under min_score keeps the fresh slot"
+    code, b = go(repo, work, {"x": const([]), "reddit": const([loud]), "company": const(fresh)}, dry=True)
+    comp_only = [s["title"] for s in b["stories"] if s["platforms"] == ["company"]]
+    assert comp_only == [f"OpenAI releases GPT model update {n}" for n in range(3)], comp_only
     # the fresh slots never push an engagement story out: a full page of them leaves no room
     many = [red(f"m{n}", t, 4000, 900, link=f"https://www.theverge.com/ai/m{n}") for n, t in enumerate(X_TITLES + R_TITLES)]
     code, b = go(repo, work, {"x": const([]), "reddit": const(many), "company": const(fresh)}, dry=True)
@@ -277,7 +285,7 @@ try:
             B.fetch_x, B.fetch_reddit, B.fetch_company = real
         assert windows["reddit"] == NOW - dt.timedelta(hours=24) and windows["company"] == NOW - dt.timedelta(hours=36), windows
         names = {f["name"] for f in c["company"]["feeds"]}
-        assert {"NVIDIA", "Google"} <= names, names
+        assert "NVIDIA" in names, names
     finally:
         B.fetch.feed_items, B.fetch.sitemap_items = real_feed, real_sitemap
 finally:

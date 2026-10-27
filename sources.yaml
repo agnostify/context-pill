@@ -795,9 +795,6 @@ breaking:
     - id: nvidia-newsroom
       name: NVIDIA
       url: https://nvidianews.nvidia.com/rss.xml
-    - id: google-ai-blog
-      name: Google
-      url: https://blog.google/technology/ai/rss/
   company_domains:
   - anthropic.com
   - claude.com
