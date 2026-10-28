@@ -56,3 +56,7 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-10-27: audit of 2026-10-27-693183fe (Anthropic): pass (The v2.1.311 release notes confirm the signed-file loading from downloads.claude.ai on all four platforms and the CLAUDE_CODE_MODEL_CATALOG=off opt-out.)
 - 2026-10-27: removed 1 item(s) from 2026-10-27 (review: repeats 2026-10-25-53c5cd3b (same Kimi K3.1 Pro announcement))
 - 2026-10-27: removed 1 item(s) from 2026-10-27 (review: Verified label overstated; blended cost and cache-read rate unchecked)
+- 2026-10-28: audit of 2026-10-28-b2cdfd03 (Google DeepMind / Google AI): pass (DeepMind blog confirms Genie 4 is real-time with native audio and text steering; trusted-tester research preview; Ultra/Project Genie and Gemini API early access.)
+- 2026-10-28: removed 1 item(s) from 2026-10-28 (review: repeats 2026-10-17-dfea536b (Gemini CLI PR #29774 Gemini 4 banner))
+- 2026-10-28: removed 1 item(s) from 2026-10-28 (review: hook cap stated as 24 but release notes allow 12 more timed-out hooks)
+- 2026-10-28: removed 1 item(s) from 2026-10-28 (review: 'Google assigned' 62 CVEs not stated in source; exploit-chain count includes a DoS)
