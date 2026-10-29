@@ -60,3 +60,11 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-10-28: removed 1 item(s) from 2026-10-28 (review: repeats 2026-10-17-dfea536b (Gemini CLI PR #29774 Gemini 4 banner))
 - 2026-10-28: removed 1 item(s) from 2026-10-28 (review: hook cap stated as 24 but release notes allow 12 more timed-out hooks)
 - 2026-10-28: removed 1 item(s) from 2026-10-28 (review: 'Google assigned' 62 CVEs not stated in source; exploit-chain count includes a DoS)
+- 2026-10-29: removed 1 item(s) from 2026-10-29 (review: our summary said access starts through Fairwind; the source names Fairwind only for later partner expansion)
+- 2026-10-29: removed 1 item(s) from 2026-10-29 (review: Why-it-matters comparison with Opus 5.5 not in the evidence and traced to an X recap)
+- 2026-10-29: removed 1 item(s) from 2026-10-29 (review: 'calibrated classification' overstates the README, which says calibration transfer is untested)
+- 2026-10-29: removed 1 item(s) from 2026-10-29 (review: Try-this step suggested uploading a recorded meeting to a hosted demo without privacy precautions)
+- 2026-10-29: audit of 2026-10-29-a9c853bf (Google DeepMind / Google AI): fail (Date, cyber-defender first access and pricing are correct, but the source names Fairwind only for later partner expansion, not initial access.); cause: our summary
+- 2026-10-29: audit of 2026-10-29-f2f4635f (Anthropic): pass (Anthropic post (Oct 28, 2026) confirms 20 partners, free Claude credits, Sloan, NSF, EMBL, STScI, gnomAD (Broad), Tau Ceti Lean library.)
+- 2026-10-29: removed 1 item(s) from 2026-10-29 (review: 'weaker safety protections' overstates the changelog's 'different safety protections')
+- 2026-10-29: removed 1 item(s) from 2026-10-29 (review: 'some in a single shot' overstates one named single-shot game not tied to Opus 5.5)

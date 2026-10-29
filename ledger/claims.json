@@ -3079,6 +3079,306 @@
    "recheck_on": "2026-11-11",
    "source_id": "ray",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-29-f619123b",
+   "date": "2026-10-29",
+   "category": "tool",
+   "claim": "GitHub Copilot Fusion is generally available. It routes each prompt across models using Single, Cascade or Critique workflows, with Standard, High and Max effort levels. Each model used is billed at its own rate, with a temporary 30% discount.",
+   "why_it_matters": "You can stop picking a model per task. Admins can limit which models Fusion uses, and costs depend on whichever models it picks.",
+   "try_this": "In VS Code or Copilot CLI, choose Copilot Fusion Standard in the model picker for one day of routine tasks, then compare AI credit use with your usual model.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-28-route-and-orchestrate-models-with-github-copilot-fusion",
+     "kind": "primary"
+    },
+    {
+     "url": "https://docs.github.com/en/copilot/concepts/auto-model-selection",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "GitHub changelog read; GitHub docs page mentions Copilot Fusion in the model picker; no hands-on test",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "When you use Copilot Fusion you’re billed for each model it uses, at each model’s standard rate.",
+   "excerpt_url": "https://github.blog/changelog/2026-10-28-route-and-orchestrate-models-with-github-copilot-fusion",
+   "item_url": "https://github.blog/changelog/2026-10-28-route-and-orchestrate-models-with-github-copilot-fusion",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-29-d843a18e",
+   "date": "2026-10-29",
+   "category": "automation",
+   "claim": "GitHub Agentic Workflows is generally available for Free, Team and Enterprise. You write workflows in Markdown and they compile to standard Actions YAML. Agents run read-only by default in a sandboxed container behind a firewall, and proposed changes get a threat scan.",
+   "why_it_matters": "You can run agent jobs like issue triage or CI failure analysis inside your existing Actions setup and policies, with safeguards turned on by default.",
+   "try_this": "In a throwaway repo, run gh extension install github/gh-aw, add one triage workflow, and read the compiled Actions YAML before enabling it.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-28-github-agentic-workflows-generally-available",
+     "kind": "primary"
+    },
+    {
+     "url": "https://github.com/github/gh-aw",
+     "kind": "primary"
+    },
+    {
+     "url": "https://github.github.com/gh-aw/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Changelog read; github/gh-aw repo (MIT, install command) and docs site confirm Markdown-to-Actions compile; not run",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Define your automation in natural language Markdown files, and GitHub Agentic Workflows compiles them into standard Actions YAML.",
+   "excerpt_url": "https://github.blog/changelog/2026-10-28-github-agentic-workflows-generally-available",
+   "item_url": "https://github.blog/changelog/2026-10-28-github-agentic-workflows-generally-available",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-29-7e2a6cac",
+   "date": "2026-10-29",
+   "category": "tool",
+   "claim": "A GitHub security extension for the Copilot app, in public preview, lists open code scanning alerts by severity and lets Copilot explain or fix them. Fixes go to your local working copy only. A /security-review command checks uncommitted changes.",
+   "why_it_matters": "You can triage and fix security alerts in one place, and nothing is committed or pushed until you review it.",
+   "try_this": "Install it with copilot plugin install github-security@awesome-copilot, then run /security-review on a small local change.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-28-security-extension-for-the-github-copilot-app",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "GitHub changelog entry read, including install command and plan requirements; not run",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Copilot only makes fixes in your local working copy and doesn’t commit or push anything.",
+   "excerpt_url": "https://github.blog/changelog/2026-10-28-security-extension-for-the-github-copilot-app",
+   "item_url": "https://github.blog/changelog/2026-10-28-security-extension-for-the-github-copilot-app",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-29-83243eba",
+   "date": "2026-10-29",
+   "category": "tool",
+   "claim": "Copilot Memory is generally available on paid Copilot plans and keeps preferences and repo conventions across sessions. Copilot dreaming, an opt-in public preview, updates memories and proposes changes to skills and instruction files through pull requests.",
+   "why_it_matters": "Agents stop relearning your conventions every session. Dreaming uses AI credits and edits memories automatically, so review what it stores.",
+   "try_this": "Open your Copilot settings and review or delete saved personal memories before you turn on dreaming.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-28-github-intelligence-puts-your-code-context-and-history-to-work",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "GitHub changelog entry read; GA and preview status and opt-in rules confirmed there; not tested",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Dreaming can add, update, and remove personal and repository memories.",
+   "excerpt_url": "https://github.blog/changelog/2026-10-28-github-intelligence-puts-your-code-context-and-history-to-work",
+   "item_url": "https://github.blog/changelog/2026-10-28-github-intelligence-puts-your-code-context-and-history-to-work",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-29-7db6c222",
+   "date": "2026-10-29",
+   "category": "automation",
+   "claim": "Shared Copilot Automations are rolling out. They belong to the repository, are editable by anyone with write access, act as Copilot, and bill AI credits to the repo owner. Org repos need an admin policy enabled first.",
+   "why_it_matters": "Team agent workflows like bug reproduction keep running after the creator leaves. Credits go to the org, so admins need to watch spend.",
+   "try_this": "Ask an org admin to review the \"Allow use of Copilot cloud agent billed to the organization\" policy before creating a shared automation.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-28-build-shared-workflows-for-your-team-with-copilot-automations",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "GitHub changelog entry read; rollout status, billing and permissions confirmed there",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "AI credits are billed to the organization or user that owns the repository",
+   "excerpt_url": "https://github.blog/changelog/2026-10-28-build-shared-workflows-for-your-team-with-copilot-automations",
+   "item_url": "https://github.blog/changelog/2026-10-28-build-shared-workflows-for-your-team-with-copilot-automations",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-10-29-952121e8",
+   "date": "2026-10-29",
+   "category": "release",
+   "claim": "Enterprises working with a GitHub or Microsoft account team can get Copilot included for every GitHub Enterprise licensed user. Usage is metered against an enterprise budget with no per-seat monthly credits. Self-serve customers get it later, in stages.",
+   "why_it_matters": "Copilot cost shifts from seat counts to usage budgets. Completions keep working when the budget runs out, but chat and cloud agents stop.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-10-28-github-enterprise-now-includes-access-to-github-copilot",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "GitHub's own changelog read; availability, $10 Standalone price and budget behavior confirmed",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Code completion and next edit suggestions keep working even with no budget available.",
+   "excerpt_url": "https://github.blog/changelog/2026-10-28-github-enterprise-now-includes-access-to-github-copilot",
+   "item_url": "https://github.blog/changelog/2026-10-28-github-enterprise-now-includes-access-to-github-copilot",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "github-changelog",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-29-f2f4635f",
+   "date": "2026-10-29",
+   "category": "release",
+   "claim": "Anthropic expanded its AI for Science program, which gives free Claude credits, to 20 foundations, institutions and research projects. These include the Sloan Foundation, the US NSF, EMBL, STScI, the Broad Institute's gnomAD and the Tau Ceti Lean math library.",
+   "why_it_matters": "Researchers may be able to get Claude credits through funders and institutions they already work with, not only by applying directly.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/news/ai-for-science-expands-foundations-research-institutions",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Fetched Anthropic's announcement page; partner list and 20-partner count confirmed",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Anthropic post (Oct 28, 2026) confirms 20 partners, free Claude credits, Sloan, NSF, EMBL, STScI, gnomAD (Broad), Tau Ceti Lean library."
+   },
+   "excerpt": "gives free Claude credits to researchers working on high-impact scientific projects.",
+   "excerpt_url": "https://www.anthropic.com/news/ai-for-science-expands-foundations-research-institutions",
+   "item_url": "https://www.anthropic.com/news/ai-for-science-expands-foundations-research-institutions",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "anthropic",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-10-29-2fd555c1",
+   "date": "2026-10-29",
+   "category": "release",
+   "claim": "OpenAI says eligible ChatGPT Pro subscribers can claim $100, $200 or $500 per month in API credits by tier. Business plans get $20 per Standard seat or $100 per Premium seat, pooled up to $500 per workspace.",
+   "why_it_matters": "If this holds, existing ChatGPT subscribers can prototype API apps and agents without separate API spend.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.youtube.com/watch?v=ujmyzWSj8IU",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "Only OpenAI's own video description read; help.openai.com article and openai.com returned 403, so the terms were not confirmed",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Business plans get $20 per paid Standard seat or $100 per paid Premium seat, pooled up to $500 per workspace.",
+   "excerpt_url": "https://www.youtube.com/watch?v=ujmyzWSj8IU",
+   "item_url": "https://www.youtube.com/watch?v=ujmyzWSj8IU",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "openai",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-10-29-ca1ee9ae",
+   "date": "2026-10-29",
+   "category": "research",
+   "claim": "At GitHub Universe, GitHub's Jay Parikh highlighted Octoverse 2026 figures as reported by Simon Willison: merged PRs tripled to 220 million per month, commits reached 7.38 billion per month, and new repos reached 30.3 million per month.",
+   "why_it_matters": "These are headline numbers for how much agents are adding to GitHub activity, but the published report frames them differently.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "GitHub's Octoverse article gives 12-month totals (1.3B merged PRs, 34.3B commits), not the monthly figures; those were not confirmed",
+    "checked_at": "2026-10-29T05:31-07:00",
+    "provisional": true,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "merged pull requests tripled in less than a year to 220 million per month",
+   "excerpt_url": "https://simonwillison.net/2026/Oct/28/github-octoverse-2026/",
+   "item_url": "https://simonwillison.net/2026/Oct/28/github-octoverse-2026/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-12",
+   "source_id": "simonw",
+   "status_at_publication": "unverified"
   }
  ],
  "audits": [
@@ -3204,6 +3504,22 @@
    "date": "2026-10-28",
    "item_id": "2026-10-28-b2cdfd03",
    "source_id": "deepmind",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-10-29",
+   "item_id": "2026-10-29-a9c853bf",
+   "source_id": "deepmind",
+   "tier": "T1-seed",
+   "verdict": "fail",
+   "cause": "our summary",
+   "removed": true
+  },
+  {
+   "date": "2026-10-29",
+   "item_id": "2026-10-29-f2f4635f",
+   "source_id": "anthropic",
    "tier": "T1-seed",
    "verdict": "pass"
   }
@@ -3418,6 +3734,36 @@
    "id": "2026-10-28-dea27bdf",
    "date": "2026-10-28",
    "reason": "review: 'Google assigned' 62 CVEs not stated in source; exploit-chain count includes a DoS"
+  },
+  {
+   "id": "2026-10-29-a9c853bf",
+   "date": "2026-10-29",
+   "reason": "review: our summary said access starts through Fairwind; the source names Fairwind only for later partner expansion"
+  },
+  {
+   "id": "2026-10-29-abcfbdbe",
+   "date": "2026-10-29",
+   "reason": "review: Why-it-matters comparison with Opus 5.5 not in the evidence and traced to an X recap"
+  },
+  {
+   "id": "2026-10-29-de711f95",
+   "date": "2026-10-29",
+   "reason": "review: 'calibrated classification' overstates the README, which says calibration transfer is untested"
+  },
+  {
+   "id": "2026-10-29-7c2975cf",
+   "date": "2026-10-29",
+   "reason": "review: Try-this step suggested uploading a recorded meeting to a hosted demo without privacy precautions"
+  },
+  {
+   "id": "2026-10-29-64be4286",
+   "date": "2026-10-29",
+   "reason": "review: 'weaker safety protections' overstates the changelog's 'different safety protections'"
+  },
+  {
+   "id": "2026-10-29-db653f70",
+   "date": "2026-10-29",
+   "reason": "review: 'some in a single shot' overstates one named single-shot game not tied to Opus 5.5"
   }
  ]
 }
