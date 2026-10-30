@@ -215,4 +215,112 @@ assert not idflag("LiteLLM 1.108.0 released with a new router option.", ["https:
 sdc = R.SameDay(); sdc.add(claim("i1", D2, "Wiz found CVE-2026-109618 in PHP.", ["https://a.example/1"], "https://a.example"))
 assert R.SameDay.check(sdc, claim("i2", D2, "PHP fixes CVE-2026-109618.", ["https://b.example/2"], "https://b.example"))
 assert R.SameDay.check(sdc, claim("i3", D2, "Zlibco fixes CVE-2026-200001.", ["https://c.example/3"], "https://c.example")) is None
+# the repeats above with the published repeat texts (first parts real, rest reconstructed): still flagged, not dropped
+for d, text, urls in [("2026-10-25", "LiteLLM release v1.107.0 was compromised: it shipped a credential-stealing .pth file and was pulled from PyPI.", ["https://news.example/litellm"]),
+                      ("2026-10-24", "PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35 fix two critical bugs (CVE-2026-109618 and CVE-2026-109619).", ["https://www.php.net/releases/8_5_12.php"]),
+                      ("2026-10-25", "PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35 are out and fix two critical bugs (CVE-2026-109618 and CVE-2026-109619).", ["https://www.php.net/ChangeLog-8.php"])]:
+    r = R.find_repeat(claim("n", d, text, urls), R.earlier_stories({"claims": [php_old, lit_old]}, d)); assert r and r[2] is False, text
+
+# rule (d): the same event past a version mismatch, flagged and kept (never dropped). Real missed repeats from the ledger.
+def ev(old, new):
+    """find_repeat for new (id, date, text, urls) against old alone."""
+    return R.find_repeat(claim("n", new[1], new[2], new[3]), R.earlier_stories({"claims": [claim(*old)]}, new[1]))
+missed = [
+    # a tool's next release adds the same model to more catalogs
+    (("2026-10-28-9b42804a", "2026-10-28", 'Codex CLI 0.165.0 adds a built-in Google Cloud Vertex AI provider (model_provider = "gcp") and GPT-6.1 Terra in its model catalogs. It also turns on memory v2 by default for fresh profiles.', ["https://github.com/openai/codex/releases/tag/rust-v0.165.0"]),
+     ("n", "2026-10-30", "Codex CLI 0.166.0 adds GPT-6.1 Terra to its bundled, Vertex AI and Amazon Bedrock model catalogs.", ["https://github.com/openai/codex/releases/tag/rust-v0.166.0"]), "same model"),
+    # same product, same event in other words (threads settle on PR); needs stemming and a short-token product name
+    (("2026-10-26-49c9a624", "2026-10-26", "T3 Code nightly builds include a Working section that holds threads whose background work the agent is waiting on, and threads settle once their PR is merged.", ["https://github.com/pingdotgg/t3code/releases"]),
+     ("n", "2026-10-30", "T3 Code links agent threads to pull requests and has a built-in PR review and merge view. With auto-settle enabled, a thread settles once every linked review is terminal.", ["https://github.com/pingdotgg/t3code/blob/main/docs/user/source-control.md"]), "shared phrase"),
+    # same three money figures, same benefit, reported second-hand
+    (("2026-10-29-2fd555c1", "2026-10-29", "OpenAI says eligible ChatGPT Pro subscribers can claim $100, $200 or $500 per month in API credits by tier. Business plans get $20 per Standard seat or $100 per Premium seat, pooled up to $500 per workspace.", ["https://www.youtube.com/watch?v=ujmyzWSj8IU"]),
+     ("n", "2026-10-30", "Simon Willison reports that OpenAI now gives $100, $200 and $500 ChatGPT plan subscribers the same amount in API credits for one API organization, matching an earlier Anthropic benefit.", ["https://help.openai.com/en/articles/20001626-api-credits-benefit-for-eligible-chatgpt-subscriptions"]), "same figures"),
+    # a PR's note, then the release that ships it: shared phrase "not optimized for Gemini 4"
+    (("2026-10-17-dfea536b", "2026-10-17", "A Gemini CLI change merged Oct 16, 2026 (PR #29774) adds a README note that the CLI is not optimized for Gemini 4 Argon. The PR's bot summary says the note points users to the Antigravity CLI.", ["https://github.com/google-gemini/gemini-cli/pull/29774"]),
+     ("n", "2026-10-28", "Gemini CLI v0.66.0 adds a banner stating that Gemini CLI is not optimized for Gemini 4. It also hardens SKILL.md frontmatter parsing and disables interactive credential and SSH prompts in its git environment.", ["https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0"]), "shared phrase"),
+    # the same launch covered again with new figures, from a mirror domain
+    (("2026-10-25-53c5cd3b", "2026-10-25", "Moonshot released Kimi K3.1 Pro, a 3T-class model with a 1M-token context window. It is on the Kimi API as kimi-k3.1-pro and kimi-k3.1-pro-highspeed, and in Kimi Code.", ["https://www.kimi.com/blog/kimi-k3-1-pro"]),
+     ("n", "2026-10-27", "Moonshot announced Kimi K3.1 Pro, a 3T-class open-weight model with a 1M-token context, with full weights promised by Nov 4, 2026. Moonshot reports 65.7% on Terminal-Bench 4.0 versus 66.4% for Claude Opus 5.5.", ["https://kimi.ai/blog/kimi-k3-1-pro"]), "same model launch"),
+]
+for old, new, kind in missed:
+    r = ev(old, new); assert r and r[0] == old[0] and r[2] is False and kind in r[1], (new[2], r)
+assert R._stem("settles") == R._stem("settled") == R._stem("settle") and R._stem("threads") == "thread"
+assert R.features("Moonshot released Kimi K3.1 Pro, a model.")["models"] == [(frozenset({"kimi", "pro"}), frozenset({"k3.1"}), True)]
+assert R.features("A Gemini CLI change")["subject"] == {"gemini", "cli"} and R.features("T3 Code links")["subject"] == {"t3", "code"}
+assert R.features("promised by Nov 4, 2026")["models"] == []                  # a date is not a model version
+# rule (d) must not flag: different models from one vendor on different days, different releases with different features,
+# a different named model with the same version, the same model in another kind of story, a different subject's run
+for old, new in [
+    ("Moonshot released Kimi K3.1 Pro, a 3T-class model with a 1M-token context window.", "Moonshot released Kimi K3.2, a 3T-class model with a 1M-token context window and faster decoding."),
+    ("Acme released Rocket 2.0, a 500B MoE with a 1M context.", "Acme released Comet 1.0, a 500B MoE with a 1M context."),
+    ("Codex CLI 0.163.0 runs independent read-only tools in parallel and lets you steer Codex while it responds.", "Codex CLI 0.165.0 adds a built-in Google Cloud Vertex AI provider and turns on memory v2 by default for fresh profiles."),
+    ("Codex CLI 0.165.0 adds a built-in Google Cloud Vertex AI provider and GPT-6.1 Terra in its model catalogs.", "Codex CLI 0.166.0 adds a /review command that summarizes uncommitted changes before a commit."),
+    ("OpenAI released GPT-6.1 Terra, API id gpt-6.1-terra, priced at $1 per million input tokens, $0.05 cached input and $5 output.",
+     "OpenAI released GPT-6.1 Sol, API id gpt-6.1-sol, priced at $1 per million input tokens, $0.05 cached input and $5 output."),
+    ("Moonshot released Kimi K3.1 Pro, a 3T-class model with a 1M-token context window.", "Artificial Analysis gives Kimi K3.1 Pro a score of 55 on its Intelligence Index, ranking it 4th of 215 models listed."),
+    ("Acme Rocket 2.1 adds streaming responses and batch mode.", "Acme Rocket 3 adds streaming responses and batch mode."),
+    ("GPT-6.1 Terra is generally available in GitHub Copilot for Pro and Business users.", "Grok Code Fast is generally available in GitHub Copilot for Pro and Business users."),
+    ("Kimi K3.1 Pro scores 65.7% on Terminal-Bench, beating Claude Opus 5.5.", "Qwen 4 Max scores 61.2% on Terminal-Bench, beating Claude Opus 5.5."),
+]:
+    assert not ev(("o", "2026-10-25", old, ["https://x.example/old"]), ("n", "2026-10-27", new, ["https://x.example/new"])), new
+# fix round 1: a shared generic or vendor word is not a shared subject; variants and lowercase ids are part of a model's identity
+for old, new in [
+    ("Gemini CLI adds support for custom system prompts in its settings file.", "Codex CLI adds support for custom system prompts in its settings file."),
+    ("Claude Code links agent threads to pull requests; a thread settles once every linked review is terminal.",
+     "T3 Code links agent threads to pull requests; a thread settles once every linked review is terminal."),
+    ("Researchers found prompt injection attacks hijack coding agents.", "Researchers found prompt injection attacks hijack browser agents."),
+    ("OpenAI released GPT-6.1 Terra with improved tool calling accuracy.", "OpenAI released o5-mini with improved tool calling accuracy."),
+]:
+    assert not ev(("o", "2026-10-25", old, ["https://x.example/old"]), ("n", "2026-10-27", new, ["https://x.example/new"])), new
+assert R.features("Researchers found prompt injection")["subject"] == frozenset()
+assert R.features("OpenAI released o5-mini today")["models"] == [(frozenset({"o", "mini"}), frozenset({"5"}), True)]
+assert R.features("Acme revenue in Q3 2026 rose")["models"] == [] and R.features("Q3 2026 results")["models"] == []
+assert not R._same_model((frozenset({"terra"}), frozenset({"6.1"}), False), (frozenset({"terra", "mini"}), frozenset({"6.1"}), False))
+
+# fix round 2: variant checks live in rule (d) only; rules (a)-(c) behave as before (these were flagged before rule (d))
+def evd(old, new):
+    """Rule (d) alone: event_repeat for new text against old text."""
+    return R.event_repeat(R.analyze(new), R.features(new), R.analyze(old), R.features(old))
+r = R.find_repeat(claim("n", "2026-10-27", "Google released Gemini 4 Flash for low-latency agents.", ["https://blog.example/flash"]),
+                  R.earlier_stories({"claims": [claim("o", "2026-10-25", "Google released Gemini 4 Flash and Gemini 4 Flash Lite for low-latency agents.", ["https://blog.example/flash"])]}, "2026-10-27"))
+assert r and r[2] is False and "same evidence URL" in r[1], r
+assert not R.conflict(R.analyze("Kimi K3.1 Pro is out."), R.analyze("Kimi K3.1 is out."))   # variants aren't a conflict in (a)-(c)
+for old, new in [
+    ("Moonshot released Kimi K3.1 Pro, a 3T-class model with a 1M-token context window for reasoning.",
+     "Moonshot released Kimi K3.1, a 3T-class model with a 1M-token context window for coding."),
+    ("Google released Gemini 4 Argon Flash with lower latency for agent tool calls.", "Google released Gemini 4 Argon Pro with lower latency for agent tool calls."),
+    ("OpenAI released GPT-6.1 Terra with improved tool calling accuracy.", "OpenAI released GPT-6.1 Terra Mini with improved tool calling accuracy."),
+]:
+    r = ev(("o", "2026-10-25", old, ["https://x.example/old"]), ("n", "2026-10-27", new, ["https://x.example/new"]))
+    assert r and "possible same story" not in r[1], (new, r)       # rule (b), as before
+    assert evd(old, new) is None, new
+# sizes and lowercase variants are part of a model's identity; a vendor-only subject needs the product to agree
+for old, new in [
+    ("Meta released Llama 5 8B with a 128K context window for on-device use.", "Meta released Llama 5 70B with a 128K context window for on-device use."),
+    ("Alibaba released Qwen 4 32B under Apache 2.0.", "Alibaba released Qwen 4 235B under Apache 2.0."),
+    ("Google released Gemini 4 Argon flash optimized for low latency and rapid responses.",
+     "Google announced Gemini 4 Argon pro designed for complex reasoning and advanced mathematics."),
+    ("Google says Gemini CLI adds support for custom system prompts in its settings file.",
+     "Google says Android Studio adds support for custom system prompts in its settings file."),
+]:
+    assert not ev(("o", "2026-10-25", old, ["https://x.example/old"]), ("n", "2026-10-27", new, ["https://x.example/new"])), new
+    assert evd(old, new) is None, new
+assert "same model launch" in evd("Meta released Llama 5 8B with a 128K context window.", "Meta announced Llama 5 8B, now with 4-bit weights.")
+assert "shared phrase" in evd("Google says Gemini CLI adds support for custom system prompts in its settings file.",
+                              "Google says Gemini CLI v0.67.0 adds support for custom system prompts in its settings file.")
+assert R.features("Meta released Llama 5 8B today")["models"] == [(frozenset({"llama", "8b"}), frozenset({"5"}), True)]
+assert R.features("Google released Gemini 4 Argon flash optimized")["models"][0][0] == {"argon", "flash"}
+assert R.features("Google says Gemini CLI adds")["subject"] == {"gemini", "cli"}
+assert R.features("Google says it will")["subject"] == frozenset()
+assert R.features("OpenAI said r2 is out")["models"] == []                    # bare lowercase r2 is not a model id
+
+# a stale history is logged (the private history once stopped at 2026-10-16); a fresh one is not
+hs = Path(tempfile.mkdtemp()) / "h.jsonl"
+hs.write_text(json.dumps({"date": "2026-10-16", "text": "Old story."}) + "\n")
+logs = []; R.earlier_stories({"claims": []}, "2026-10-30", str(hs), log=logs.append)
+assert any("stale" in m and "2026-10-16" in m for m in logs), logs
+logs = []; R.earlier_stories({"claims": []}, "2026-10-18", str(hs), log=logs.append)
+assert not any("stale" in m for m in logs), logs
+logs = []; R.earlier_stories({"claims": []}, "2026-10-16", str(hs), log=logs.append)   # no entry before the run date
+assert any("stale (no entries before 2026-10-16)" in m for m in logs) and not any("none" in m for m in logs), logs
 print("test_repeats: all passed")
