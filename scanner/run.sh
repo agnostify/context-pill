@@ -10,5 +10,6 @@ export CP_GEMINI_APPROVED="${CP_GEMINI_APPROVED:-1}" GEMINI_MODEL="${GEMINI_MODE
 "$PY" -m scanner.tests.test_trust
 "$PY" -m scanner.tests.test_tools
 "$PY" -m scanner.tests.test_repeats
+"$PY" -m scanner.tests.test_notes
 "$PY" -m scanner.tests.test_breaking || echo "breaking tests failed; the daily drop continues (Breaking AI News never blocks it)"
 "$PY" -m scanner.run "$@"

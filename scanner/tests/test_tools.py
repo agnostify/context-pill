@@ -99,9 +99,13 @@ for _ in range(2):
     s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
     assert not s.get("audit_demoted"), s
     assert led["claims"][0]["verification"]["audit_verdict"] == "pass"
+    # the published audit note is built from the verdict and a URL only (scanner/notes.py); the model note "ok" is never used
+    assert led["claims"][0]["verification"]["audit_note"] == "Verdict: pass. Source: https://example.com/a", led["claims"][0]["verification"]
 assert au.call_count == 0          # second rerun reuses the saved verdict
 cl = (tmp / "CHANGELOG-sources.md").read_text()
 assert cl.count(f"audit of {old}") == 1 and "cause: our summary" in cl
+assert f"audit of {nid} (Fixture source): pass (Verdict: pass. Source: https://example.com/a)" in cl and "(ok)" not in cl, cl
+assert f"audit of {old} (Fixture source): fail (Verdict: fail.); cause: our summary" in cl, cl      # no evidence on record: no Source
 # audit: a failed audit of the source's own claim demotes the source; two reruns keep one record at the start-of-day tier
 (tmp / "sources.yaml").write_text(yaml.safe_dump(reg)); (tmp / "CHANGELOG-sources.md").write_text("# Source changes\n")
 for f in (tmp / "ledger").glob("*"): f.unlink()
