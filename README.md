@@ -33,7 +33,7 @@ Codex, Cursor and VS Code: see [setup snippets](#setup-snippets-copy-and-paste).
 | "Has Context Pill checked `<tool or model>`?" | `search_claims` with `query: "<tool or model>"` |
 | "How far should I trust `<source>`?" | `list_sources` with `name: "<source>"` |
 
-Every answer comes back with a status (`verified`, `docs-verified`, `vendor-claim`, `unverified`...), the source's trust score and evidence links, so your agent can tell a checked release from a press release.
+Every claim comes back with a status (`verified`, `docs-verified`, `vendor-claim`, `unverified`...), how it was checked and its evidence links (`get_latest` adds the source's trust score), so your agent can tell a checked release from a press release.
 
 ## What it is
 
