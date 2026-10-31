@@ -1,8 +1,9 @@
 """Mechanical check of the short public notes the resolver and auditor write (resolution_note, audit_note, changelog lines).
 The model returns, per claim, a note plus the single source_url it relies on and a verbatim quote from that source.
-validate_note() rejects a note that states a figure the quote doesn't (or in another order, or next to another word), mixes
-sources, claims something is absent while any of its terms is on the page (or the page wasn't fetched), states any figure
-without the page fetched, or recombines the quote's words into a phrase it doesn't contain. A rejected or malformed note is
+validate_note() is conservative: a note with any figure must repeat each figure-bearing clause verbatim from the quote (case,
+whitespace and punctuation aside) and needs the page fetched; every content word must be in the quote; negations must match
+the quote's exactly; an absence claim needs the page fetched with none of its terms on it; no mixing sources; no recombining
+the quote's words into a phrase it doesn't contain. A rejected or malformed note is
 replaced by a deterministic one ("Outcome: good. Source: <url>", source_url only if its page was fetched, else the claim's
 evidence URL); the outcome or verdict itself never changes.
 Deterministic; the only network use is fetch_text (through util.get), which callers can swap out."""
@@ -10,7 +11,7 @@ import html, re
 from . import util
 
 MAX_WORDS = 20
-MIN_COVERAGE = 0.75             # share of the note's content words that must appear in the quote
+NEGATIONS = {"not", "no", "never", "cannot", "can't", "isn't", "unavailable", "without", "none"}   # plus any other "n't" word
 
 NUM_WORDS = {w: str(i) for i, w in enumerate("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
                                               "fifteen sixteen seventeen eighteen nineteen twenty".split())}
@@ -37,12 +38,13 @@ _LABEL = {k: re.compile(r"\b(?:" + v + r")s?\b", re.I) for k, v in SOURCE_LABELS
 LABEL_WORDS = {"post", "blog", "announcement", "arxiv", "abstract", "paper", "preprint", "docs", "documentation", "changelog",
                "repo", "repository", "readme", "github", "rss", "feed", "article"}       # naming the source isn't content
 AGREEMENT = re.compile(r"\b(agree|agrees|both (?:confirm|say|show|list|state|report)|sources? (?:confirm|agree))\b", re.I)
-ABSENCE = re.compile(r"\b(not (?:shown|listed|mentioned|found|included|present|stated)|isn'?t (?:shown|listed|mentioned|included)|"
-                     r"no longer (?:shown|listed|mentioned|included|present|available|offered)|omit(?:s|ted)?|removed|lack(?:s|ing)?|"
+ABSENCE = re.compile(r"\b(not (?:shown|listed|mentioned|found|included|present|stated|available|offered)|"
+                     r"isn'?t (?:shown|listed|mentioned|included|available|offered)|no longer(?: \w+)?|unavailable|"
+                     r"retired|discontinued|dropped|deprecated|omit(?:s|ted)?|removed|lack(?:s|ing)?|"
                      r"absent|missing|no mention|(?:doesn'?t|does not|don'?t|do not) (?:mention|show|list|include))\b", re.I)
 
-STOP = set("""a an the and or but nor of in on at to for from by with without as is are was were be been being it its this that these
-those there here than then so such not no only also both all any each per via into onto over under up down out about after before
+STOP = set("""a an the and or but nor of in on at to for from by with as is are was were be been being it its this that these
+those there here than then so such only also both all any each per via into onto over under up down out about after before
 within inside across between among through around near
 can could may might will would should must has have had do does did done new now still just more most less same very own
 which who whom whose what when where while how why says said say confirm confirms confirmed show shows shown list lists listed
@@ -149,6 +151,44 @@ def _joined(pair, toks, allowed, window=4):
                for i in at[a] for j in at[b])
 
 
+def _negations(text):
+    """Negation words in the text (they are content: dropping or adding one flips the meaning)."""
+    ws = {w.lower().replace("’", "'") for w in re.findall(r"[A-Za-z][A-Za-z'’]*", text or "")}
+    return {w for w in ws if w in NEGATIONS or w.endswith("n't")}
+
+
+_BREAK = r";|,(?!\d)|\.(?!\d)"          # clause breaks; "1,000" and "4.5" are not split
+
+
+def _flat(s):
+    """Lowercase words and figures with all other punctuation and spacing reduced to single spaces ("We've" -> "weve")."""
+    s = (s or "").lower()
+    for a, b in (("’", "'"), ("‘", "'"), ("×", "x")):
+        s = s.replace(a, b)
+    s = re.sub(r"(?<=\d),(?=\d)", "", s.replace("'", ""))
+    s = re.sub(r"\$\s+", "$", re.sub(r"\s+%", "%", s))
+    s = re.sub(r"[^a-z0-9$%.]+", " ", s)
+    s = re.sub(r"\.(?!\d)|(?<!\d)\.", " ", s)
+    return " ".join(s.split())
+
+
+def _figure_spans(body):
+    """Each clause of the note that holds a figure, split on ; , . and : -- a clause after a colon keeps the words before the
+    colon ("Input: $5" is checked as "input $5"), unless they only name the source ("Post: ...")."""
+    out = []
+    for sent in re.split(_BREAK, body):
+        pieces = sent.split(":")
+        for i, p in enumerate(pieces):
+            if numbers(p):
+                head = [h for h in pieces[:i] if numbers(h) or any(_tokens(h))]
+                out.append(_flat(" ".join(head + [p])))
+    return [s for s in out if s]
+
+
+def _quote_segments(parts):
+    return [_flat(seg) for p in parts for seg in re.split(_BREAK, p) if _flat(seg)]
+
+
 def _norm(s):
     s = (s or "").lower()
     for a, b in (("’", "'"), ("‘", "'"), ("“", '"'), ("”", '"'), ("–", "-"), ("—", "-"), (" ", " ")):
@@ -238,15 +278,26 @@ def validate_note(note, quote, source_text=None):
     elif len(labels) > 1 and numbers(note):
         problems.append(f"note mixes sources with figures ({', '.join(sorted(labels))})")
 
-    # wording: most content words come from the quote, and two words side by side in the note that are both in the quote
+    # any figure: every clause holding one is a verbatim span of one clause of the quote, so figures stay with their words
+    if numbers(body):
+        segs = [f" {q} " for q in _quote_segments(parts)]
+        for span in _figure_spans(body):
+            if not any(f" {span} " in q for q in segs):
+                problems.append(f"figure clause not verbatim in the quote: {span!r}")
+
+    # negations match the quote's in both directions, so "can veto" can't come from "cannot veto" (nor the reverse)
+    nneg, qneg = _negations(body), _negations(qtext)
+    if nneg != qneg:
+        problems.append(f"negation differs from the quote (note {sorted(nneg)}, quote {sorted(qneg)})")
+
+    # wording: every content word comes from the quote, and two words side by side in the note that are both in the quote
     # also stand together there, so "redaction categories" can't come from "redactions within predefined categories"
     qset = set(_words(qtext))
     qtoks = [_tokens(p) for p in parts]
     nwords = _words(body)
-    if nwords:
-        cov = sum(w in qset for w in nwords) / len(nwords)
-        if cov < MIN_COVERAGE:
-            problems.append(f"only {cov:.0%} of the note's words are in the quote")
+    absent = sorted({w for w in nwords if w not in qset})
+    if absent:
+        problems.append(f"words not in the quote: {', '.join(absent)}")
     for c in _clauses(body):
         for pair in sorted(_note_pairs(c), key=sorted):
             if pair <= qset and not any(_joined(pair, t, set(nwords)) for t in qtoks):

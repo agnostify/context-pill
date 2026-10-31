@@ -108,29 +108,29 @@ def test_agreement_and_fallbacks():
 
 # good notes pass and are kept verbatim
 def test_good_notes():
-    accepts("Post: one design uses 12% more qubits but 17x fewer gates.",
+    accepts("Post: one circuit in the family uses 12% more qubits but 17x fewer gates.",
             "one circuit in the family uses 12% more qubits but 17x fewer gates", POST_TEXT)
-    accepts("arXiv abstract: significant reductions on seven of the eight tasks.",
+    accepts("arXiv abstract: significant reductions in resource cost on seven of the eight tasks.",
             "significant reductions in resource cost on seven of the eight tasks", ARXIV_TEXT)
-    accepts("Six METR employees onboarded; Anthropic cannot veto publication.",
+    accepts("Onboarded six METR employees; Anthropic cannot veto publication.",
             ["We've onboarded six METR employees", "Anthropic cannot veto publication"], METR_TEXT)
     accepts("Anthropic decides what falls inside predefined redaction categories.",
             "Anthropic may require redactions within predefined categories, and Anthropic decides what falls inside those categories",
             METR_TEXT)
-    accepts("Legacy models list Claude Haiku 4.5 at $1 input, $5 output per MTok.",
+    accepts("Legacy models: Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok.",
             "Legacy models Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT)
-    accepts("Model spec names sound judgment, human agency and faithfulness to intent.",
+    accepts("Model spec: sound judgment, human agency and faithfulness to intent.",
             "Our model spec: the model should aim for three things: sound judgment, respect for human agency, "
             "and faithfulness to the intent of its instructions", OPENAI_TEXT)
     q = "one circuit in the family uses 12% more qubits but 17x fewer gates"
-    note = "Post: one design uses 12% more qubits, 17x fewer gates."
+    note = "Post: one circuit in the family uses 12% more qubits but 17x fewer gates."
     assert N.resolution_note({"outcome": "good", "note": note, "source_url": POST, "quote": q}, "good",
                              fetch=lambda u: POST_TEXT) == note
     # page not fetched: a note with figures falls back
     assert N.resolution_note({"outcome": "good", "note": note, "source_url": POST, "quote": q}, "good",
                              fetch=lambda u: None) == "Outcome: good."
-    a = {"verdict": "pass", "note": "Six METR employees onboarded.", "source_url": METR, "quote": "We've onboarded six METR employees"}
-    assert N.audit_note(a, fetch=lambda u: METR_TEXT) == "Six METR employees onboarded."
+    a = {"verdict": "pass", "note": "Onboarded six METR employees.", "source_url": METR, "quote": "We've onboarded six METR employees"}
+    assert N.audit_note(a, fetch=lambda u: METR_TEXT) == "Onboarded six METR employees."
 
 
 # figures keep the quote's order and the word right before each
@@ -142,7 +142,8 @@ def test_figure_order_and_labels():
     accepts("Input $1; output $5.", q, q)
     accepts("Input: $1, output: $5.", "Input: $1 / MTok, Output: $5 / MTok", "Input: $1 / MTok, Output: $5 / MTok")
     rejects("Input $1; output $5.", ["Output $5", "Input $1"], "Input $1 Output $5", why="order")
-    accepts("Haiku 4.5 at $1 input, $5 output.", "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT)
+    rejects("Haiku 4.5 at $1 input, $5 output.", "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT,
+            why="not verbatim")                                               # paraphrased figures are no longer trusted
     rejects("Haiku 4.5 input $5.", "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT, why="attached to different")
 
 
@@ -157,11 +158,11 @@ def test_failed_fetch():
     rejects("Anthropic picks the evaluators.", "Anthropic cannot veto publication", why="in the quote")
     a = {"verdict": "pass", "note": "Anthropic cannot veto publication.", "source_url": METR, "quote": "Anthropic cannot veto publication"}
     assert N.audit_note(a, [{"url": POST}], fetch=lambda u: None) == "Anthropic cannot veto publication."
-    a["note"] = "Six METR employees onboarded."; a["quote"] = "We've onboarded six METR employees"
+    a["note"] = "Onboarded six METR employees."; a["quote"] = "We've onboarded six METR employees"
     assert N.audit_note(a, [{"url": POST}], fetch=lambda u: None) == f"Verdict: pass. Source: {POST}"
     assert N.audit_note(a, [{"url": POST}], fetch=None) == f"Verdict: pass. Source: {POST}"
-    assert N.audit_note(a, [{"url": POST}], fetch=lambda u: METR_TEXT) == "Six METR employees onboarded."
-    a["note"] = "Seven METR employees onboarded."                     # fetched but rejected: source_url is cited
+    assert N.audit_note(a, [{"url": POST}], fetch=lambda u: METR_TEXT) == "Onboarded six METR employees."
+    a["note"] = "Onboarded seven METR employees."                     # fetched but rejected: source_url is cited
     assert N.audit_note(a, [{"url": POST}], fetch=lambda u: METR_TEXT) == f"Verdict: pass. Source: {METR}"
     def boom(u): raise RuntimeError("network")
     assert N.audit_note(a, [{"url": POST}], fetch=boom) == f"Verdict: pass. Source: {POST}"
@@ -194,6 +195,59 @@ def test_robustness():
     assert N.resolution_note(None, "good", [None, {"url": 5}, {"url": POST}], fetch=lambda u: 9) == f"Outcome: good. Source: {POST}"
     assert N.audit_note("junk", fetch=None) == "Verdict: None."
     assert N.quote_parts(["a", 1]) == [] and N.quote_parts(None) == []
+
+
+# 1. any figure: each clause holding one is verbatim in one clause of the quote, and the quote is on the fetched page
+def test_figure_clauses_verbatim():
+    q = "Input $1; output $5."
+    rejects("$1 output; $5 input.", q, q, why="not verbatim")                 # same order, labels swapped
+    rejects("Input: $5.", q, q, why="not verbatim")                           # colon keeps "Input" with "$5"
+    rejects("Output $5.", q, "Input $9; output $7.", why="quote not found")   # quote not on the page
+    rejects("Output $5.", q, why="figures without the full source text")
+    accepts("Output $5.", q, q)
+    accepts("Input $1; output $5.", q, q)
+    legacy = "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok Claude Sonnet 4.5 Input $3 / MTok Output $15 / MTok"
+    for note in ("Claude Haiku 4.5 Input $3 / MTok.", "Haiku 4.5: Input $3 / MTok.", "Claude Haiku 4.5 Output $15 / MTok.",
+                 "Claude Haiku 4.5 Input $3 / MTok Output $15 / MTok."):
+        rejects(note, legacy, PRICING_TEXT, why="not verbatim")                # Sonnet's figures moved to Haiku
+    accepts("Claude Sonnet 4.5 Input $3 / MTok Output $15 / MTok.", legacy, PRICING_TEXT)
+    accepts("Eight benchmark tasks.", ARXIV_TEXT.split(". ")[1], ARXIV_TEXT)
+    for note in ("Eight design tasks.", "Reductions on 7 of the eight tasks.", "A 4.5 model.", "Seven tasks improved."):
+        rejects(note, ARXIV_TEXT.split(". ")[1], ARXIV_TEXT, why="not verbatim")    # number word, digit, decimal
+    rejects("Uses twelve percent more qubits.", "uses 12% more qubits", POST_TEXT)
+    rejects("17× fewer gates, 12% more qubits.", "uses 12% more qubits but 17x fewer gates", POST_TEXT, why="order")
+    accepts("Uses 12 % more qubits but 17× fewer gates.", "uses 12% more qubits but 17x fewer gates", POST_TEXT)
+
+
+# 2. every content word is in the quote, and negations match the quote's in both directions
+def test_full_coverage_and_negation():
+    rejects("Haiku is not available.", "Haiku is available", "Haiku is available.")
+    rejects("Haiku is not available.", "Haiku is available")
+    rejects("Anthropic can veto publication.", "Anthropic cannot veto publication", METR_TEXT, why="negation differs")
+    rejects("Anthropic cannot veto publication.", "Anthropic can veto publication", "Anthropic can veto publication.",
+            why="negation differs")
+    rejects("Anthropic never vetoes publication.", "Anthropic cannot veto publication", METR_TEXT, why="negation differs")
+    rejects("Anthropic can't veto publication.", "Anthropic cannot veto publication", METR_TEXT, why="negation differs")
+    rejects("METR publishes without redactions.", "METR will publish its risk assessments", METR_TEXT, why="negation differs")
+    rejects("Anthropic doesn't decide.", "Anthropic decides what falls inside those categories", METR_TEXT, why="negation")
+    rejects("Anthropic cannot veto METR publication.", "Anthropic cannot veto publication", METR_TEXT,
+            why="words not in the quote: metr")                               # one extra word is enough
+    accepts("Anthropic cannot veto publication.", "Anthropic cannot veto publication", METR_TEXT)
+    accepts("Anthropic can't veto publication.", "Anthropic can't veto publication", "Anthropic can't veto publication.")
+
+
+# 3. more absence phrasings; each still needs the fetched page with none of its subject on it
+def test_absence_phrases():
+    q = "Claude Haiku 5.5 Input $0.10 / MTok"
+    for phrase in ("is unavailable", "is not available", "retired", "discontinued", "dropped", "deprecated", "no longer offered",
+                   "no longer", "removed", "omitted"):
+        rejects(f"Haiku 4.5 {phrase}.", q, PRICING_TEXT, why="absence claim but the source contains")
+        rejects(f"Haiku 4.5 {phrase}.", q, why="absence claim without")
+        accepts(f"Mythos {phrase}.", q, PRICING_TEXT)
+    for phrase in ("omits", "lacks"):
+        rejects(f"Pricing page {phrase} Haiku 4.5.", q, PRICING_TEXT, why="absence claim but")
+        accepts(f"Page {phrase} Mythos.", q, PRICING_TEXT)
+        rejects(f"Pricing page {phrase} Mythos.", q, why="absence claim without")
 
 
 def test_numbers():
