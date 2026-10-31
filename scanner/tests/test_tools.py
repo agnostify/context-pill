@@ -106,6 +106,19 @@ cl = (tmp / "CHANGELOG-sources.md").read_text()
 assert cl.count(f"audit of {old}") == 1 and "cause: our summary" in cl
 assert f"audit of {nid} (Fixture source): pass (Verdict: pass. Source: https://example.com/a)" in cl and "(ok)" not in cl, cl
 assert f"audit of {old} (Fixture source): fail (Verdict: fail.); cause: our summary" in cl, cl      # no evidence on record: no Source
+# audit: an invalid verdict in audit.result.json is re-audited, but the entry's cause/superseded_by survive the rewrite
+(work / "raw" / D2 / "audit.result.json").write_text(json.dumps({old: {"verdict": "failed", "cause": "our summary", "superseded_by": nid},
+                                                                  nid: {"verdict": ["pass"], "cause": "c1"}}))
+with mock.patch.object(sys, "argv", ["run", "--date", D2, "--skip-extract"]), \
+     mock.patch.object(util, "url_alive", return_value=(True, 200)), \
+     mock.patch.object(extract, "audit", side_effect=lambda smp, *a: {x["id"]: {"verdict": "pass"} for x in smp}) as au:
+    runmod.main()
+assert [x["id"] for x in au.call_args[0][0]] == [nid], au.call_args
+saved = json.loads((work / "raw" / D2 / "audit.result.json").read_text())
+assert saved[old] == {"cause": "our summary", "superseded_by": nid}, saved
+assert saved[nid]["verdict"] == "pass" and saved[nid]["cause"] == "c1", saved
+led = json.loads((tmp / "ledger" / "claims.json").read_text())
+assert [(x["item_id"], x["verdict"]) for x in led["audits"]] == [(nid, "pass")], led["audits"]
 # audit: a failed audit of the source's own claim demotes the source; two reruns keep one record at the start-of-day tier
 (tmp / "sources.yaml").write_text(yaml.safe_dump(reg)); (tmp / "CHANGELOG-sources.md").write_text("# Source changes\n")
 for f in (tmp / "ledger").glob("*"): f.unlink()

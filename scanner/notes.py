@@ -3,20 +3,22 @@
 from the validated outcome/verdict and one URL. The model's note, quote and reasoning go to WORK raw/<date>/*.reasoning.json
 (private, never pushed); split() separates them from the structured fields everything downstream reads."""
 import json, urllib.parse
-from . import util
+from . import gate, util
 
 OUTCOMES = ("good", "docs-verified", "partial", "bad", "inconclusive")
 VERDICTS = ("pass", "fail", "inconclusive")
 
 
 def usable_url(url):
-    """An http(s) URL with a host, no whitespace or control characters, not on a blocked host. Never raises."""
+    """An http(s) URL with a host, no whitespace or control characters, not on a blocked host, and nothing the publish
+    gate would flag (X link or post ID, secret, private pattern), so a note built from it always passes the gate. Never raises."""
     try:
         if not isinstance(url, str) or not url or any(ch.isspace() or not ch.isprintable() for ch in url):
             return False
         p = urllib.parse.urlsplit(url)
         p.port                                          # raises on a malformed port
-        return p.scheme in ("http", "https") and bool(p.hostname) and not util.blocked(url)
+        return (p.scheme in ("http", "https") and bool(p.hostname) and not util.blocked(url)
+                and not gate.scan_text("note", url, gate.private_patterns()[0]))
     except Exception:
         return False
 

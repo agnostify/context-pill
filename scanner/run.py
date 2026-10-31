@@ -221,10 +221,15 @@ def main():
     ares_p = raw / "audit.result.json"
     # audit.result.json keeps only the verdict, source_url and the fields below (cause/superseded_by are set by the maintainer)
     AKEEP = ("cause", "superseded_by", "source_id", "tier", "evidence_url")
-    ares, why = notes.split(json.loads(ares_p.read_text()) if (a.skip_extract and ares_p.exists()) else {}, "verdict", notes.VERDICTS, AKEEP)
+    araw = json.loads(ares_p.read_text()) if (a.skip_extract and ares_p.exists()) else {}
+    ares, why = notes.split(araw, "verdict", notes.VERDICTS, AKEEP)
     notes.save_reasoning(raw / "audit.reasoning.json", why)
+    # an entry with an invalid verdict is re-audited, but its maintainer fields are kept (and written back with the new verdict)
+    MKEEP = ("cause", "superseded_by")
+    held = {k: {f: r[f] for f in MKEEP if r.get(f)} for k, r in (araw.items() if isinstance(araw, dict) else ())
+            if isinstance(k, str) and isinstance(r, dict) and k not in ares and any(r.get(f) for f in MKEEP)}
     # a claim rewritten after a failed audit gets a new id; the maintainer links it ("superseded_by") and it is always re-audited
-    replaces = {r["superseded_by"]: k for k, r in ares.items() if r.get("superseded_by")}
+    replaces = {r["superseded_by"]: k for k, r in (held | ares).items() if r.get("superseded_by")}
     sample += [d for d in drop if d["id"] in replaces and d not in sample]
     sample_tier = {d["id"]: start_tier(d) for d in sample}             # recorded before any demotion below
     todo = [d for d in sample if d["id"] not in ares]
@@ -232,8 +237,8 @@ def main():
         got, why = notes.split(extract.audit([{"id": d["id"], "claim": d["claim"], "evidence": d["evidence"], "source": d["source"]["name"]} for d in todo],
                                              WORK, date, log), "verdict", notes.VERDICTS)
         notes.save_reasoning(raw / "audit.reasoning.json", why)
-        ares.update({k: r for k, r in got.items() if k in {d["id"] for d in todo}})      # never ids it wasn't asked about
-        ares_p.write_text(json.dumps(ares, indent=1))
+        ares.update({k: r | held.get(k, {}) for k, r in got.items() if k in {d["id"] for d in todo}})      # never ids it wasn't asked about
+        ares_p.write_text(json.dumps(held | ares, indent=1))
     log(f"audit: {sum(1 for d in sample if d['id'] in ares)} of {len(sample)} sampled items judged")
     ledger["audits"] = [x for x in ledger["audits"] if x["date"] != date]
     def demote(s):
@@ -291,8 +296,8 @@ def main():
             if demotes(r):
                 demote(srcs[d["source"]["id"]])
 
-    if ares:
-        ares_p.write_text(json.dumps(ares, indent=1))
+    if ares or held:
+        ares_p.write_text(json.dumps(held | ares, indent=1))
     # 6. ledger (stable ids; reruns replace today's entries)
     corrected = {c["id"]: c for c in ledger["claims"] if c["date"] == date and c.get("state") == "corrected"}   # scanner.correct survives rebuilds
     for d in drop:

@@ -156,11 +156,11 @@ def extract(items, repo, work, date, log, day_no):
 
 
 def _json_block(txt):
-    """The JSON object between ===JSON=== and ===END===; {} when missing, unparseable or not an object."""
+    """The JSON object between ===JSON=== and ===END===; {} when missing, unparseable, too deeply nested or not an object."""
     m = re.search(r"===JSON===\s*(.*?)\s*===END===", txt or "", re.S)
     try:
         res = json.loads(re.sub(r"^```(json)?|```$", "", m.group(1).strip(), flags=re.M)) if m else {}
-    except ValueError:
+    except (ValueError, RecursionError):                  # RecursionError: nesting too deep for the parser
         return {}
     return res if isinstance(res, dict) else {}
 
