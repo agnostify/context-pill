@@ -38,13 +38,11 @@ def accepts(note, quote, src=None):
 CASE1 = "Post: eight tasks, closed loop; arXiv: seven of eight; 12% more qubits, 17x fewer gates."
 def test_case1_mixed_sources_and_figures_not_in_quote():
     q = "significant reductions in resource cost on seven of the eight tasks"
-    rejects(CASE1, q, ARXIV_TEXT, why="figure 12% not in the quote")
-    rejects(CASE1, q, ARXIV_TEXT, why="figure 17x not in the quote")
-    rejects(CASE1, q, ARXIV_TEXT, why="mixes sources")
-    rejects(CASE1, q, why="figure 12%")                       # no source text: the quote alone still catches it
-    # even quoting the post (which has every figure) the note still mixes two sources' figures
+    rejects(CASE1, q, ARXIV_TEXT, why="contiguous span")
+    rejects(CASE1, q, why="figures without the full source text")
+    # even quoting the post (which has every figure) the note joins several spans
     rejects(CASE1, ["closed loop with an automated evaluator on eight circuit design tasks", "uses 12% more qubits but 17x fewer gates",
-                    "seven of the eight"], why="mixes sources")
+                    "seven of the eight"], POST_TEXT + " " + ARXIV_TEXT, why="contiguous span")
     r = {"outcome": "good", "note": CASE1, "source_url": ARXIV, "quote": q}
     assert N.resolution_note(r, "good", [{"url": POST}], fetch=lambda u: ARXIV_TEXT) == f"Outcome: good. Source: {ARXIV}"
 
@@ -54,8 +52,8 @@ CASE2 = "Six METR staff, near risk-team access; no veto; Anthropic decides redac
 def test_case2_recombined_phrase():
     q = ["We've onboarded six METR employees", "similar to the access of our own risk teams", "Anthropic cannot veto publication",
          "Anthropic may require redactions within predefined categories, and Anthropic decides what falls inside those categories"]
-    rejects(CASE2, q, METR_TEXT, why="phrase category redaction not in the quote")
-    rejects("Anthropic decides redaction categories.", q[3], METR_TEXT, why="phrase")
+    rejects(CASE2, q, METR_TEXT, why="contiguous span")
+    rejects("Anthropic decides redaction categories.", q[3], METR_TEXT, why="contiguous span")
     r = {"outcome": "good", "note": CASE2, "source_url": METR, "quote": q}
     assert N.resolution_note(r, "good", fetch=lambda u: METR_TEXT) == f"Outcome: good. Source: {METR}"
 
@@ -65,6 +63,7 @@ CASE3 = "Haiku 5.5 tiers match pricing page; Haiku 4.5 $1/$5 not shown there."
 def test_case3_absence_claim():
     q = "Claude Haiku 5.5 Input $0.10 / MTok Output $0.50 / MTok"
     rejects(CASE3, q, PRICING_TEXT, why="absence claim but the source contains")
+    rejects(CASE3, q, PRICING_TEXT, why="contiguous span")                   # the rest is a paraphrase too
     rejects(CASE3, q, why="absence claim without the full source text")       # page not fetched: unverified
     r = {"outcome": "good", "note": CASE3, "source_url": PRICING, "quote": q}
     assert N.resolution_note(r, "good", fetch=lambda u: PRICING_TEXT) == f"Outcome: good. Source: {PRICING}"
@@ -82,8 +81,8 @@ CASE4 = ("OpenAI RSS item dated 29 Oct 2026 confirms five core values: sound jud
          "Article page returned 403.")
 def test_case4_audit_count_not_in_source():
     q = "aim for three things: sound judgment, respect for human agency, and faithfulness to the intent of its instructions"
-    rejects(CASE4, q, OPENAI_TEXT, why="figure 5 not in the quote")
-    rejects("Confirms five core values: sound judgment, human agency, faithfulness to intent.", q, OPENAI_TEXT, why="figure 5")
+    rejects(CASE4, q, OPENAI_TEXT, why="contiguous span")
+    rejects("Confirms five core values: sound judgment, human agency, faithfulness to intent.", q, OPENAI_TEXT, why="contiguous span")
     r = {"verdict": "pass", "note": CASE4, "source_url": OPENAI, "quote": q}
     assert N.audit_note(r, fetch=lambda u: OPENAI_TEXT) == f"Verdict: pass. Source: {OPENAI}"
     assert r["verdict"] == "pass"                                             # the verdict itself is never changed
@@ -96,7 +95,7 @@ def test_quote_must_be_in_source():
 
 
 def test_agreement_and_fallbacks():
-    rejects("Post and paper agree on the closed loop.", "closed loop", why="agreement")
+    rejects("Post and paper agree on the closed loop.", "closed loop", why="contiguous span")
     rejects("x " * 21, "x", why="over 20 words")
     rejects("Closed loop confirmed.", "", why="no quote")
     assert N.resolution_note({"outcome": "bad"}, "bad", [{"url": XURL}, {"url": POST}], fetch=None) == f"Outcome: bad. Source: {POST}"
@@ -108,22 +107,20 @@ def test_agreement_and_fallbacks():
 
 # good notes pass and are kept verbatim
 def test_good_notes():
-    accepts("Post: one circuit in the family uses 12% more qubits but 17x fewer gates.",
+    accepts("One circuit in the family uses 12% more qubits but 17x fewer gates.",
             "one circuit in the family uses 12% more qubits but 17x fewer gates", POST_TEXT)
-    accepts("arXiv abstract: significant reductions in resource cost on seven of the eight tasks.",
+    accepts("Significant reductions in resource cost on seven of the eight tasks.",
             "significant reductions in resource cost on seven of the eight tasks", ARXIV_TEXT)
-    accepts("Onboarded six METR employees; Anthropic cannot veto publication.",
-            ["We've onboarded six METR employees", "Anthropic cannot veto publication"], METR_TEXT)
-    accepts("Anthropic decides what falls inside predefined redaction categories.",
+    accepts("Anthropic decides what falls inside those categories.",
             "Anthropic may require redactions within predefined categories, and Anthropic decides what falls inside those categories",
             METR_TEXT)
     accepts("Legacy models: Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok.",
             "Legacy models Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT)
-    accepts("Model spec: sound judgment, human agency and faithfulness to intent.",
+    accepts("Sound judgment, respect for human agency, and faithfulness to the intent of its instructions.",
             "Our model spec: the model should aim for three things: sound judgment, respect for human agency, "
             "and faithfulness to the intent of its instructions", OPENAI_TEXT)
     q = "one circuit in the family uses 12% more qubits but 17x fewer gates"
-    note = "Post: one circuit in the family uses 12% more qubits but 17x fewer gates."
+    note = "One circuit in the family uses 12% more qubits but 17x fewer gates."
     assert N.resolution_note({"outcome": "good", "note": note, "source_url": POST, "quote": q}, "good",
                              fetch=lambda u: POST_TEXT) == note
     # page not fetched: a note with figures falls back
@@ -133,18 +130,44 @@ def test_good_notes():
     assert N.audit_note(a, fetch=lambda u: METR_TEXT) == "Onboarded six METR employees."
 
 
-# figures keep the quote's order and the word right before each
+# the whole note is ONE span: no source label, no joining spans, no paraphrase
+def test_one_contiguous_span():
+    rejects("Post: one circuit in the family uses 12% more qubits but 17x fewer gates.",
+            "one circuit in the family uses 12% more qubits but 17x fewer gates", POST_TEXT, why="contiguous span")
+    rejects("Onboarded six METR employees; Anthropic cannot veto publication.",
+            ["We've onboarded six METR employees", "Anthropic cannot veto publication"], METR_TEXT, why="contiguous span")
+    rejects("Anthropic decides what falls inside predefined redaction categories.",
+            "Anthropic may require redactions within predefined categories, and Anthropic decides what falls inside those categories",
+            METR_TEXT, why="contiguous span")
+    # Sonnet's prices attached to Haiku: both pieces are in the quote, in order, but not as one span
+    text = "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok; Claude Sonnet 4.5 Input $3 / MTok Output $15 / MTok"
+    rejects("Claude Haiku 4.5, Input $3 / MTok, Output $15 / MTok.", text, text, why="contiguous span")
+    accepts("Claude Haiku 4.5, Input $1 / MTok, Output $5 / MTok.", text, text)
+    accepts("Claude Sonnet 4.5 Input $3 / MTok Output $15 / MTok.", text, text)
+    q = "Available on iOS, not on Android"
+    rejects("Available on Android, not on iOS.", q, q, why="contiguous span")
+    accepts("Available on iOS, not on Android.", q, q)
+    rejects("On Android.", q, q, why="contiguous span")                        # span right after "not"
+    q = "Anthropic acquired Bun"
+    rejects("Bun acquired Anthropic.", q, q, why="contiguous span")
+    accepts("Anthropic acquired Bun.", q, q)
+
+
+# figures stay in the quote's order and with the words around them
 def test_figure_order_and_labels():
     q = "Input $1; output $5."
-    rejects("Input $5; output $1.", q, q, why="out of the quote's order")
-    rejects("Output $5; input $1.", q, q, why="out of the quote's order")      # right pairs, wrong order
-    rejects("$5 input, $1 output.", q, q, why="out of the quote's order")      # no labels, but the order is reversed
+    rejects("Input $5; output $1.", q, q, why="contiguous span")              # reversed input/output
+    rejects("Output $5; input $1.", q, q, why="contiguous span")              # right pairs, wrong order
+    rejects("$5 input, $1 output.", q, q, why="contiguous span")
+    rejects("Input: $5.", q, q, why="contiguous span")
     accepts("Input $1; output $5.", q, q)
-    accepts("Input: $1, output: $5.", "Input: $1 / MTok, Output: $5 / MTok", "Input: $1 / MTok, Output: $5 / MTok")
-    rejects("Input $1; output $5.", ["Output $5", "Input $1"], "Input $1 Output $5", why="order")
+    accepts("Input: $1 / MTok, Output: $5 / MTok.", "Input: $1 / MTok, Output: $5 / MTok", "Input: $1 / MTok, Output: $5 / MTok")
+    rejects("Input: $1, output: $5.", "Input: $1 / MTok, Output: $5 / MTok", "Input: $1 / MTok, Output: $5 / MTok",
+            why="contiguous span")                                            # dropping words breaks the span
+    rejects("Input $1; output $5.", ["Output $5", "Input $1"], "Input $1 Output $5", why="contiguous span")
     rejects("Haiku 4.5 at $1 input, $5 output.", "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT,
-            why="not verbatim")                                               # paraphrased figures are no longer trusted
-    rejects("Haiku 4.5 input $5.", "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT, why="attached to different")
+            why="contiguous span")
+    rejects("Haiku 4.5 input $5.", "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT, why="contiguous span")
 
 
 # page not fetched: only plain, figure-free notes supported by the quote pass
@@ -154,10 +177,14 @@ def test_failed_fetch():
     rejects("Six METR employees onboarded.", "We've onboarded six METR employees", why="figures without")      # number word
     rejects("A single circuit uses fewer gates.", q, why="figures without")
     rejects("Haiku 4.5 omitted? Mythos not listed.", "Claude Haiku 4.5", why="absence claim without")
-    accepts("Anthropic cannot veto publication.", "Anthropic cannot veto publication")
-    rejects("Anthropic picks the evaluators.", "Anthropic cannot veto publication", why="in the quote")
-    a = {"verdict": "pass", "note": "Anthropic cannot veto publication.", "source_url": METR, "quote": "Anthropic cannot veto publication"}
-    assert N.audit_note(a, [{"url": POST}], fetch=lambda u: None) == "Anthropic cannot veto publication."
+    rejects("Anthropic cannot veto publication.", "Anthropic cannot veto publication", why="negation without")
+    accepts("Worked in a closed loop with an automated evaluator.", "Claude worked in a closed loop with an automated evaluator")
+    rejects("Anthropic picks the evaluators.", "Anthropic picks evaluators", why="contiguous span")
+    a = {"verdict": "pass", "note": "Closed loop.", "source_url": POST, "quote": "a closed loop with an automated evaluator"}
+    assert N.audit_note(a, [{"url": METR}], fetch=lambda u: None) == "Closed loop."
+    a["note"] = "Anthropic cannot veto publication."; a["quote"] = "Anthropic cannot veto publication"
+    assert N.audit_note(a, [{"url": POST}], fetch=lambda u: None) == f"Verdict: pass. Source: {POST}"
+    a["source_url"] = METR
     a["note"] = "Onboarded six METR employees."; a["quote"] = "We've onboarded six METR employees"
     assert N.audit_note(a, [{"url": POST}], fetch=lambda u: None) == f"Verdict: pass. Source: {POST}"
     assert N.audit_note(a, [{"url": POST}], fetch=None) == f"Verdict: pass. Source: {POST}"
@@ -197,11 +224,10 @@ def test_robustness():
     assert N.quote_parts(["a", 1]) == [] and N.quote_parts(None) == []
 
 
-# 1. any figure: each clause holding one is verbatim in one clause of the quote, and the quote is on the fetched page
+# any figure: the quote is on the fetched page and the note is one span of it
 def test_figure_clauses_verbatim():
     q = "Input $1; output $5."
-    rejects("$1 output; $5 input.", q, q, why="not verbatim")                 # same order, labels swapped
-    rejects("Input: $5.", q, q, why="not verbatim")                           # colon keeps "Input" with "$5"
+    rejects("$1 output; $5 input.", q, q, why="contiguous span")              # same order, labels swapped
     rejects("Output $5.", q, "Input $9; output $7.", why="quote not found")   # quote not on the page
     rejects("Output $5.", q, why="figures without the full source text")
     accepts("Output $5.", q, q)
@@ -209,34 +235,35 @@ def test_figure_clauses_verbatim():
     legacy = "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok Claude Sonnet 4.5 Input $3 / MTok Output $15 / MTok"
     for note in ("Claude Haiku 4.5 Input $3 / MTok.", "Haiku 4.5: Input $3 / MTok.", "Claude Haiku 4.5 Output $15 / MTok.",
                  "Claude Haiku 4.5 Input $3 / MTok Output $15 / MTok."):
-        rejects(note, legacy, PRICING_TEXT, why="not verbatim")                # Sonnet's figures moved to Haiku
+        rejects(note, legacy, PRICING_TEXT, why="contiguous span")                # Sonnet's figures moved to Haiku
     accepts("Claude Sonnet 4.5 Input $3 / MTok Output $15 / MTok.", legacy, PRICING_TEXT)
     accepts("Eight benchmark tasks.", ARXIV_TEXT.split(". ")[1], ARXIV_TEXT)
     for note in ("Eight design tasks.", "Reductions on 7 of the eight tasks.", "A 4.5 model.", "Seven tasks improved."):
-        rejects(note, ARXIV_TEXT.split(". ")[1], ARXIV_TEXT, why="not verbatim")    # number word, digit, decimal
+        rejects(note, ARXIV_TEXT.split(". ")[1], ARXIV_TEXT, why="contiguous span")    # number word, digit, decimal
     rejects("Uses twelve percent more qubits.", "uses 12% more qubits", POST_TEXT)
-    rejects("17× fewer gates, 12% more qubits.", "uses 12% more qubits but 17x fewer gates", POST_TEXT, why="order")
+    rejects("17× fewer gates, 12% more qubits.", "uses 12% more qubits but 17x fewer gates", POST_TEXT, why="contiguous span")
     accepts("Uses 12 % more qubits but 17× fewer gates.", "uses 12% more qubits but 17x fewer gates", POST_TEXT)
 
 
-# 2. every content word is in the quote, and negations match the quote's in both directions
-def test_full_coverage_and_negation():
+# a negation can't be added, dropped or swapped
+def test_negation():
     rejects("Haiku is not available.", "Haiku is available", "Haiku is available.")
     rejects("Haiku is not available.", "Haiku is available")
-    rejects("Anthropic can veto publication.", "Anthropic cannot veto publication", METR_TEXT, why="negation differs")
+    rejects("Anthropic can veto publication.", "Anthropic cannot veto publication", METR_TEXT, why="contiguous span")
     rejects("Anthropic cannot veto publication.", "Anthropic can veto publication", "Anthropic can veto publication.",
-            why="negation differs")
-    rejects("Anthropic never vetoes publication.", "Anthropic cannot veto publication", METR_TEXT, why="negation differs")
-    rejects("Anthropic can't veto publication.", "Anthropic cannot veto publication", METR_TEXT, why="negation differs")
-    rejects("METR publishes without redactions.", "METR will publish its risk assessments", METR_TEXT, why="negation differs")
-    rejects("Anthropic doesn't decide.", "Anthropic decides what falls inside those categories", METR_TEXT, why="negation")
+            why="contiguous span")
+    rejects("Anthropic never vetoes publication.", "Anthropic cannot veto publication", METR_TEXT, why="contiguous span")
+    rejects("Anthropic can't veto publication.", "Anthropic cannot veto publication", METR_TEXT, why="contiguous span")
+    rejects("METR publishes without redactions.", "METR will publish its risk assessments", METR_TEXT, why="contiguous span")
+    rejects("Anthropic doesn't decide.", "Anthropic decides what falls inside those categories", METR_TEXT, why="contiguous span")
     rejects("Anthropic cannot veto METR publication.", "Anthropic cannot veto publication", METR_TEXT,
-            why="words not in the quote: metr")                               # one extra word is enough
+            why="contiguous span")                                            # one extra word is enough
+    rejects("Veto publication.", "Anthropic cannot veto publication", METR_TEXT, why="contiguous span")   # negation dropped
     accepts("Anthropic cannot veto publication.", "Anthropic cannot veto publication", METR_TEXT)
     accepts("Anthropic can't veto publication.", "Anthropic can't veto publication", "Anthropic can't veto publication.")
 
 
-# 3. more absence phrasings; each still needs the fetched page with none of its subject on it
+# more absence phrasings; each still needs the fetched page with none of its subject on it
 def test_absence_phrases():
     q = "Claude Haiku 5.5 Input $0.10 / MTok"
     for phrase in ("is unavailable", "is not available", "retired", "discontinued", "dropped", "deprecated", "no longer offered",

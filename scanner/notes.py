@@ -1,17 +1,19 @@
 """Mechanical check of the short public notes the resolver and auditor write (resolution_note, audit_note, changelog lines).
 The model returns, per claim, a note plus the single source_url it relies on and a verbatim quote from that source.
-validate_note() is conservative: a note with any figure must repeat each figure-bearing clause verbatim from the quote (case,
-whitespace and punctuation aside) and needs the page fetched; every content word must be in the quote; negations must match
-the quote's exactly; an absence claim needs the page fetched with none of its terms on it; no mixing sources; no recombining
-the quote's words into a phrase it doesn't contain. A rejected or malformed note is
-replaced by a deterministic one ("Outcome: good. Source: <url>", source_url only if its page was fetched, else the claim's
+validate_note() is strict: after normalizing (lowercase, whitespace collapsed, punctuation dropped except $ % . / inside
+figures) the whole note must be ONE contiguous span of one quote part, not directly after a negation, and the quote must be
+on the fetched page. Spans are never joined, so "Claude Haiku 4.5" + "Input $3 / MTok" can't be lifted from a Haiku-then-Sonnet
+price list. Without the fetched page the note must also hold no figure, number word, negation or absence claim. An absence
+claim needs the page fetched with none of its terms on it; the rest of the note is then the span. A rejected or malformed note
+is replaced by a deterministic one ("Outcome: good. Source: <url>", source_url only if its page was fetched, else the claim's
 evidence URL); the outcome or verdict itself never changes.
 Deterministic; the only network use is fetch_text (through util.get), which callers can swap out."""
 import html, re
 from . import util
 
 MAX_WORDS = 20
-NEGATIONS = {"not", "no", "never", "cannot", "can't", "isn't", "unavailable", "without", "none"}   # plus any other "n't" word
+NEGATIONS = {"not", "no", "nor", "never", "cannot", "unavailable", "without", "none"}   # plus any "n't" word ("cant", "isnt" once flattened)
+_NT = {"ca", "is", "are", "was", "were", "do", "does", "did", "wo", "would", "should", "could", "has", "have", "had", "must", "ai"}
 
 NUM_WORDS = {w: str(i) for i, w in enumerate("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
                                               "fifteen sixteen seventeen eighteen nineteen twenty".split())}
@@ -22,22 +24,8 @@ _TOKEN = re.compile(r"(\$)\s?(\d[\d,]*(?:\.\d+)?)"                     # $1, $0.
                     r"|(?<![\w.])(\d[\d,]*(?:\.\d+)*)\s?(%|percent\b|x\b|×)?"  # 12%, 17x, 4.5, 2026
                     r"|\b(" + "|".join(NUM_WORDS) + r")\b", re.I)
 
-# kinds of source a note can name; two different kinds in one note with figures = figures from more than one source
-SOURCE_LABELS = {
-    "post": r"post|blog|announcement",
-    "paper": r"arxiv|abstract|paper|preprint",
-    "docs": r"docs|documentation",
-    "changelog": r"changelog|release notes",
-    "repo": r"repo|repository|readme|github",
-    "card": r"model card|system card",
-    "feed": r"rss|feed",
-    "article": r"article",
-    "pricing": r"pricing page",
-}
-_LABEL = {k: re.compile(r"\b(?:" + v + r")s?\b", re.I) for k, v in SOURCE_LABELS.items()}
 LABEL_WORDS = {"post", "blog", "announcement", "arxiv", "abstract", "paper", "preprint", "docs", "documentation", "changelog",
                "repo", "repository", "readme", "github", "rss", "feed", "article"}       # naming the source isn't content
-AGREEMENT = re.compile(r"\b(agree|agrees|both (?:confirm|say|show|list|state|report)|sources? (?:confirm|agree))\b", re.I)
 ABSENCE = re.compile(r"\b(not (?:shown|listed|mentioned|found|included|present|stated|available|offered)|"
                      r"isn'?t (?:shown|listed|mentioned|included|available|offered)|no longer(?: \w+)?|unavailable|"
                      r"retired|discontinued|dropped|deprecated|omit(?:s|ted)?|removed|lack(?:s|ing)?|"
@@ -83,39 +71,6 @@ def _num(s):
     return s.rstrip("0").rstrip(".") if s.count(".") == 1 else s     # 4.50 -> 4.5, $1.00 -> 1
 
 
-def _figures(text):
-    """Figures in order as ((kind, value), label): label is the stem of the content word directly before the figure (only
-    whitespace between, so "input, $5" has none), else None."""
-    out = []
-    for m, tok in zip(_TOKEN.finditer(text), numbers(text)):
-        w = re.search(r"([A-Za-z][A-Za-z'’]*)[ \t]*$", text[:m.start()])
-        out.append((tok, w and (_tokens(w.group(1)) or [None])[0]))
-    return out
-
-
-def _quote_figures(parts):
-    """Figures of the quote in order, each with the word before it in its part (any punctuation between)."""
-    out = []
-    for p in parts:
-        for m, tok in zip(_TOKEN.finditer(p), numbers(p)):
-            w = re.search(r"([A-Za-z][A-Za-z'’]*)\W*$", p[:m.start()])
-            out.append((tok, w and _stem(w.group(1))))
-    return out
-
-
-def _figures_in_order(note_figs, quote_figs):
-    """Each note figure matches a later quote figure than the one before it, with the same value and (if the note puts a
-    word right before the figure) the same word before it in the quote. Greedy earliest match decides a subsequence."""
-    i = 0
-    for tok, label in note_figs:
-        while i < len(quote_figs) and not (_has_number(tok, [quote_figs[i][0]]) and (not label or quote_figs[i][1] == label)):
-            i += 1
-        if i == len(quote_figs):
-            return False
-        i += 1
-    return True
-
-
 def _has_number(tok, pool):
     kind, val = tok
     return any(v == val and (not kind or k == kind) for k, v in pool)
@@ -136,64 +91,33 @@ def _words(text):
     return [t for t in _tokens(text) if t]
 
 
-def _note_pairs(text):
-    """Content words standing side by side in the note (order-free)."""
-    t = _tokens(text)
-    return {frozenset((a, b)) for a, b in zip(t, t[1:]) if a and b and a != b}
-
-
-def _joined(pair, toks, allowed, window=4):
-    """The quote has both words at most `window` words apart, with nothing between them but stopwords, figures and words
-    the note itself uses (so dropping a qualifier like "predefined" breaks the phrase)."""
-    a, b = sorted(pair)
-    at = {w: [i for i, t in enumerate(toks) if t == w] for w in (a, b)}
-    return any(abs(i - j) <= window and all(t is None or t in allowed for t in toks[min(i, j) + 1:max(i, j)])
-               for i in at[a] for j in at[b])
-
-
-def _negations(text):
-    """Negation words in the text (they are content: dropping or adding one flips the meaning)."""
-    ws = {w.lower().replace("’", "'") for w in re.findall(r"[A-Za-z][A-Za-z'’]*", text or "")}
-    return {w for w in ws if w in NEGATIONS or w.endswith("n't")}
-
-
-_BREAK = r";|,(?!\d)|\.(?!\d)"          # clause breaks; "1,000" and "4.5" are not split
-
-
 def _flat(s):
-    """Lowercase words and figures with all other punctuation and spacing reduced to single spaces ("We've" -> "weve")."""
+    """Lowercase words and figures, all other punctuation and spacing reduced to single spaces ("We've" -> "weve"); $ % . /
+    survive only inside figures ("$1", "12%", "4.5", "1/5")."""
     s = (s or "").lower()
     for a, b in (("’", "'"), ("‘", "'"), ("×", "x")):
         s = s.replace(a, b)
     s = re.sub(r"(?<=\d),(?=\d)", "", s.replace("'", ""))
-    s = re.sub(r"\$\s+", "$", re.sub(r"\s+%", "%", s))
-    s = re.sub(r"[^a-z0-9$%.]+", " ", s)
-    s = re.sub(r"\.(?!\d)|(?<!\d)\.", " ", s)
+    s = re.sub(r"\$\s+(?=\d)", "$", re.sub(r"(?<=\d)\s+%", "%", s))
+    s = re.sub(r"[^a-z0-9$%./]+", " ", s)
+    s = re.sub(r"\.(?!\d)|(?<!\d)\.|/(?!\$?\d)|(?<!\d)/|\$(?!\d)|(?<!\d)%", " ", s)
     return " ".join(s.split())
 
 
-def _figure_spans(body):
-    """Each clause of the note that holds a figure, split on ; , . and : -- a clause after a colon keeps the words before the
-    colon ("Input: $5" is checked as "input $5"), unless they only name the source ("Post: ...")."""
-    out = []
-    for sent in re.split(_BREAK, body):
-        pieces = sent.split(":")
-        for i, p in enumerate(pieces):
-            if numbers(p):
-                head = [h for h in pieces[:i] if numbers(h) or any(_tokens(h))]
-                out.append(_flat(" ".join(head + [p])))
-    return [s for s in out if s]
+def _neg(w):
+    """A flattened word that negates what follows it."""
+    return w in NEGATIONS or (w.endswith("nt") and w[:-2] in _NT)
 
 
-def _quote_segments(parts):
-    return [_flat(seg) for p in parts for seg in re.split(_BREAK, p) if _flat(seg)]
-
-
-def _norm(s):
-    s = (s or "").lower()
-    for a, b in (("’", "'"), ("‘", "'"), ("“", '"'), ("”", '"'), ("–", "-"), ("—", "-"), (" ", " ")):
-        s = s.replace(a, b)
-    return re.sub(r"\s+", "", s)
+def _span(text, parts):
+    """The flattened text is one contiguous run of words in one quote part, somewhere not directly after a negation (so
+    "veto publication" can't come from "cannot veto publication")."""
+    n = _flat(text).split()
+    for p in parts:
+        q = _flat(p).split()
+        if any(q[i:i + len(n)] == n and not (i and _neg(q[i - 1])) for i in range(len(q) - len(n) + 1)):
+            return bool(n)
+    return False
 
 
 def quote_parts(quote):
@@ -222,7 +146,7 @@ def _absence_subject(note):
 def validate_note(note, quote, source_text=None):
     """Problems with a note (empty list = the note may be published). quote: str or list of str from ONE source;
     source_text: that source's full page text when it was fetched (enables the quote and absence checks; without it a
-    note with any figure, count or absence claim is rejected)."""
+    note with any figure, number word, negation or absence claim is rejected)."""
     if note is not None and not isinstance(note, str):
         return ["note is not a string"]
     if source_text is not None and not isinstance(source_text, str):
@@ -237,11 +161,15 @@ def validate_note(note, quote, source_text=None):
     if len(note.split()) > MAX_WORDS:
         problems.append(f"over {MAX_WORDS} words")
     if source_text is not None:
-        src = _norm(source_text)
-        missing = [p for p in parts if _norm(p) not in src]
+        src = f" {_flat(source_text)} "
+        missing = [p for p in parts if f" {_flat(p)} " not in src]
         if missing:
             problems.append(f"quote not found in source: {missing[0][:60]!r}")
-    qtext = " ... ".join(parts)
+    else:
+        if numbers(note):
+            problems.append("figures without the full source text checked")
+        if any(_neg(w) for w in _flat(note).split()):
+            problems.append("negation without the full source text checked")
 
     body = note
     subjects, rest = _absence_subject(note)
@@ -255,53 +183,11 @@ def validate_note(note, quote, source_text=None):
                 present = [t for t in terms if (t[1] in src_words if t[0] == "w" else _has_number(t[1], src_nums))]
                 if not terms or present:                # any subject term on the page: it may well be listed there
                     problems.append(f"absence claim but the source contains {s.strip()!r}")
-            body = rest                     # verified-absent subjects are not expected in the quote
-
-    qnums = numbers(qtext)
-    snums = numbers(source_text) if source_text is not None else None
-    if source_text is None and numbers(body):
-        problems.append("figures without the full source text checked")
-    for t in numbers(body):
-        if not _has_number(t, qnums):
-            problems.append(f"figure {t[1]}{t[0] if t[0] != '$' else ''} not in the quote")
-        elif snums is not None and not _has_number(t, snums):
-            problems.append(f"figure {t[1]} not in the source")
-    if all(_has_number(t, qnums) for t in numbers(body)):
-        # figures keep the quote's order and the word right before each, so "Input $5; output $1" can't come from "Input $1; output $5"
-        nfigs = [f for c in _clauses(body) for f in _figures(c)]
-        if not _figures_in_order(nfigs, _quote_figures(parts)):
-            problems.append("figures out of the quote's order or attached to different words")
-
-    labels = {k for k, rx in _LABEL.items() if rx.search(note)}
-    if AGREEMENT.search(note):
-        problems.append("note combines sources (agreement)")
-    elif len(labels) > 1 and numbers(note):
-        problems.append(f"note mixes sources with figures ({', '.join(sorted(labels))})")
-
-    # any figure: every clause holding one is a verbatim span of one clause of the quote, so figures stay with their words
-    if numbers(body):
-        segs = [f" {q} " for q in _quote_segments(parts)]
-        for span in _figure_spans(body):
-            if not any(f" {span} " in q for q in segs):
-                problems.append(f"figure clause not verbatim in the quote: {span!r}")
-
-    # negations match the quote's in both directions, so "can veto" can't come from "cannot veto" (nor the reverse)
-    nneg, qneg = _negations(body), _negations(qtext)
-    if nneg != qneg:
-        problems.append(f"negation differs from the quote (note {sorted(nneg)}, quote {sorted(qneg)})")
-
-    # wording: every content word comes from the quote, and two words side by side in the note that are both in the quote
-    # also stand together there, so "redaction categories" can't come from "redactions within predefined categories"
-    qset = set(_words(qtext))
-    qtoks = [_tokens(p) for p in parts]
-    nwords = _words(body)
-    absent = sorted({w for w in nwords if w not in qset})
-    if absent:
-        problems.append(f"words not in the quote: {', '.join(absent)}")
-    for c in _clauses(body):
-        for pair in sorted(_note_pairs(c), key=sorted):
-            if pair <= qset and not any(_joined(pair, t, set(nwords)) for t in qtoks):
-                problems.append(f"phrase {' '.join(sorted(pair))} not in the quote")
+        body = rest                         # verified-absent subjects are not expected in the quote
+        if not _flat(body):
+            return problems
+    if not _span(body, parts):
+        problems.append("note is not one contiguous span of the quote")
     return problems
 
 
