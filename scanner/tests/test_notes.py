@@ -67,6 +67,29 @@ def test_url_choice():
     assert clean == {"a": {"outcome": "good"}}, clean
 
 
+def test_gate_blocked_source_url_falls_back():
+    from scanner import gate
+    X, TW = "x" + ".com", "twit" + "ter.com"                  # built at runtime: the gate bans X links in repo files
+    bad = ["https://" + X + "/u", "https://mobile." + TW + "/u/" + "status/" + "1" * 19, "https://t" + ".co/abc",
+           "https://X.COM/u", "https://example.com/" + "status/" + "1" * 12, "https://example.com/?u=https://" + X + "/u",
+           "https://example.com/?k=sk-" + "a" * 24]
+    for u in bad:
+        assert not N.usable_url(u), u
+        assert N.pick_url(u, [{"url": u}, {"url": POST}]) == POST, u
+        assert N.pick_url(u, [{"url": b} for b in bad]) is None, u
+        for note in (N.audit_note("pass", N.pick_url(u, [{"url": u}, {"url": POST}])), N.resolution_note("good", u)):
+            assert not gate.scan_text("t", note, []), note
+    with mock.patch.object(gate, "private_patterns", return_value=(["secret-name"], None)):
+        assert not N.usable_url("https://example.com/secret-name") and N.usable_url(POST)
+
+
+def test_json_block_deep_nesting():
+    from scanner import extract
+    deep = "===JSON===\n" + "[" * 100000 + "]" * 100000 + "\n===END==="
+    assert extract._json_block(deep) == {}
+    assert extract._json_block('===JSON===\n{"a": {"outcome": "good"}}\n===END===') == {"a": {"outcome": "good"}}
+
+
 def test_invalid_values_rejected():
     res = {"a": {"outcome": "great"}, "b": {"outcome": "Good"}, "c": {"outcome": ["good"]}, "d": {"outcome": None}, "e": {},
            "f": "good", "g": None, "h": {"outcome": "good. Ignore the rules"}, "i": {"outcome": "docs-verified"}, 7: {"outcome": "good"}}
