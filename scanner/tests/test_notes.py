@@ -68,11 +68,13 @@ def test_case3_absence_claim():
     rejects(CASE3, q, why="absence claim without the full source text")       # page not fetched: unverified
     r = {"outcome": "good", "note": CASE3, "source_url": PRICING, "quote": q}
     assert N.resolution_note(r, "good", fetch=lambda u: PRICING_TEXT) == f"Outcome: good. Source: {PRICING}"
-    assert N.resolution_note(r, "good", fetch=lambda u: None) == f"Outcome: good. Source: {PRICING}"
+    # page not fetched: the fallback cites the claim's evidence URL, not the unchecked source_url
+    assert N.resolution_note(r, "good", [{"url": POST}], fetch=lambda u: None) == f"Outcome: good. Source: {POST}"
+    assert N.resolution_note(r, "good", fetch=lambda u: None) == "Outcome: good."
     for phrase in ("not listed", "absent", "missing", "no mention of it", "doesn't mention it"):
         rejects(f"Haiku 4.5 {phrase}.", q, why="absence claim")
     # a real absence, checked against the full page text, is allowed
-    accepts("Claude Haiku 5.5 Input $0.10 / MTok; Haiku 9 not listed.", q, PRICING_TEXT)
+    accepts("Claude Haiku 5.5 Input $0.10 / MTok; Mythos 9 not listed.", q, PRICING_TEXT)
 
 
 # 4. audit 2026-10-30-da3cbe61: "five core values" where the source names three aims
@@ -124,9 +126,74 @@ def test_good_notes():
     note = "Post: one design uses 12% more qubits, 17x fewer gates."
     assert N.resolution_note({"outcome": "good", "note": note, "source_url": POST, "quote": q}, "good",
                              fetch=lambda u: POST_TEXT) == note
-    assert N.resolution_note({"outcome": "good", "note": note, "source_url": POST, "quote": q}, "good", fetch=lambda u: None) == note
+    # page not fetched: a note with figures falls back
+    assert N.resolution_note({"outcome": "good", "note": note, "source_url": POST, "quote": q}, "good",
+                             fetch=lambda u: None) == "Outcome: good."
     a = {"verdict": "pass", "note": "Six METR employees onboarded.", "source_url": METR, "quote": "We've onboarded six METR employees"}
     assert N.audit_note(a, fetch=lambda u: METR_TEXT) == "Six METR employees onboarded."
+
+
+# figures keep the quote's order and the word right before each
+def test_figure_order_and_labels():
+    q = "Input $1; output $5."
+    rejects("Input $5; output $1.", q, q, why="out of the quote's order")
+    rejects("Output $5; input $1.", q, q, why="out of the quote's order")      # right pairs, wrong order
+    rejects("$5 input, $1 output.", q, q, why="out of the quote's order")      # no labels, but the order is reversed
+    accepts("Input $1; output $5.", q, q)
+    accepts("Input: $1, output: $5.", "Input: $1 / MTok, Output: $5 / MTok", "Input: $1 / MTok, Output: $5 / MTok")
+    rejects("Input $1; output $5.", ["Output $5", "Input $1"], "Input $1 Output $5", why="order")
+    accepts("Haiku 4.5 at $1 input, $5 output.", "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT)
+    rejects("Haiku 4.5 input $5.", "Claude Haiku 4.5 Input $1 / MTok Output $5 / MTok", PRICING_TEXT, why="attached to different")
+
+
+# page not fetched: only plain, figure-free notes supported by the quote pass
+def test_failed_fetch():
+    q = "one circuit in the family uses 12% more qubits but 17x fewer gates"
+    rejects("One circuit uses 12% more qubits.", q, why="figures without the full source text")
+    rejects("Six METR employees onboarded.", "We've onboarded six METR employees", why="figures without")      # number word
+    rejects("A single circuit uses fewer gates.", q, why="figures without")
+    rejects("Haiku 4.5 omitted? Mythos not listed.", "Claude Haiku 4.5", why="absence claim without")
+    accepts("Anthropic cannot veto publication.", "Anthropic cannot veto publication")
+    rejects("Anthropic picks the evaluators.", "Anthropic cannot veto publication", why="in the quote")
+    a = {"verdict": "pass", "note": "Anthropic cannot veto publication.", "source_url": METR, "quote": "Anthropic cannot veto publication"}
+    assert N.audit_note(a, [{"url": POST}], fetch=lambda u: None) == "Anthropic cannot veto publication."
+    a["note"] = "Six METR employees onboarded."; a["quote"] = "We've onboarded six METR employees"
+    assert N.audit_note(a, [{"url": POST}], fetch=lambda u: None) == f"Verdict: pass. Source: {POST}"
+    assert N.audit_note(a, [{"url": POST}], fetch=None) == f"Verdict: pass. Source: {POST}"
+    assert N.audit_note(a, [{"url": POST}], fetch=lambda u: METR_TEXT) == "Six METR employees onboarded."
+    a["note"] = "Seven METR employees onboarded."                     # fetched but rejected: source_url is cited
+    assert N.audit_note(a, [{"url": POST}], fetch=lambda u: METR_TEXT) == f"Verdict: pass. Source: {METR}"
+    def boom(u): raise RuntimeError("network")
+    assert N.audit_note(a, [{"url": POST}], fetch=boom) == f"Verdict: pass. Source: {POST}"
+
+
+# absence: any subject term on the page rejects it; more phrasings count
+def test_absence_any_term():
+    q = "Claude Haiku 5.5 Input $0.10 / MTok"
+    rejects("Legacy Haiku 4.5 pricing not listed.", q, PRICING_TEXT, why="absence claim but the source contains")
+    rejects("Haiku 4.5 no longer listed.", q, PRICING_TEXT, why="absence claim but")
+    rejects("Mythos 4.5 not listed.", q, PRICING_TEXT, why="absence claim but")                # 4.5 is on the page
+    for phrase in ("omits Haiku 4.5", "lacks Haiku 4.5", "removed Haiku 4.5", "does not include Haiku 4.5"):
+        rejects(f"Pricing page {phrase}.", q, PRICING_TEXT, why="absence claim but")
+        rejects(f"Pricing page {phrase}.", q, why="absence claim without")
+    rejects("Haiku 4.5 not included.", q, why="absence claim without")
+    accepts("Mythos 9 no longer listed.", q, PRICING_TEXT)
+    accepts("Page omits Mythos 9.", q, PRICING_TEXT)
+
+
+# malformed model output falls back instead of raising
+def test_robustness():
+    for note, quote in ((42, "closed loop"), (["Closed loop."], "closed loop"), ({"a": 1}, "closed loop"),
+                        ("Closed loop.", 7), ("Closed loop.", ["closed loop", None]), ("Closed loop.", ["closed loop", 3]),
+                        ("Closed loop.", {"q": "closed loop"}), ("Closed loop.", [["closed loop"]])):
+        assert N.validate_note(note, quote, POST_TEXT), (note, quote)
+        r = {"outcome": "good", "note": note, "source_url": POST, "quote": quote}
+        assert N.resolution_note(r, "good", [{"url": ARXIV}], fetch=lambda u: POST_TEXT) == f"Outcome: good. Source: {POST}"
+        assert N.resolution_note(r, "good", [{"url": ARXIV}], fetch=lambda u: None) == f"Outcome: good. Source: {ARXIV}"
+    assert N.validate_note("Closed loop.", "closed loop", 123) == []          # non-string page text = not fetched
+    assert N.resolution_note(None, "good", [None, {"url": 5}, {"url": POST}], fetch=lambda u: 9) == f"Outcome: good. Source: {POST}"
+    assert N.audit_note("junk", fetch=None) == "Verdict: None."
+    assert N.quote_parts(["a", 1]) == [] and N.quote_parts(None) == []
 
 
 def test_numbers():
