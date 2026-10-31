@@ -99,7 +99,7 @@ for _ in range(2):
     s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
     assert not s.get("audit_demoted"), s
     assert led["claims"][0]["verification"]["audit_verdict"] == "pass"
-    # an auditor note with no source_url/quote is replaced by the fallback (scanner/notes.py), in the item and the changelog
+    # the published audit note is built from the verdict and a URL only (scanner/notes.py); the model note "ok" is never used
     assert led["claims"][0]["verification"]["audit_note"] == "Verdict: pass. Source: https://example.com/a", led["claims"][0]["verification"]
 assert au.call_count == 0          # second rerun reuses the saved verdict
 cl = (tmp / "CHANGELOG-sources.md").read_text()
