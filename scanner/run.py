@@ -5,7 +5,7 @@ Repo (public) = this checkout. Work dir (private, never pushed) = $CP_WORK or ..
 import argparse, json, os, hashlib, datetime as dt
 from pathlib import Path
 import yaml
-from . import fetch, extract, trust, render, gate, util, repeats
+from . import fetch, extract, trust, render, gate, util, repeats, notes
 
 REPO = Path(__file__).resolve().parent.parent
 WORK = Path(os.environ.get("CP_WORK", REPO.parent / "context-pill-work"))
@@ -90,7 +90,8 @@ def main():
             continue
         if c["category"] in ("tool", "automation") and out == "good" and not c.get("smoke_test_log"):
             out = "docs-verified"                    # no recorded smoke test -> docs-verified credit at most
-        c["state"] = "resolved"; c["outcome"] = out; c["resolved_on"] = date; c["resolution_note"] = r.get("note")
+        c["state"] = "resolved"; c["outcome"] = out; c["resolved_on"] = date
+        c["resolution_note"] = notes.resolution_note(r, out, c["evidence"])      # checked against its quote, else a fallback
 
     # 2. trust update; apply drop, audit demotion/recovery, and per-tier tightening (>1 audit error in the last 20)
     def update_tightening():
@@ -227,6 +228,13 @@ def main():
         ares_p.write_text(json.dumps(ares, indent=1))
     log(f"audit: {sum(1 for d in sample if d['id'] in ares)} of {len(sample)} sampled items judged")
     ledger["audits"] = [x for x in ledger["audits"] if x["date"] != date]
+    earlier_ev = {c["id"]: c.get("evidence") for c in ledger["claims"]}
+    def audit_note(r, evidence):
+        """The auditor's note checked against its quote (else a fallback), kept in audit.result.json so reruns publish the
+        same changelog line; recomputed only if the auditor's note changes."""
+        if "checked_note" not in r or r.get("checked_for") != r.get("note"):
+            r["checked_note"] = notes.audit_note(r, evidence); r["checked_for"] = r.get("note")
+        return r["checked_note"]
     def demote(s):
         if s.get("audit_demoted"):
             return
@@ -253,7 +261,8 @@ def main():
             rec["removed"] = True
         ledger["audits"].append(rec)
         sname = srcs[r["source_id"]]["name"] if r.get("source_id") in srcs else r.get("source_id")
-        changelog(f"audit of {k} ({sname}): {r['verdict']}" + (f" ({r.get('note')})" if r.get("note") else "")
+        note = audit_note(r, earlier_ev.get(k))
+        changelog(f"audit of {k} ({sname}): {r['verdict']}" + (f" ({note})" if note else "")
                   + (f"; cause: {r['cause']}" if r.get("cause") else "") + (f"; replaced by {r['superseded_by']}" if r.get("superseded_by") else ""))
         if r["verdict"] == "fail":
             tightened = update_tightening()
@@ -263,14 +272,15 @@ def main():
     audited = sample + [d for d in drop if d["id"] in ares and d not in sample]
     for d in audited:
         r = ares.get(d["id"]) or {"verdict": "not run", "note": "auditor returned no verdict"}
-        v = d["verification"]; v["t1_audit_sample"] = True; v["audit_verdict"] = r["verdict"]; v["audit_note"] = r.get("note")
+        note = audit_note(r, d["evidence"]) if d["id"] in ares else r["note"]
+        v = d["verification"]; v["t1_audit_sample"] = True; v["audit_verdict"] = r["verdict"]; v["audit_note"] = note
         ledger["audits"].append({"date": date, "item_id": d["id"], "source_id": d["source"]["id"],
                                  "tier": sample_tier.get(d["id"]) or start_tier(d), "verdict": r["verdict"]})
         if d["id"] in ares:                          # remembered so the record survives if the item is later rewritten or removed
             ares[d["id"]].setdefault("source_id", d["source"]["id"]); ares[d["id"]].setdefault("tier", ledger["audits"][-1]["tier"])
         if d["id"] in replaces:
             v["method"] += f"; an earlier draft of this summary ({replaces[d['id']]}) failed the full audit and was corrected, then re-audited"
-        changelog(f"audit of {d['id']} ({d['source']['name']}): {r['verdict']}" + (f" ({r.get('note')})" if r.get("note") else "")
+        changelog(f"audit of {d['id']} ({d['source']['name']}): {r['verdict']}" + (f" ({note})" if note else "")
                   + (f"; re-audit of the corrected {replaces[d['id']]}" if d["id"] in replaces else ""))
         if r["verdict"] == "fail":
             v["status"] = "unverified"; v["method"] += "; failed the full audit"; d["try_this"] = None
