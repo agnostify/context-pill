@@ -28,10 +28,13 @@
    "item_url": "https://www.latent.space/p/ainews-agents-disprove-polysemanticity",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "latentspace",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Source: https://platform.claude.com/docs/en/build-with-claude/fast-mode"
   },
   {
    "id": "2026-10-16-5b9e5691",
@@ -60,10 +63,13 @@
    "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.302",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "anthropic",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/anthropics/claude-code/releases/tag/v2.1.302"
   },
   {
    "id": "2026-10-16-789714cf",
@@ -92,10 +98,13 @@
    "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.302",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "anthropic",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Source: https://github.com/anthropics/claude-code/releases/tag/v2.1.302"
   },
   {
    "id": "2026-10-16-6b985b38",
@@ -124,10 +133,13 @@
    "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.163.0",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "openai",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/openai/codex/releases/tag/rust-v0.163.0"
   },
   {
    "id": "2026-10-16-8b94aede",
@@ -156,10 +168,13 @@
    "item_url": "https://cursor.com/changelog/cloud-agent-canvases-and-environments",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "cursor",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://cursor.com/changelog/cloud-agent-canvases-and-environments"
   },
   {
    "id": "2026-10-16-16176cd3",
@@ -188,10 +203,13 @@
    "item_url": "https://www.latent.space/p/ainews-agents-disprove-polysemanticity",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "latentspace",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://code.claude.com/docs/en/code-review"
   },
   {
    "id": "2026-10-16-75be094c",
@@ -220,10 +238,13 @@
    "item_url": "https://www.latent.space/p/ainews-agents-disprove-polysemanticity",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "latentspace",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/perplexityai/space"
   },
   {
    "id": "2026-10-16-4ee62b0e",
@@ -252,10 +273,13 @@
    "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.301",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "anthropic",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/anthropics/claude-code/releases/tag/v2.1.301"
   },
   {
    "id": "2026-10-16-51406f64",
@@ -284,10 +308,13 @@
    "item_url": "https://www.anthropic.com/engineering/redesigning-source-control",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "anthropic",
-   "status_at_publication": "vendor-claim"
+   "status_at_publication": "vendor-claim",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Source: https://www.anthropic.com/engineering/redesigning-source-control"
   },
   {
    "id": "2026-10-16-77948875",
@@ -320,10 +347,13 @@
    "item_url": "https://www.anthropic.com/research/designing-efficient-quantum-circuits",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "anthropic",
-   "status_at_publication": "vendor-claim"
+   "status_at_publication": "vendor-claim",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Sources: https://www.anthropic.com/research/designing-efficient-quantum-circuits, https://arxiv.org/abs/2610.22367"
   },
   {
    "id": "2026-10-16-7bbecbe6",
@@ -352,10 +382,13 @@
    "item_url": "https://www.anthropic.com/research/ecdsa-curve-origins",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "anthropic",
-   "status_at_publication": "vendor-claim"
+   "status_at_publication": "vendor-claim",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Source: https://www.anthropic.com/research/ecdsa-curve-origins"
   },
   {
    "id": "2026-10-16-c5ba7374",
@@ -384,10 +417,13 @@
    "item_url": "https://www.anthropic.com/news/an-update-on-independent-evaluators",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "anthropic",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Source: https://www.anthropic.com/news/an-update-on-independent-evaluators"
   },
   {
    "id": "2026-10-16-cd172a7c",
@@ -416,10 +452,13 @@
    "item_url": "https://deepmind.google/blog/accelerating-antimicrobial-discovery/",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "deepmind",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://deepmind.google/blog/accelerating-antimicrobial-discovery/"
   },
   {
    "id": "2026-10-16-6cf48814",
@@ -448,10 +487,13 @@
    "item_url": "https://simonwillison.net/2026/Oct/15/chirp-pong/",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-30",
    "source_id": "simonw",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "partial",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: partial. Source: https://tools.simonwillison.net/chirp-pong"
   },
   {
    "id": "2026-10-17-32916e5c",
@@ -480,10 +522,13 @@
    "item_url": "https://simonwillison.net/2026/Oct/16/code-review/",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-31",
    "source_id": "simonw",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Source: https://claude.dev/blog/solving-code-review-at-anthropic/"
   },
   {
    "id": "2026-10-17-f0e1a13c",
@@ -512,10 +557,13 @@
    "item_url": "https://www.latent.space/p/ainews-high-taste-testers-ep-1",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-31",
    "source_id": "latentspace",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "partial",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: partial. Source: https://claude.com/pricing"
   },
   {
    "id": "2026-10-17-190dfe02",
@@ -580,10 +628,13 @@
    "item_url": "https://www.latent.space/p/ainews-high-taste-testers-ep-1",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-31",
    "source_id": "latentspace",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://raw.githubusercontent.com/anthropics/claude-code/refs/heads/main/CHANGELOG.md"
   },
   {
    "id": "2026-10-17-4c09ef09",
@@ -612,10 +663,13 @@
    "item_url": "https://www.latent.space/p/ainews-high-taste-testers-ep-1",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-31",
    "source_id": "latentspace",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Source: https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B"
   },
   {
    "id": "2026-10-17-7ff752e7",
@@ -648,10 +702,13 @@
    "item_url": "https://www.latent.space/p/ainews-high-taste-testers-ep-1",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-31",
    "source_id": "latentspace",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Sources: https://huggingface.co/reflection/Beam-1.0-501B-A23B, https://reflection.ai/beam-safety-report"
   },
   {
    "id": "2026-10-17-690cf5a4",
@@ -680,10 +737,13 @@
    "item_url": "https://www.latent.space/p/ainews-high-taste-testers-ep-1",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-31",
    "source_id": "latentspace",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: good. Source: https://huggingface.co/stepfun-ai/Step-5-Preview-BF16"
   },
   {
    "id": "2026-10-17-dfea536b",
@@ -712,10 +772,13 @@
    "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0-nightly.20261017.ged96faedf",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-31",
    "source_id": "deepmind",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/google-gemini/gemini-cli/pull/29774"
   },
   {
    "id": "2026-10-17-e98a96fa",
@@ -744,10 +807,13 @@
    "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0-nightly.20261017.ged96faedf",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-10-31",
    "source_id": "deepmind",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-01",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0-nightly.20261017.ged96faedf"
   },
   {
    "id": "2026-10-19-6c3cb5e4",
@@ -3379,6 +3445,206 @@
    "recheck_on": "2026-11-12",
    "source_id": "simonw",
    "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-11-01-a20ed010",
+   "date": "2026-11-01",
+   "category": "research",
+   "claim": "Parameter Labs found a ChatGPT exploit chain: a sandboxed HTML preview sent postMessage to MathLive's virtual keyboard listener, which used innerHTML, letting a shared chat link run code in a signed-in victim's session.",
+   "why_it_matters": "If you render model-generated HTML in sandboxed iframes, third-party libraries on the parent page can reopen the hole you thought the sandbox closed.",
+   "try_this": "Search your app for message event listeners and confirm each one checks event.origin or event.source and never passes message data into innerHTML.",
+   "evidence": [
+    {
+     "url": "https://www.parameter.ai/labs/we-found-a-gap-at-openai",
+     "kind": "primary"
+    },
+    {
+     "url": "https://mathlive.io/mathfield/virtual-keyboard/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Read Parameter Labs writeup linked by Simon; attack chain, share-link impact, fix and $5,000 bounty match the post",
+    "checked_at": "2026-11-01T06:00-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "you could create a ChatGPT share URL which, when visited by another signed-in user, could exfiltrate their private data",
+   "excerpt_url": "https://simonwillison.net/2026/Oct/31/how-we-took-over-chatgpt-accounts/",
+   "item_url": "https://simonwillison.net/2026/Oct/31/how-we-took-over-chatgpt-accounts/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-15",
+   "source_id": "simonw",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-01-c4acc5f0",
+   "date": "2026-11-01",
+   "category": "technique",
+   "claim": "In the same ChatGPT attack, a CSP that blocked inline scripts was bypassed because it allowlisted YouTube, whose oEmbed JSONP callback echoed attacker JavaScript. OpenAI fixed the issue by October 26, 2026.",
+   "why_it_matters": "A script-src allowlist is only as strong as the weakest endpoint on each allowed domain. JSONP-style endpoints turn a trusted domain into a script source.",
+   "try_this": "List every domain in your script-src policy and check whether any of them serve JSONP or callback-parameter endpoints; drop or narrow those entries.",
+   "evidence": [
+    {
+     "url": "https://www.parameter.ai/labs/we-found-a-gap-at-openai",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Parameter Labs writeup describes the YouTube oEmbed JSONP bypass and the October 26, 2026 fix confirmation",
+    "checked_at": "2026-11-01T06:00-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://www.parameter.ai/labs/we-found-a-gap-at-openai"
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://simonwillison.net/2026/Oct/31/how-we-took-over-chatgpt-accounts/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-15",
+   "source_id": "simonw",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-01-17c76013",
+   "date": "2026-11-01",
+   "category": "tool",
+   "claim": "Claude Code has dynamic workflows: Claude writes a JavaScript script that runs many subagents in the background. Karpathy says he used one to run Sonnet over Hacker News comments.",
+   "why_it_matters": "For bulk jobs like filtering thousands of comments or auditing many files, a workflow keeps the orchestration in a rerunnable script, not in your chat context.",
+   "try_this": "In Claude Code, run /deep-research with a narrow question to see a workflow run, then open /workflows to inspect its phases and per-agent token use.",
+   "evidence": [
+    {
+     "url": "https://code.claude.com/docs/en/workflows",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Claude Code workflows docs page describes the feature, /deep-research and /workflows; not smoke-tested",
+    "checked_at": "2026-11-01T06:00-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://karpathy.bearblog.dev/hacker-tube/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-15",
+   "source_id": "karpathy",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-01-55ba5639",
+   "date": "2026-11-01",
+   "category": "technique",
+   "claim": "Karpathy says he built hackertube.org in about two hours by talking to Claude Code (Opus 5.5, medium effort). It narrowed HN comments to about 40K recommending 6,454 YouTube videos across 150 topics.",
+   "why_it_matters": "This is a concrete account of a builder handing an agent the whole loop, from data collection to deploying and hardening a VPS. His only manual steps were an API key, a server and a domain.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://karpathy.bearblog.dev/hacker-tube/",
+     "kind": "primary"
+    },
+    {
+     "url": "https://hackertube.org",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "face-value-T1",
+    "method": "primary link exists; hackertube.org loads as a video site; video and topic counts not shown on site",
+    "checked_at": "2026-11-01T06:00-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "In total, we get 6,454 YouTube videos that have been recommended by a few people on HN from 2007-2026 across 150 topics.",
+   "excerpt_url": "https://karpathy.bearblog.dev/hacker-tube/",
+   "item_url": "https://karpathy.bearblog.dev/hacker-tube/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-15",
+   "source_id": "karpathy",
+   "status_at_publication": "face-value-T1"
+  },
+  {
+   "id": "2026-11-01-c28fa610",
+   "date": "2026-11-01",
+   "category": "tool",
+   "claim": "datasette-llm 0.1a9 now falls back to LLM's own default model when no other default is set, so Datasette Agent works without passing a default_model setting.",
+   "why_it_matters": "This removes a setup step for people trying Datasette Agent on their own SQLite data with a model they already configured in LLM.",
+   "try_this": "If you use the llm CLI, run llm models default to see which model datasette-llm 0.1a9 will now pick up.",
+   "evidence": [
+    {
+     "url": "https://github.com/datasette/datasette-llm/releases",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "GitHub release 0.1a9 dated Oct 31 with matching note on default model; no sandbox smoke test",
+    "checked_at": "2026-11-01T06:00-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://simonwillison.net/2026/Oct/31/datasette-llm/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-15",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-01-2b0a11b4",
+   "date": "2026-11-01",
+   "category": "technique",
+   "claim": "Arca's lead AI engineer Aman Singh says their agents write code to query client data. That code is translated into a strict format, the code is discarded, and guardrails check the format before it reaches the backend.",
+   "why_it_matters": "This is one way to let agents compute freely over sensitive data while the backend only ever sees a checked query shape.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://latent.space/p/arca/",
+     "kind": "independent"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "Guest claim in podcast writeup; no Arca primary source reachable to confirm the design",
+    "checked_at": "2026-11-01T06:00-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://latent.space/p/arca/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-15",
+   "source_id": "latentspace",
+   "status_at_publication": "unverified"
   }
  ],
  "audits": [
@@ -3520,6 +3786,13 @@
    "date": "2026-10-29",
    "item_id": "2026-10-29-f2f4635f",
    "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-01",
+   "item_id": "2026-11-01-c4acc5f0",
+   "source_id": "simonw",
    "tier": "T1-seed",
    "verdict": "pass"
   }

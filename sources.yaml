@@ -34,8 +34,8 @@ sources:
     lb10_basis: undecayed-12mo (low volume)
     resolved_tips: 0
     tier: T1-seed
-    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-29'
+    research_criterion: face value + primary link exists; random full audit of at least 10% of items
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-23': 1
@@ -75,8 +75,8 @@ sources:
     lb10_basis: undecayed-12mo (low volume)
     resolved_tips: 0
     tier: T1-seed
-    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-29'
+    research_criterion: face value + primary link exists; random full audit of at least 10% of items
+    updated: '2026-11-01'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -109,15 +109,15 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.0
+    alpha: 8.0
     beta: 2.0
-    trust_mean: 0.5
-    lb10: 0.196
-    lb10_basis: undecayed-12mo (low volume)
-    resolved_tips: 0
+    trust_mean: 0.8
+    lb10: 0.632
+    lb10_basis: decayed
+    resolved_tips: 7
     tier: T1-seed
-    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-29'
+    research_criterion: face value + primary link exists; random full audit of at least 10% of items
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-16': 10
       '2026-10-19': 2
@@ -162,15 +162,15 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.0
+    alpha: 2.5
     beta: 2.0
-    trust_mean: 0.5
-    lb10: 0.196
+    trust_mean: 0.556
+    lb10: 0.262
     lb10_basis: undecayed-12mo (low volume)
-    resolved_tips: 0
+    resolved_tips: 1
     tier: T1-seed
-    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-29'
+    research_criterion: face value + primary link exists; random full audit of at least 10% of items
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-16': 7
       '2026-10-17': 2
@@ -215,15 +215,15 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.0
+    alpha: 3.5
     beta: 2.0
-    trust_mean: 0.5
-    lb10: 0.196
+    trust_mean: 0.636
+    lb10: 0.372
     lb10_basis: undecayed-12mo (low volume)
-    resolved_tips: 0
+    resolved_tips: 3
     tier: T1-seed
-    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-29'
+    research_criterion: face value + primary link exists; random full audit of at least 10% of items
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -237,7 +237,8 @@ sources:
       '2026-10-27': 2
       '2026-10-28': 5
       '2026-10-29': 1
-    items_seen: 19
+      '2026-11-01': 1
+    items_seen: 20
     scorable_claims: 8
 - id: karpathy
   name: Andrej Karpathy
@@ -273,11 +274,12 @@ sources:
     lb10_basis: undecayed-12mo (low volume)
     resolved_tips: 0
     tier: T1-seed
-    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-29'
-    items_seen_by_date: {}
-    items_seen: 0
-    scorable_claims: 0
+    research_criterion: face value + primary link exists; random full audit of at least 10% of items
+    updated: '2026-11-01'
+    items_seen_by_date:
+      '2026-11-01': 1
+    items_seen: 1
+    scorable_claims: 2
 - id: simonw
   name: Simon Willison
   home_url: https://simonwillison.net
@@ -300,15 +302,15 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.0
-    beta: 2.0
-    trust_mean: 0.5
-    lb10: 0.196
+    alpha: 3.5
+    beta: 2.5
+    trust_mean: 0.583
+    lb10: 0.327
     lb10_basis: undecayed-12mo (low volume)
-    resolved_tips: 0
+    resolved_tips: 2
     tier: T1-seed
-    research_criterion: 'main claim checked against one primary or independent source (provisional: first 14 days); plus the random full audit'
-    updated: '2026-10-29'
+    research_criterion: face value + primary link exists; random full audit of at least 10% of items
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -323,8 +325,9 @@ sources:
       '2026-10-27': 3
       '2026-10-28': 2
       '2026-10-29': 3
-    items_seen: 25
-    scorable_claims: 5
+      '2026-11-01': 2
+    items_seen: 27
+    scorable_claims: 8
 - id: ray
   name: Ray Fu (RayCFU)
   home_url: https://www.raycfu.com
@@ -368,7 +371,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 2
@@ -398,16 +401,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.0
-    beta: 2.0
-    trust_mean: 0.5
-    lb10: 0.196
-    lb10_basis: undecayed-12mo (low volume)
-    resolved_tips: 0
+    alpha: 8.0
+    beta: 2.5
+    trust_mean: 0.762
+    lb10: 0.588
+    lb10_basis: decayed
+    resolved_tips: 8
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -418,8 +421,9 @@ sources:
       '2026-10-27': 1
       '2026-10-28': 4
       '2026-10-29': 2
-    items_seen: 19
-    scorable_claims: 16
+      '2026-11-01': 1
+    items_seen: 20
+    scorable_claims: 17
 - id: mollick
   name: Ethan Mollick (One Useful Thing)
   home_url: https://www.oneusefulthing.org
@@ -451,7 +455,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -485,7 +489,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-22': 5
@@ -516,16 +520,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.0
+    alpha: 2.5
     beta: 2.0
-    trust_mean: 0.5
-    lb10: 0.196
+    trust_mean: 0.556
+    lb10: 0.262
     lb10_basis: undecayed-12mo (low volume)
-    resolved_tips: 0
+    resolved_tips: 1
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-16': 1
     items_seen: 1
@@ -560,7 +564,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-20': 3
@@ -605,7 +609,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 1
@@ -646,7 +650,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -680,7 +684,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-18': 1
       '2026-10-25': 1
@@ -717,7 +721,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-10-29'
+    updated: '2026-11-01'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-27': 1
@@ -738,8 +742,8 @@ sources:
   - AI-related entries only (AI Mode/AI Overviews ads, Gemini in Google Ads, agentic commerce)
   register:
     route: rss/atom
-    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; blog.google/robots.txt allows * and our UA (re-checked Nov 1, 2026; first checked
-      by the AI Search & Ads Brief, Oct 17, 2026)
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; blog.google/robots.txt allows * and our
+      UA (re-checked Nov 1, 2026; first checked by the AI Search & Ads Brief, Oct 17, 2026)
     terms: 'https://policies.google.com/terms: public RSS feed Google publishes for feed readers; we summarize in our words and link back (no
       login, no bulk copying).'
     republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
@@ -776,8 +780,8 @@ sources:
   - AI-related entries only (AI Mode, AI Overviews, Gemini in Search)
   register:
     route: rss/atom
-    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; blog.google/robots.txt allows * and our UA (re-checked Nov 1, 2026; first checked
-      by the AI Search & Ads Brief, Oct 17, 2026)
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; blog.google/robots.txt allows * and our
+      UA (re-checked Nov 1, 2026; first checked by the AI Search & Ads Brief, Oct 17, 2026)
     terms: 'https://policies.google.com/terms: public RSS feed published for syndication; we summarize and link back.'
     republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
     limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
