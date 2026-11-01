@@ -723,6 +723,121 @@ sources:
       '2026-10-27': 1
     items_seen: 2
     scorable_claims: 2
+- id: google-ads-commerce
+  name: Google Ads & Commerce blog
+  home_url: https://blog.google/products/ads-commerce/
+  kind: vendor
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://blog.google/products/ads-commerce/rss/
+  research_criteria:
+  - Primary for whether its own ads/commerce product or policy change exists, and for its dates and markets
+  - Ad-performance, reach and 'AI-powered' results claims are 'vendor claim'
+  - AI-related entries only (AI Mode/AI Overviews ads, Gemini in Google Ads, agentic commerce)
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; blog.google/robots.txt allows * and our UA (re-checked Nov 1, 2026; first checked
+      by the AI Search & Ads Brief, Oct 17, 2026)
+    terms: 'https://policies.google.com/terms: public RSS feed Google publishes for feed readers; we summarize in our words and link back (no
+      login, no bulk copying).'
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-11-01'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: google-search
+  name: Google Search blog (The Keyword)
+  home_url: https://blog.google/products/search/
+  kind: vendor
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://blog.google/products/search/rss/
+  research_criteria:
+  - Primary for whether its own Search / AI Mode feature exists and where it is rolling out
+  - Usage, quality and 'AI-powered' results claims are 'vendor claim'
+  - AI-related entries only (AI Mode, AI Overviews, Gemini in Search)
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; blog.google/robots.txt allows * and our UA (re-checked Nov 1, 2026; first checked
+      by the AI Search & Ads Brief, Oct 17, 2026)
+    terms: 'https://policies.google.com/terms: public RSS feed published for syndication; we summarize and link back.'
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-11-01'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
+- id: google-search-central
+  name: Google Search Central (blog + documentation updates)
+  home_url: https://developers.google.com/search
+  kind: vendor
+  seed: false
+  enabled: true
+  feeds:
+  - type: rss
+    url: https://developers.google.com/search/blog/feed.xml
+  - type: rss
+    url: https://developers.google.com/search/updates/search_docs_updates.rss
+  research_criteria:
+  - Primary for Google's own crawling, indexing and AI-feature guidance; a doc change is checked against the live doc page
+  - AI-related entries only (AI features in Search, Google-Extended / AI training controls, AI crawlers)
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time; developers.google.com/robots.txt allows
+      * and our UA (re-checked Nov 1, 2026; first checked by the AI Search & Ads Brief, Oct 17, 2026)
+    terms: 'https://developers.google.com/terms/site-terms: Google Developers content is CC BY 4.0; public feeds Google invites adding to a feed
+      reader. We attribute and link.'
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: Doc-updates feed entries link to a monthly anchor (search/updates#<month>-<year>), and fetch dedupes by URL, so only the first doc update
+    per month is ingested; the rest need a hand check of the updates page.
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-11-01'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
 - id: x-discovery
   name: X (private discovery signal)
   enabled: false
