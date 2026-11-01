@@ -68,3 +68,6 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-10-29: audit of 2026-10-29-f2f4635f (Anthropic): pass (Anthropic post (Oct 28, 2026) confirms 20 partners, free Claude credits, Sloan, NSF, EMBL, STScI, gnomAD (Broad), Tau Ceti Lean library.)
 - 2026-10-29: removed 1 item(s) from 2026-10-29 (review: 'weaker safety protections' overstates the changelog's 'different safety protections')
 - 2026-10-29: removed 1 item(s) from 2026-10-29 (review: 'some in a single shot' overstates one named single-shot game not tied to Opus 5.5)
+- 2026-11-01: added Google Ads & Commerce blog (google-ads-commerce, RSS) at T3, 30-day probation; maintainer-named for the AI Search & Ads Brief. Not a seed.
+- 2026-11-01: added Google Search blog (The Keyword) (google-search, RSS) at T3, 30-day probation; maintainer-named for the AI Search & Ads Brief. Not a seed.
+- 2026-11-01: added Google Search Central (blog + documentation updates) (google-search-central, 2 RSS feeds) at T3, 30-day probation; maintainer-named for the AI Search & Ads Brief. Not a seed. Doc-updates entries share a monthly anchor URL, so only the first update per month is ingested.
