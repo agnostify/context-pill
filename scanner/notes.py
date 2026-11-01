@@ -111,9 +111,13 @@ def split(res, field, allowed, keep=()):
             us = usable_urls(cited)
             clean[k] = {field: v} | ({"source_urls": us} if us else {}) \
                 | ({FLAG: r[FLAG]} if isinstance(r.get(FLAG), bool) else {}) | {x: r[x] for x in keep if x in r}
-            # the flag vouches for the pages the resolver cited: if any of them is not in the note, it no longer holds
+            # the flag vouches for the pages the resolver cited: if any of them is not in the note, it no longer holds.
+            # every entry of a present source_urls list counts (null, "" or a non-string is an invalid citation); only the
+            # older single source_url may be absent or null
             lost = ("source_urls" in r and not isinstance(r["source_urls"], list)) \
-                or any(u is not None and not usable_url(u) for u in cited) or len(usable_urls_all(cited)) > MAX_URLS
+                or any(not usable_url(u) for u in given) \
+                or (r.get("source_url") is not None and not usable_url(r["source_url"])) \
+                or len(usable_urls_all(cited)) > MAX_URLS
             if clean[k].get(FLAG) is True and (lost or not us):
                 clean[k][FLAG] = False
                 why.setdefault(k, {})["flag_cleared"] = f"{FLAG} was true but " + (

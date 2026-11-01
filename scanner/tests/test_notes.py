@@ -138,7 +138,8 @@ def test_dropped_citations_clear_flag():
             out, note, why = resolved(one, {"outcome": o, N.FLAG: True} | r, [{"url": POST}])
             assert (out, note) == ("partial", f"Outcome: partial. Source: {POST}") and N.FLAG in why, (r, out, note, why)
     # an invalid URL next to a valid one, or four pages cut to three -> partial
-    for urls in ([POST, XURL], [POST, "http://["], [POST, ARXIV, METR, PRICING]):
+    for urls in ([POST, XURL], [POST, "http://["], [POST, ARXIV, METR, PRICING], [POST, None], [POST, ""], [POST, 42],
+                 [POST, ["x"]], [POST, {"url": ARXIV}]):
         out, note, why = resolved(QUANTUM, {"outcome": "good", "source_urls": urls, N.FLAG: True})
         assert out == "partial" and note.startswith("Outcome: partial. Source"), (urls, out, note)
     clean, why = N.split({"a": {"outcome": "good", "source_urls": [POST, ARXIV, METR, PRICING], N.FLAG: True}}, "outcome", N.OUTCOMES)
@@ -146,6 +147,16 @@ def test_dropped_citations_clear_flag():
     assert why["a"][N.FLAG] is True and "past the first 3" in why["a"]["flag_cleared"], why
     clean, why = N.split({"a": {"outcome": "good", N.FLAG: True}}, "outcome", N.OUTCOMES)
     assert clean == {"a": {"outcome": "good", N.FLAG: False}} and "no validated citation" in why["a"]["flag_cleared"], (clean, why)
+    # a null/empty/non-string entry in source_urls is an invalid citation (cleared, logged); a null or absent source_url is not
+    for bad in (None, "", 7):
+        clean, why = N.split({"a": {"outcome": "good", "source_urls": [POST, bad], N.FLAG: True}}, "outcome", N.OUTCOMES)
+        assert clean == {"a": {"outcome": "good", "source_urls": [POST], N.FLAG: False}}, (bad, clean)
+        assert why["a"]["source_urls"] == [POST, bad] and "invalid" in why["a"]["flag_cleared"], (bad, why)
+    for legacy in ({"source_url": None}, {}):
+        out, note, why = resolved(QUANTUM, {"outcome": "good", "source_urls": [POST, ARXIV], N.FLAG: True} | legacy)
+        assert (out, why) == ("good", None), (legacy, out, note, why)
+    out, note, why = resolved(QUANTUM, {"outcome": "good", "source_urls": [POST, ARXIV], "source_url": "", N.FLAG: True})
+    assert out == "partial", (out, note, why)
     # a duplicate of a kept URL, or the same URL in source_url, is not a dropped citation
     out, note, why = resolved(QUANTUM, {"outcome": "good", "source_urls": [POST, ARXIV, POST], "source_url": ARXIV, N.FLAG: True})
     assert (out, why) == ("good", None), (out, note, why)
