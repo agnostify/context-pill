@@ -36,13 +36,18 @@ def pick_url(source_url, evidence=()):
         return None
 
 
-def usable_urls(urls):
-    """The usable URLs among urls (a list, or one URL), deduped in order, at most MAX_URLS. Never raises."""
+def usable_urls_all(urls):
+    """The usable URLs among urls (a list, or one URL), deduped in order, not truncated. Never raises."""
     out = []
     for u in (urls if isinstance(urls, (list, tuple)) else [urls]):
         if usable_url(u) and u not in out:
             out.append(u)
-    return out[:MAX_URLS]
+    return out
+
+
+def usable_urls(urls):
+    """The usable URLs among urls (a list, or one URL), deduped in order, at most MAX_URLS. Never raises."""
+    return usable_urls_all(urls)[:MAX_URLS]
 
 
 def pick_urls(urls, evidence=()):
@@ -89,7 +94,8 @@ def split(res, field, allowed, keep=()):
     """(clean, reasoning) from a model result {id: {field, source_urls, source_url, all_facts_on_cited_pages, note, ...}}.
     clean: entries whose field is in allowed, holding only field, source_urls (the usable ones from source_urls and the older
     single source_url, deduped, at most MAX_URLS), all_facts_on_cited_pages if it is a boolean, and the keys in keep;
-    an invalid entry is left out (not judged). reasoning: what was stripped (the model's text, invalid values), per id."""
+    the flag is set False when a cited URL was invalid or cut by MAX_URLS, or no usable URL remains (so downgrade() makes
+    good/docs-verified partial); an invalid entry is left out (not judged). reasoning: what was stripped (the model's text, invalid values), per id."""
     clean, why = {}, {}
     for k, r in (res.items() if isinstance(res, dict) else ()):
         if not isinstance(k, str):
@@ -101,17 +107,25 @@ def split(res, field, allowed, keep=()):
         ok = isinstance(v, str) and v in allowed
         if ok:
             given = r.get("source_urls") if isinstance(r.get("source_urls"), list) else []
-            us = usable_urls(given + [r.get("source_url")])
+            cited = given + [r.get("source_url")]
+            us = usable_urls(cited)
             clean[k] = {field: v} | ({"source_urls": us} if us else {}) \
                 | ({FLAG: r[FLAG]} if isinstance(r.get(FLAG), bool) else {}) | {x: r[x] for x in keep if x in r}
+            # the flag vouches for the pages the resolver cited: if any of them is not in the note, it no longer holds
+            lost = ("source_urls" in r and not isinstance(r["source_urls"], list)) \
+                or any(u is not None and not usable_url(u) for u in cited) or len(usable_urls_all(cited)) > MAX_URLS
+            if clean[k].get(FLAG) is True and (lost or not us):
+                clean[k][FLAG] = False
+                why.setdefault(k, {})["flag_cleared"] = f"{FLAG} was true but " + (
+                    "no validated citation remains" if not us else "a cited URL was invalid or past the first " + str(MAX_URLS))
         def kept(x):                                # a URL field is stripped unless every value made it into source_urls
             if x not in ("source_url", "source_urls"):
                 return x in clean[k] or x in keep
             vals = r[x] if x == "source_urls" and isinstance(r[x], list) else [r[x]]
             return all(u in clean[k].get("source_urls", ()) for u in vals)
-        rest = {x: y for x, y in r.items() if not ok or not kept(x)}
+        rest = {x: y for x, y in r.items() if not ok or not kept(x) or (x == FLAG and clean[k].get(FLAG) != y)}
         if rest:
-            why[k] = rest
+            why[k] = why.get(k, {}) | rest
     return clean, why
 
 

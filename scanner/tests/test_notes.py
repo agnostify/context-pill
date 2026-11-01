@@ -127,7 +127,28 @@ def test_held_nov1_cases():
     # partial/bad/inconclusive are never changed; good with the flag on a one-fact claim stays good
     for o in ("partial", "bad", "inconclusive"):
         assert resolved(HAIKU, {"outcome": o, "source_urls": [PRICING]})[0] == o
-    assert resolved("Claude Code 2.1 is out.", {"outcome": "good", N.FLAG: True}, [{"url": POST}])[:2] == ("good", f"Outcome: good. Source: {POST}")
+    assert resolved("Claude Code 2.1 is out.", {"outcome": "good", "source_urls": [POST], N.FLAG: True})[:2] == ("good", f"Outcome: good. Source: {POST}")
+
+
+def test_dropped_citations_clear_flag():
+    one = "Claude Code 2.1 is out."
+    # no validated citation: the evidence fallback URL is shown but the flag no longer holds -> partial
+    for r in ({}, {"source_url": "http://["}, {"source_urls": [XURL]}, {"source_urls": "junk"}):
+        for o in ("good", "docs-verified"):
+            out, note, why = resolved(one, {"outcome": o, N.FLAG: True} | r, [{"url": POST}])
+            assert (out, note) == ("partial", f"Outcome: partial. Source: {POST}") and N.FLAG in why, (r, out, note, why)
+    # an invalid URL next to a valid one, or four pages cut to three -> partial
+    for urls in ([POST, XURL], [POST, "http://["], [POST, ARXIV, METR, PRICING]):
+        out, note, why = resolved(QUANTUM, {"outcome": "good", "source_urls": urls, N.FLAG: True})
+        assert out == "partial" and note.startswith("Outcome: partial. Source"), (urls, out, note)
+    clean, why = N.split({"a": {"outcome": "good", "source_urls": [POST, ARXIV, METR, PRICING], N.FLAG: True}}, "outcome", N.OUTCOMES)
+    assert clean["a"][N.FLAG] is False and clean["a"]["source_urls"] == [POST, ARXIV, METR], clean
+    assert why["a"][N.FLAG] is True and "past the first 3" in why["a"]["flag_cleared"], why
+    clean, why = N.split({"a": {"outcome": "good", N.FLAG: True}}, "outcome", N.OUTCOMES)
+    assert clean == {"a": {"outcome": "good", N.FLAG: False}} and "no validated citation" in why["a"]["flag_cleared"], (clean, why)
+    # a duplicate of a kept URL, or the same URL in source_url, is not a dropped citation
+    out, note, why = resolved(QUANTUM, {"outcome": "good", "source_urls": [POST, ARXIV, POST], "source_url": ARXIV, N.FLAG: True})
+    assert (out, why) == ("good", None), (out, note, why)
 
 
 def test_gate_blocked_source_url_falls_back():
@@ -206,7 +227,8 @@ def test_no_model_text_in_public_outputs():
     bad = dict(due, id="2026-10-19-0000bbbb", claim="other old claim")
     multi = dict(due, id="2026-10-19-0000cccc", claim=HAIKU)            # scored good on one page, no flag: downgraded
     both = dict(due, id="2026-10-19-0000dddd", claim=QUANTUM)           # two pages, every fact on them: stays good
-    (tmp / "ledger" / "claims.json").write_text(json.dumps({"started": "2026-10-16", "claims": [due, bad, multi, both], "audits": []}))
+    lost = dict(due, id="2026-10-19-0000eeee", claim=QUANTUM)           # flag set but one cited URL dropped: partial
+    (tmp / "ledger" / "claims.json").write_text(json.dumps({"started": "2026-10-16", "claims": [due, bad, multi, both, lost], "audits": []}))
     claim = {"source_id": "fx", "item_url": "https://example.com/b", "claim": "new claim", "category": "release", "why_it_matters": "x",
              "try_this": "do x", "evidence": ev, "verification": {"status": "verified", "method": "m"}}
     (raw / "claims.raw.json").write_text(json.dumps([claim])); (raw / "items.json").write_text("[]")
@@ -219,7 +241,8 @@ def test_no_model_text_in_public_outputs():
         asked = {x["id"] for x in xs}                       # a rerun only asks about claims still pending
         return {k: v for k, v in (out | {bad["id"]: {"outcome": f"{M}-not-an-outcome", "note": f"{M} n"},
                       multi["id"]: {"outcome": "good", "source_urls": [PRICING], "reasoning": f"{M} r"},
-                      both["id"]: {"outcome": "good", "source_urls": [POST, ARXIV, XURL], N.FLAG: True}}).items() if k in asked}
+                      both["id"]: {"outcome": "good", "source_urls": [POST, ARXIV], N.FLAG: True},
+                      lost["id"]: {"outcome": "good", "source_urls": [POST, ARXIV, XURL], N.FLAG: True}}).items() if k in asked}
     runmod.WORK = work; runmod.REPO = tmp
     for verdict in ("pass", "fail"):                                       # a verdict change on rerun publishes a new note
         if verdict == "fail":
@@ -239,7 +262,9 @@ def test_no_model_text_in_public_outputs():
         assert byid[bad["id"]]["state"] == "pending" and "outcome" not in byid[bad["id"]], byid[bad["id"]]    # invalid: not judged
         assert (byid[multi["id"]]["outcome"], byid[multi["id"]]["resolution_note"]) == ("partial", f"Outcome: partial. Source: {PRICING}")
         assert (byid[both["id"]]["outcome"], byid[both["id"]]["resolution_note"]) == ("good", f"Outcome: good. Sources: {POST}, {ARXIV}")
+        assert (byid[lost["id"]]["outcome"], byid[lost["id"]]["resolution_note"]) == ("partial", f"Outcome: partial. Sources: {POST}, {ARXIV}")
         rr = json.loads((raw / "resolve.reasoning.json").read_text())
+        assert rr[lost["id"]]["downgraded"]["to"] == "partial" and "flag_cleared" in rr[lost["id"]], rr
         assert rr[multi["id"]]["downgraded"]["from"] == "good" and rr[multi["id"]]["downgraded"]["to"] == "partial", rr
         assert rr[multi["id"]]["reasoning"] == f"{M} r" and "downgraded" not in rr.get(both["id"], {}), rr
         new = [c for c in led["claims"] if c["date"] == D]

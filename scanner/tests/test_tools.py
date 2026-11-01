@@ -185,6 +185,56 @@ assert len(qlog) == 1 and qlog[0]["ids"] == sorted([qc[0]["id"], qc[1]["id"]]) a
 snap = [(tmp / f).read_text() for f in ("ledger/claims.json", "sources.yaml", "CHANGELOG-sources.md")] + [(work / "raw" / D2 / "quarantine.json").read_text()]
 r = qrun(*args); assert r.returncode == 0, r.stdout + r.stderr                       # idempotent
 assert snap == [(tmp / f).read_text() for f in ("ledger/claims.json", "sources.yaml", "CHANGELOG-sources.md")] + [(work / "raw" / D2 / "quarantine.json").read_text()]
+# quarantine undoes what the blocked resolutions did to the source that day: the run.py tier, disable and recovery lines stay
+# (the changelog is append-only) and a dated "tier change reverted" line follows; a drop-rule disable from that day is lifted
+def qstate(outcomes, src=(), lines=()):
+    """Ledger of resolved claims [(resolved_on, outcome)], the source scored on them as run.py would, and run.py's changelog lines."""
+    cs = [rc(n, id=f"2026-10-1{n % 10}-{n:08d}", resolved_on=d, outcome=o) for n, (d, o) in enumerate(outcomes)]
+    l = json.loads((tmp / "ledger" / "claims.json").read_text()); l["claims"] = cs
+    (tmp / "ledger" / "claims.json").write_text(json.dumps(l))
+    sq = {k: v for k, v in regq["sources"][0].items() if not k.startswith("audit_demoted")} | {"seed": False, "enabled": True} | dict(src)
+    sq["trust"] = trust.score(sq, ev(cs), dt.date(2026, 11, 1)); sq["trust"].pop("audit_demoted")
+    (tmp / "sources.yaml").write_text(yaml.safe_dump({"sources": [sq]}))
+    (tmp / "CHANGELOG-sources.md").write_text("# Source changes\n" + "".join(f"- {D2}: {m}\n" for m in lines))
+    return cs, sq["trust"]
+def tline(prev, t):                                                                 # run.py's tier-change line
+    return f"Fixture source tier {prev} -> {t['tier']} (mean {t['trust_mean']}, LB10 {t['lb10']}, {t['resolved_tips']} resolved)"
+reverted = lambda ids: f"- {D2}: Fixture source tier change reverted (resolutions quarantined: {', '.join(sorted(ids))})\n"
+# 1. today's good resolution lifted the source T3 -> T2; quarantining it puts it back to T3
+cs, t = qstate([("2026-10-20", "good")] * 14 + [(D2, "good")]); assert t["tier"] == "T2", t
+lines = [tline("T3", t)]; qstate([("2026-10-20", "good")] * 14 + [(D2, "good")], lines=lines)
+r = qrun(D2, cs[-1]["id"], "--reason", "review"); assert r.returncode == 0, r.stdout + r.stderr
+s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
+assert s["trust"]["tier"] == "T3" and s["enabled"], s
+assert (tmp / "CHANGELOG-sources.md").read_text() == f"# Source changes\n- {D2}: {lines[0]}\n" + reverted([cs[-1]["id"]])
+# 2. today's bad resolution tripped the drop rule and disabled the source; quarantining it re-enables it at T3
+out = [("2026-10-20", "bad")] * 14 + [(D2, "bad")]
+lines = [tline("T3", {"tier": "drop", **{k: v for k, v in qstate(out)[1].items() if k != "tier"}}),
+         "Fixture source disabled: trust mean below 0.50 after 15+ resolved tips"]
+cs, t = qstate(out, {"enabled": False, "disabled_reason": f"dropped by trust rule on {D2}"}, lines); assert t["tier"] == "drop", t
+r = qrun(D2, cs[-1]["id"], "--reason", "review"); assert r.returncode == 0, r.stdout + r.stderr
+s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
+assert s["trust"]["tier"] == "T3" and s["enabled"] is True and "disabled_reason" not in s, s
+assert (tmp / "CHANGELOG-sources.md").read_text() == "# Source changes\n" + "".join(f"- {D2}: {m}\n" for m in lines) + reverted([cs[-1]["id"]])
+# a disable from another day is not lifted, and no line is written when nothing changes back
+cs, t = qstate([("2026-10-20", "bad")] * 14 + [(D2, "bad")], {"enabled": False, "disabled_reason": "dropped by trust rule on 2026-10-25"})
+r = qrun(D2, cs[-1]["id"], "--reason", "review"); assert r.returncode == 0, r.stdout + r.stderr
+s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
+assert s["enabled"] is False and s["trust"]["tier"] == "T3", s
+assert reverted([cs[-1]["id"]]) in (tmp / "CHANGELOG-sources.md").read_text()          # tier drop -> T3 changed back
+cs, t = qstate([("2026-10-20", "good")] * 3 + [(D2, "good")])
+r = qrun(D2, cs[-1]["id"], "--reason", "review"); assert r.returncode == 0, r.stdout + r.stderr
+assert (tmp / "CHANGELOG-sources.md").read_text() == "# Source changes\n"                  # T3 -> T3: nothing to revert
+# 3. today's resolutions earned back an audit demotion; without them the source is demoted again
+out = [("2026-10-20", "good")] * 10 + [(D2, "good")] * 10
+demoted = {"audit_demoted": True, "audit_demoted_on": "2026-10-17"}
+assert not trust.score(demoted, ev([rc(0, resolved_on=d, outcome=o) for d, o in out]), dt.date(2026, 11, 1))["audit_demoted"]
+cs, t = qstate(out, {"audit_demoted": False, "audit_demoted_on": "2026-10-17"},
+               ["Fixture source recovered from audit demotion (15+ resolved since, LB10 >= 0.80)"])
+r = qrun(D2, *[c["id"] for c in cs[10:]], "--reason", "review"); assert r.returncode == 0, r.stdout + r.stderr
+s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
+assert s["audit_demoted"] is True and s["trust"]["tier"] == "T2-provisional", s
+assert (tmp / "CHANGELOG-sources.md").read_text().endswith(reverted([c["id"] for c in cs[10:]])), (tmp / "CHANGELOG-sources.md").read_text()
 # gemini: CP_GEMINI_FROM can't move the start before Oct 23
 vid = [{"kind": "youtube", "url": "https://www.youtube.com/watch?v=x"}]
 with mock.patch.dict(os.environ, {"GEMINI_API_KEY": "fixture", "CP_GEMINI_APPROVED": "1", "CP_GEMINI_FROM": "2026-10-16"}), \
