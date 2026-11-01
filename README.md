@@ -144,6 +144,7 @@ python -m scanner.tests.test_tools
 python -m scanner.run --hours 36
 python -m scanner.breaking --dry-run   # Breaking AI News preview; writes only to the private work dir
 python -m scanner.gate      # pre-publication checks on the working tree
+python -m scanner.quarantine YYYY-MM-DD <claim-id> ... --reason "..."   # undo resolutions a review blocked (back to pending)
 python -m scanner.prepush   # maintainers only: needs the private patterns file (CP_PRIVATE_PATTERNS)
 ```
 

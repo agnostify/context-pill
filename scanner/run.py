@@ -80,7 +80,6 @@ def main():
     due = [c for c in ledger["claims"] if c["state"] == "pending" and c.get("scorable") and c["recheck_on"] <= date]
     res = extract.resolve([{"id": c["id"], "claim": c["claim"], "evidence": c["evidence"], "category": c["category"]} for c in due], WORK, date, log)
     res, why = notes.split(res, "outcome", notes.OUTCOMES)       # an invalid outcome is not judged; model text stays in WORK
-    notes.save_reasoning(raw / "resolve.reasoning.json", why)
     for c in due:
         r = res.get(c["id"])
         if not r: continue
@@ -92,8 +91,14 @@ def main():
             continue
         if c["category"] in ("tool", "automation") and out == "good" and not c.get("smoke_test_log"):
             out = "docs-verified"                    # no recorded smoke test -> docs-verified credit at most
+        urls = notes.pick_urls(r.get("source_urls"), c["evidence"])
+        out, dwhy = notes.downgrade(out, c["claim"], urls, r.get(notes.FLAG))   # good only if every fact is on a cited page
+        if dwhy:
+            why.setdefault(c["id"], {})["downgraded"] = {"from": r["outcome"], "to": out, "why": dwhy}
+            log(f"resolve: {c['id']} {r['outcome']} -> {out}: {dwhy}")
         c["state"] = "resolved"; c["outcome"] = out; c["resolved_on"] = date
-        c["resolution_note"] = notes.resolution_note(out, notes.pick_url(r.get("source_url"), c["evidence"]))
+        c["resolution_note"] = notes.resolution_note(out, urls)
+    notes.save_reasoning(raw / "resolve.reasoning.json", why)
 
     # 2. trust update; apply drop, audit demotion/recovery, and per-tier tightening (>1 audit error in the last 20)
     def update_tightening():
@@ -219,7 +224,7 @@ def main():
     t1 = [d for d in drop if (start_tier(d) or "").startswith("T1") and d["verification"]["status"] in CHECKED]
     sample = [d for d in t1 if _h(d["id"]) % AUDIT_RATE == 0] or sorted(t1, key=lambda d: _h(d["id"]))[:1]
     ares_p = raw / "audit.result.json"
-    # audit.result.json keeps only the verdict, source_url and the fields below (cause/superseded_by are set by the maintainer)
+    # audit.result.json keeps only the verdict, source_urls and the fields below (cause/superseded_by are set by the maintainer)
     AKEEP = ("cause", "superseded_by", "source_id", "tier", "evidence_url")
     araw = json.loads(ares_p.read_text()) if (a.skip_extract and ares_p.exists()) else {}
     ares, why = notes.split(araw, "verdict", notes.VERDICTS, AKEEP)
@@ -267,7 +272,7 @@ def main():
             rec["removed"] = True
         ledger["audits"].append(rec)
         sname = srcs[r["source_id"]]["name"] if r.get("source_id") in srcs else r.get("source_id")
-        note = notes.audit_note(r["verdict"], notes.pick_url(r.get("source_url"), [{"url": r.get("evidence_url")}]))
+        note = notes.audit_note(r["verdict"], notes.pick_urls(r.get("source_urls"), [{"url": r.get("evidence_url")}]))
         changelog(f"audit of {k} ({sname}): {r['verdict']} ({note})"
                   + (f"; cause: {r['cause']}" if r.get("cause") else "") + (f"; replaced by {r['superseded_by']}" if r.get("superseded_by") else ""))
         if r["verdict"] == "fail":
@@ -278,7 +283,7 @@ def main():
     audited = sample + [d for d in drop if d["id"] in ares and d not in sample]
     for d in audited:
         r = ares.get(d["id"]) or {"verdict": "not run"}
-        note = notes.audit_note(r["verdict"], notes.pick_url(r.get("source_url"), d["evidence"]))
+        note = notes.audit_note(r["verdict"], notes.pick_urls(r.get("source_urls"), d["evidence"]))
         v = d["verification"]; v["t1_audit_sample"] = True; v["audit_verdict"] = r["verdict"]; v["audit_note"] = note
         ledger["audits"].append({"date": date, "item_id": d["id"], "source_id": d["source"]["id"],
                                  "tier": sample_tier.get(d["id"]) or start_tier(d), "verdict": r["verdict"]})

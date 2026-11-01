@@ -45,6 +45,8 @@ A source is only fetched if its entry in `sources.yaml` has a complete register:
 
 A resolved claim found wrong within 90 days (recorded with `python -m scanner.correct`) loses its original credit, and β gets +1 dated at the correction. A correction on a pending claim closes it, so it is never scored.
 
+**Resolution notes.** The published note on a resolved claim is built from fixed fields only: "Outcome: good. Source: <url>", or "Sources: <url>, <url>" when the outcome rests on more than one page (at most 3; each URL is checked like any published link). No model prose is published. A claim scores good or docs-verified only if the resolver says every part of it is stated on a page it cites; anything not re-checked, or inferred, makes it partial, and the scanner applies that downgrade itself (also for a claim with several facts and only one cited page) and logs it for review. If a review blocks a day's resolutions, `python -m scanner.quarantine <date> <claim-id> ... --reason "..."` puts those claims back to pending to be resolved again a week later, recomputes the affected sources' trust from the ledger, and drops that day's changelog lines for them. Outcomes are never edited by hand.
+
 **Beta-Binomial with recency decay**
 - Every source starts at a neutral Beta(2, 2).
 - Evidence above the prior decays by λ = 0.9923 per day (a 90-day half-life).

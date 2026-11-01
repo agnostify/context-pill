@@ -1,6 +1,6 @@
 """Tests for remove.py, correct.py, gate item rules and robots stop handling, on a self-contained fixture
 (never on the live drop, so an empty or held day can't break the daily run). Run: python -m scanner.tests.test_tools"""
-import json, shutil, subprocess, sys, tempfile, os
+import json, shutil, subprocess, sys, tempfile, os, datetime as dt
 from pathlib import Path
 from unittest import mock
 
@@ -148,6 +148,43 @@ led = rebuild()
 assert not led["claims"] and nid not in (tmp / "latest.md").read_text() and led["removed"][0]["id"] == nid, led
 aud = [x for x in led["audits"] if x["item_id"] == nid]
 assert len(aud) == 1 and aud[0]["removed"] and aud[0]["tier"] == "T1-seed" and aud[0]["verdict"] == "fail", led["audits"]
+# quarantine: claims resolved on D2 go back to pending (re-resolved a week later), trust is recomputed from the ledger, today's
+# changelog lines for them are dropped and the reason is recorded in WORK; other claims are left alone; a rerun changes nothing
+from scanner import trust  # noqa: E402
+def rc(n, **kw):
+    return {"id": f"2026-10-18-0000000{n}", "date": "2026-10-18", "category": "release", "claim": f"old {n}", "evidence": [], "scorable": True,
+            "source_id": "fx", "state": "resolved", "outcome": "good", "resolved_on": D2, "resolution_note": "Outcome: good.",
+            "recheck_on": "2026-11-01"} | kw
+qc = [rc(1), rc(2, outcome="docs-verified"), rc(3), rc(4, resolved_on="2026-10-31"), rc(5, state="pending", recheck_on="2026-11-03")]
+for k in ("outcome", "resolved_on", "resolution_note"): qc[4].pop(k)
+led = json.loads((tmp / "ledger" / "claims.json").read_text()); led["claims"] = qc
+(tmp / "ledger" / "claims.json").write_text(json.dumps(led))
+ev = lambda cs: [{"date": c["resolved_on"], "outcome": c["outcome"]} for c in cs if c["state"] == "resolved"]
+regq = yaml.safe_load((tmp / "sources.yaml").read_text())
+regq["sources"][0]["trust"] = trust.score(regq["sources"][0], ev(qc), dt.date(2026, 11, 1)) | {"items_seen_by_date": {D2: 1}, "items_seen": 1}
+(tmp / "sources.yaml").write_text(yaml.safe_dump(regq))
+keep_lines = f"- {D2}: Fixture source tier T1-seed -> T3\n- 2026-10-31: note on {qc[0]['id']}\n- {D2}: audit of {qc[2]['id']} (Fixture source): pass\n"
+(tmp / "CHANGELOG-sources.md").write_text("# Source changes\n" + keep_lines + f"- {D2}: line about {qc[0]['id']}\n- {D2}: and {qc[1]['id']}\n")
+qenv = dict(env, CP_WORK=str(work))
+qrun = lambda *a: subprocess.run([sys.executable, "-m", "scanner.quarantine", *a], cwd=tmp, env=qenv, capture_output=True, text=True)
+assert qrun(D2, qc[0]["id"]).returncode == 2                                         # --reason is required
+args = (D2, qc[0]["id"], qc[1]["id"], qc[3]["id"], qc[4]["id"], "--reason", "review: note credits a page that lacks part of the claim")
+r = qrun(*args); assert r.returncode == 0, r.stdout + r.stderr
+led = json.loads((tmp / "ledger" / "claims.json").read_text()); byid = {c["id"]: c for c in led["claims"]}
+for c in qc[:2]:
+    q = byid[c["id"]]
+    assert q["state"] == "pending" and q["recheck_on"] == "2026-11-08" and not {"outcome", "resolved_on", "resolution_note"} & set(q), q
+assert byid[qc[2]["id"]] == qc[2] and byid[qc[3]["id"]] == qc[3] and byid[qc[4]["id"]] == qc[4]      # not named / other date / pending
+s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
+want = trust.score(s, ev([qc[2], qc[3]]), dt.date(2026, 11, 1))
+assert s["trust"]["resolved_tips"] == 2 and s["trust"]["alpha"] == want["alpha"] and s["trust"]["tier"] == want["tier"], s["trust"]
+assert s["trust"]["items_seen_by_date"] == {D2: 1} and "research_criterion" in s["trust"], s["trust"]
+assert (tmp / "CHANGELOG-sources.md").read_text() == "# Source changes\n" + keep_lines
+qlog = json.loads((work / "raw" / D2 / "quarantine.json").read_text())
+assert len(qlog) == 1 and qlog[0]["ids"] == sorted([qc[0]["id"], qc[1]["id"]]) and qlog[0]["reason"].startswith("review:"), qlog
+snap = [(tmp / f).read_text() for f in ("ledger/claims.json", "sources.yaml", "CHANGELOG-sources.md")] + [(work / "raw" / D2 / "quarantine.json").read_text()]
+r = qrun(*args); assert r.returncode == 0, r.stdout + r.stderr                       # idempotent
+assert snap == [(tmp / f).read_text() for f in ("ledger/claims.json", "sources.yaml", "CHANGELOG-sources.md")] + [(work / "raw" / D2 / "quarantine.json").read_text()]
 # gemini: CP_GEMINI_FROM can't move the start before Oct 23
 vid = [{"kind": "youtube", "url": "https://www.youtube.com/watch?v=x"}]
 with mock.patch.dict(os.environ, {"GEMINI_API_KEY": "fixture", "CP_GEMINI_APPROVED": "1", "CP_GEMINI_FROM": "2026-10-16"}), \
