@@ -72,3 +72,5 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-01: added Google Search blog (The Keyword) (google-search, RSS) at T3, 30-day probation; maintainer-named for the AI Search & Ads Brief. Not a seed.
 - 2026-11-01: added Google Search Central (blog + documentation updates) (google-search-central, 2 RSS feeds) at T3, 30-day probation; maintainer-named for the AI Search & Ads Brief. Not a seed. Doc-updates entries share a monthly anchor URL, so only the first update per month is ingested.
 - 2026-11-01: audit of 2026-11-01-c4acc5f0 (Simon Willison): pass (Verdict: pass. Source: https://www.parameter.ai/labs/we-found-a-gap-at-openai)
+- 2026-11-02: audit of 2026-11-02-8e49be85 (Anthropic): pass (Verdict: pass. Source: https://www.anthropic.com/research/Claude-accelerates-protein-design)
+- 2026-11-02: removed 1 item(s) from 2026-11-02 (review: 1.3x-3x range of other users' reports not supported by the issue thread)

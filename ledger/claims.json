@@ -847,9 +847,10 @@
    "scorable": true,
    "prediction_deadline": null,
    "state": "pending",
-   "recheck_on": "2026-11-02",
+   "recheck_on": "2026-11-09",
    "source_id": "openai",
-   "status_at_publication": "unverified"
+   "status_at_publication": "unverified",
+   "inconclusive_count": 1
   },
   {
    "id": "2026-10-19-c8e4fb74",
@@ -878,10 +879,13 @@
    "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.164.0-alpha.4",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-02",
    "source_id": "openai",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-02",
+   "resolution_note": "Outcome: good. Source: https://github.com/openai/codex/releases/tag/rust-v0.164.0-alpha.4"
   },
   {
    "id": "2026-10-19-afcaccb4",
@@ -910,10 +914,13 @@
    "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0-nightly.20261019.ged96faedf",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-02",
    "source_id": "deepmind",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-02",
+   "resolution_note": "Outcome: good. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.66.0-nightly.20261019.ged96faedf"
   },
   {
    "id": "2026-10-20-894ba3de",
@@ -3645,6 +3652,406 @@
    "recheck_on": "2026-11-15",
    "source_id": "latentspace",
    "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-11-02-e0da738e",
+   "date": "2026-11-02",
+   "category": "release",
+   "claim": "Claude's consumer plans are now Free ($0), Pro ($20/month), Max ($100/month) and Ultra ($200/month). Ultra takes the old $200 Max 20x slot.",
+   "why_it_matters": "If you pay for Claude Code through a subscription, the tier names and prices you budget around have changed.",
+   "try_this": "Open claude.com/pricing and check which tier your current plan maps to before your next renewal.",
+   "evidence": [
+    {
+     "url": "https://claude.com/pricing",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Claude pricing page lists Max at $100 and Ultra at $200 per month",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=y5TEATUDDfc",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "theo",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-02-82e937d8",
+   "date": "2026-11-02",
+   "category": "release",
+   "claim": "On the Ultra plan, verified accounts have no 5-hour usage limit. The video says weekly limits stay in place.",
+   "why_it_matters": "Long agent runs on Ultra no longer stall at the 5-hour window, but only once your account counts as verified.",
+   "try_this": "On Ultra, check Settings > Usage. Theo says verified accounts no longer show a 'Current session' bar.",
+   "evidence": [
+    {
+     "url": "https://claude.com/pricing",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Pricing page footnote on Ultra says no 5-hour limit for verified accounts; weekly-limit detail not checked",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "No 5-hour limit for verified accounts.",
+   "excerpt_url": "https://claude.com/pricing",
+   "item_url": "https://www.youtube.com/watch?v=y5TEATUDDfc",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "theo",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-02-935599fa",
+   "date": "2026-11-02",
+   "category": "research",
+   "claim": "Anthropic reports that Mythos Preview and Opus 4.8 designed protein binders that worked against 14 of 15 targets in outside wet-lab tests. Hit rates were 22.6% to 35.1%, against a typical 10-15%.",
+   "why_it_matters": "This is a concrete public test of an agent running a long, multi-model science pipeline on its own, and the prompts and data are released.",
+   "try_this": "Read the released 30,000-token protein design prompt to see how Anthropic set up a 48-hour autonomous agent session.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Post exists and states these figures; wet-lab results are Anthropic's report, not independently checked",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Claude (Mythos Preview and Opus 4.8) designed protein binders against 15 targets, and succeeded against 14 of them.",
+   "excerpt_url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+   "item_url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-02-a09b937a",
+   "date": "2026-11-02",
+   "category": "technique",
+   "claim": "Anthropic says Claude Opus 5 in Claude Science took raw proprietary NMR and LC-MS instrument files and a short prompt, with no vendor software. It returned results in 23 and 19 minutes, with purity 96.4% versus the lab's 96.33%.",
+   "why_it_matters": "It suggests a generally available model can decode undocumented binary formats and do routine lab analysis, with self-checks against the file's own totals.",
+   "try_this": "In Claude Science, give Claude a raw NMR or LC-MS file and ask it to confirm the compound's identity and purity.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Post exists and states timings and purity match; single-sample result reported by Anthropic",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "give Claude a raw NMR or LC-MS file and ask the model to confirm the compound’s identity and purity.",
+   "excerpt_url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+   "item_url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-02-8e49be85",
+   "date": "2026-11-02",
+   "category": "release",
+   "claim": "Anthropic says protein design and other dual-use biology research features are not available for general access in Claude Fable 5. It plans an access program for scientists, and Opus 5 remains its most capable generally available model.",
+   "why_it_matters": "Biology builders should expect refusals or blocks on the newest model and plan around Opus 5 or a future trusted access program.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "face-value-T1",
+    "method": "primary link exists",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://www.anthropic.com/research/Claude-accelerates-protein-design"
+   },
+   "excerpt": "protein design and other dual-use research biology capabilities remain unavailable for general access in Claude Fable 5.",
+   "excerpt_url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+   "item_url": "https://www.anthropic.com/research/Claude-accelerates-protein-design",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "anthropic",
+   "status_at_publication": "face-value-T1"
+  },
+  {
+   "id": "2026-11-02-abf0b256",
+   "date": "2026-11-02",
+   "category": "tool",
+   "claim": "BootLoops, from Harvard physicist Matthew Schwartz, is an open-source harness of exact-calculation tools and agent skills for quantitative science. Its GitHub org has 7 public repos, mostly MIT-licensed, including a skills repo packaged as Claude Code and Codex plugins.",
+   "why_it_matters": "It is a public example of a domain-specific harness and skill set built for any model doing long, checkable research work.",
+   "try_this": "Browse the BootLoops-ai skills repo on GitHub and read its research protocols as a model for your own agent skills.",
+   "evidence": [
+    {
+     "url": "https://bootloops.ai",
+     "kind": "primary"
+    },
+    {
+     "url": "https://github.com/BootLoops-ai",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "bootloops.ai and GitHub org list open-source repos and licenses; code not run",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "a harness to help Large Language Models do interdisciplinary quantitative science",
+   "excerpt_url": "https://bootloops.ai",
+   "item_url": "https://www.anthropic.com/research/claude-shaped-science",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-02-f0271b52",
+   "date": "2026-11-02",
+   "category": "technique",
+   "claim": "To run many long Claude Code projects at once, Schwartz used one session per project and a master session that coordinates the others. Background subagents meant a classifier block stopped only one agent, and periodic file consolidation helped against context loss from compaction.",
+   "why_it_matters": "These are practical patterns for multi-day agent work: isolating failures, a coordinator session, and files as durable memory across compaction.",
+   "try_this": "Add a step to long agent tasks that has the agent consolidate its notes into one up-to-date plan file at regular intervals.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/claude-shaped-science",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "face-value-T1",
+    "method": "primary link exists",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "a master session that coordinates the others, allocates compute, and validates results",
+   "excerpt_url": "https://www.anthropic.com/research/claude-shaped-science",
+   "item_url": "https://www.anthropic.com/research/claude-shaped-science",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "anthropic",
+   "status_at_publication": "face-value-T1"
+  },
+  {
+   "id": "2026-11-02-f6f14ec2",
+   "date": "2026-11-02",
+   "category": "technique",
+   "claim": "In Vibe Physics (first published March 2026), Schwartz had Claude Code keep a tree of markdown files with one summary per stage and one file per task. He also cross-checked its work with GPT and Gemini and added a CLAUDE.md rule banning skipped steps.",
+   "why_it_matters": "These are simple, reusable ways to cut silent errors and lost context when an agent works through a long technical project.",
+   "try_this": "Add to CLAUDE.md: never use phrases like 'this becomes' to skip steps; show the calculation or say 'I don't know'.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/vibe-physics",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "face-value-T1",
+    "method": "primary link exists",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "It works better with things it can look up than things it has to remember.",
+   "excerpt_url": "https://www.anthropic.com/research/vibe-physics",
+   "item_url": "https://www.anthropic.com/research/vibe-physics",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "anthropic",
+   "status_at_publication": "face-value-T1"
+  },
+  {
+   "id": "2026-11-02-4b1f6866",
+   "date": "2026-11-02",
+   "category": "tool",
+   "claim": "T3 Code merged PR #28410 on Nov 2, 2026. Claude processes it starts now report CLAUDE_CODE_ENTRYPOINT as t3-code instead of the Agent SDK default sdk-ts.",
+   "why_it_matters": "Apps are relabeling their entrypoint to avoid how usage may be weighted. The linked issue warns this hides the label and may conflict with Anthropic's terms.",
+   "try_this": "not recommended: terms risk",
+   "evidence": [
+    {
+     "url": "https://github.com/pingdotgg/t3code/pull/28410",
+     "kind": "primary"
+    },
+    {
+     "url": "https://github.com/anthropics/claude-code/issues/97074",
+     "kind": "independent"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "PR page shows merged Nov 2, 2026 with entrypoint change; not run",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=y5TEATUDDfc",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "theo",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-02-1ff12659",
+   "date": "2026-11-02",
+   "category": "tool",
+   "claim": "Manus 2.0, announced Sept 28, 2026, adds the Cascade agent harness, Automations that start from events such as a new email or calendar event, and an always-on Cloud Computer. Video Editor followed on Oct 1.",
+   "why_it_matters": "Event-triggered agents that run on persistent hosted machines are now a packaged feature, not something you have to build yourself.",
+   "try_this": "Read the Manus 2.0 post to see which connected services Automations can trigger on before designing a workflow.",
+   "evidence": [
+    {
+     "url": "https://manus.im/blog/introducing-manus-2-0",
+     "kind": "primary"
+    },
+    {
+     "url": "https://manus.im/blog/introducing-video-editor",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Manus blog confirms 2.0 features and dates; Cascade parallel sub-agents not confirmed",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Manus 2.0 is here, with the new Cascade agent harness, Cloud Computer and Automations",
+   "excerpt_url": "https://manus.im/blog",
+   "item_url": "https://www.raycfu.com/guides/ai-trading-research-team-manus",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "ray",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-02-a38386c6",
+   "date": "2026-11-02",
+   "category": "automation",
+   "claim": "Ray Fu published a free guide to building a multi-agent stock research team in Manus, with Analyst, Quant, Risk and Report agents. Its triggers include earnings dates, newsletters and CEO posts on X.",
+   "why_it_matters": "The guide exists, but its trading usefulness is unproven and its X-monitoring trigger raises platform terms concerns.",
+   "try_this": "not recommended: terms risk",
+   "evidence": [
+    {
+     "url": "https://www.raycfu.com/guides/ai-trading-research-team-manus",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "Guide exists; trading value not assessed; X-post trigger not confirmed in Manus docs",
+    "checked_at": "2026-11-02T05:22-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.raycfu.com/guides/ai-trading-research-team-manus",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "ray",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-11-02-3d1a138c",
+   "date": "2026-11-02",
+   "category": "release",
+   "claim": "OpenAI published Codex CLI pre-releases rust-v0.167.0-alpha.2 and alpha.3 on GitHub on Nov 1, 2026. The release pages include no changelog notes.",
+   "why_it_matters": "A 0.167.0 Codex release appears close. Wait for stable notes before upgrading production setups.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.167.0-alpha.3",
+     "kind": "primary"
+    },
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.167.0-alpha.2",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "face-value-T1",
+    "method": "primary link exists",
+    "checked_at": "2026-11-02T05:23-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.167.0-alpha.3",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-16",
+   "source_id": "openai",
+   "status_at_publication": "face-value-T1"
   }
  ],
  "audits": [
@@ -3793,6 +4200,13 @@
    "date": "2026-11-01",
    "item_id": "2026-11-01-c4acc5f0",
    "source_id": "simonw",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-02",
+   "item_id": "2026-11-02-8e49be85",
+   "source_id": "anthropic",
    "tier": "T1-seed",
    "verdict": "pass"
   }
@@ -4037,6 +4451,11 @@
    "id": "2026-10-29-db653f70",
    "date": "2026-10-29",
    "reason": "review: 'some in a single shot' overstates one named single-shot game not tied to Opus 5.5"
+  },
+  {
+   "id": "2026-11-02-e6f0f56a",
+   "date": "2026-11-02",
+   "reason": "review: 1.3x-3x range of other users' reports not supported by the issue thread"
   }
  ]
 }
