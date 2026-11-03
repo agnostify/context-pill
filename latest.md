@@ -5,10 +5,10 @@
 <!-- breaking:start -->
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 3, 12:02 PM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 3, 3:09 PM PT; refreshed every 3 hours.
 
 1. **[Google Will Turn Off Search for Schools That Reject A.I.](https://www.reddit.com/r/singularity/comments/1xmxcxl/google_will_turn_off_search_for_schools_that/)**
-   - Reddit (r/singularity): 207 upvotes*, 152 comments · Covered by: nytimes.com · source: r/singularity
+   - Reddit (r/singularity): 330 upvotes*, 206 comments · Covered by: nytimes.com · source: r/singularity
    - `b-eda34df8d4` · also: [outlet](https://www.nytimes.com/2026/11/03/us/google-search-schools-restrict-ai.html)
 2. **[RTX 5090 with 64GB and 96GB VRAM 'confirmed' by US GPU repair tech](https://www.reddit.com/r/LocalLLaMA/comments/1xmqq2a/rtx_5090_with_64gb_and_96gb_vram_confirmed_by_us/)**
    - Reddit (r/LocalLLaMA): 441 upvotes*, 108 comments · source: r/LocalLLaMA
