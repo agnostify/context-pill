@@ -330,8 +330,10 @@ class RpcError extends Error {
   constructor(code, message, data) { super(message); this.code = code; if (data !== undefined) this.data = data; }
 }
 
+const isVersionError = (o) => !!(o && o.error && (o.error.code === -32022 || o.error.code === -32020));
+
 function unsupportedVersion(requested) {
-  return new RpcError(-32022, "Unsupported protocol version", { supported: PROTOCOLS, requested: oneLine(String(requested), 40) });
+  return new RpcError(-32022, "Unsupported protocol version", { supported: PROTOCOLS, requested: typeof requested === "string" ? requested : String(requested) });
 }
 
 // The protocol version for one message: params._meta wins, else the header. Throws -32022 / -32020 per 2026-07-28.
@@ -510,17 +512,22 @@ export async function handleMcp(request, opts = {}) {
   if (Array.isArray(msg)) {
     if (msg.length === 0 || msg.length > 20) { note({ error: -32600, reason: "batch" }); return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid batch" } }, 400, h); }
     const out = (await Promise.all(msg.map((m) => handleOne(m, fetchText, pv, note)))).filter(Boolean);
-    return out.length ? json(out, 200, h) : new Response(null, { status: 202, headers: h });
+    if (out.some(isVersionError)) note({ reason: "version" });
+    return out.length ? json(out, out.some(isVersionError) ? 400 : 200, h) : new Response(null, { status: 202, headers: h });
   }
   // 2026-07-28: the Mcp-Method header, when sent, must match the body.
   const hm = request.headers.get("mcp-method");
-  if (hm && msg && typeof msg.method === "string" && hm !== msg.method) {
+  const hn = request.headers.get("mcp-name");
+  const p = msg && msg.params && typeof msg.params === "object" ? msg.params : {};
+  const bodyName = msg && msg.method === "resources/read" ? p.uri : p.name;
+  const named = msg && ["tools/call", "prompts/get", "resources/read"].includes(msg.method);
+  if ((hm && msg && typeof msg.method === "string" && hm !== msg.method) || (hn && named && hn !== bodyName)) {
     note({ error: -32020, reason: "header" });
-    return json({ jsonrpc: "2.0", id: msg.id ?? null, error: { code: -32020, message: "Mcp-Method header does not match the request body" } }, 400, h);
+    return json({ jsonrpc: "2.0", id: msg.id ?? null, error: { code: -32020, message: "Mcp-Method or Mcp-Name header does not match the request body" } }, 400, h);
   }
   const out = await handleOne(msg, fetchText, pv, note);
   // Version errors are 400 on HTTP (UnsupportedProtocolVersion, HeaderMismatch).
-  const status = out && out.error && (out.error.code === -32022 || out.error.code === -32020) ? 400 : 200;
+  const status = isVersionError(out) ? 400 : 200;
   if (status === 400) note({ reason: "version" });
   return out ? json(out, status, h) : new Response(null, { status: 202, headers: h });
 }

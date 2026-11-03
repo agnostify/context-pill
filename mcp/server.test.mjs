@@ -95,3 +95,15 @@ test("errors: unknown tool and parse error are logged with codes", async () => {
   const mnf = await call({ jsonrpc: "2.0", id: 9, method: "nope/x" });
   assert.equal(mnf.body.error.code, -32601);
 });
+
+test("codex round: Mcp-Name mismatch, batch version error, full requested string", async () => {
+  const a = await call({ jsonrpc: "2.0", id: 1, method: "tools/call", params: modernMeta({ name: "get_latest", arguments: {} }) }, { ...H26, "Mcp-Method": "tools/call", "Mcp-Name": "list_sources" });
+  assert.equal(a.status, 400); assert.equal(a.body.error.code, -32020);
+  const b = await call([{ jsonrpc: "2.0", id: 1, method: "tools/list", params: { _meta: { [M]: "1999-01-01" } } }]);
+  assert.equal(b.status, 400); assert.equal(b.body[0].error.code, -32022);
+  const long = "x".repeat(60);
+  const c = await call({ jsonrpc: "2.0", id: 1, method: "tools/list" }, { "MCP-Protocol-Version": long });
+  assert.equal(c.body.error.data.requested, long);
+  const ok = await call([{ jsonrpc: "2.0", id: 1, method: "tools/list" }]);
+  assert.equal(ok.status, 200);
+});
