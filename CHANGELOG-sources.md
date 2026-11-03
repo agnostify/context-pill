@@ -78,3 +78,8 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-02: monthly pruning review: no source pruned. No source has 15 resolved tips yet (the most are Latent Space with 8 and Anthropic with 7), so verified good tips per item read is not a stable signal yet. Next review Mon Dec 7, 2026.
 - 2026-11-02: monthly candidate-source review: no sources added. The 3 Google ads and search sources added on Nov 1 stay on probation. This review found no other candidate that meets the discovery rule.
 - 2026-11-02: monthly tightening review: no tier is tightened (`tightened` in sources.yaml is empty), so there is nothing to lift. The T1 window the code counts (pass and fail audits on items not removed, last 20, 15 so far) holds 1 fail (2026-10-16-57503e5e), within the limit of 1 error. T2 has no counted audits yet.
+- 2026-11-03: audit of 2026-11-03-e30159df (Google DeepMind / Google AI): pass (Verdict: pass. Source: https://blog.google/innovation-and-ai/models-and-research/google-deepmind/introducing-genie-4/)
+- 2026-11-03: removed 1 item(s) from 2026-11-03 (review: repeats 2026-10-28-b2cdfd03)
+- 2026-11-03: removed 1 item(s) from 2026-11-03 (review: quote traced to X recap)
+- 2026-11-03: removed 1 item(s) from 2026-11-03 (review: Try this omits remote billed calls)
+- 2026-11-03: removed 1 item(s) from 2026-11-03 (review: benchmark conditions missing)
