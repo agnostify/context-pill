@@ -6,7 +6,14 @@
 // fetchText(path) must return the text of a repo file (e.g. "latest.json") or throw.
 
 export const SERVER_INFO = { name: "context-pill", title: "Context Pill", version: "0.1.0" };
-const PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26"];
+// 2026-07-28 is stateless (no initialize; version in the MCP-Protocol-Version header and params._meta). The 2025 versions
+// use the initialize handshake. Both are served by the same stateless handler.
+const MODERN = "2026-07-28";
+const LEGACY = ["2025-11-25", "2025-06-18", "2025-03-26"];
+const PROTOCOLS = [MODERN, ...LEGACY];
+const PV_META = "io.modelcontextprotocol/protocolVersion";
+const CAPABILITIES = { tools: { listChanged: false }, prompts: { listChanged: false }, resources: { listChanged: false } };
+const LIST_TTL_MS = 300000; // feed files are cached 300 s at the edge
 // Browser origins allowed to call this endpoint. Requests with no Origin header (CLI and desktop clients) are allowed.
 const ALLOWED_ORIGIN = /^(https:\/\/(www\.)?contextpill\.com|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)$/;
 const MAX_BYTES = 65536;
@@ -320,24 +327,57 @@ async function readResource(uri, fetchText) {
 }
 
 class RpcError extends Error {
-  constructor(code, message) { super(message); this.code = code; }
+  constructor(code, message, data) { super(message); this.code = code; if (data !== undefined) this.data = data; }
 }
 
-async function handleOne(msg, fetchText) {
+const isVersionError = (o) => !!(o && o.error && (o.error.code === -32022 || o.error.code === -32020));
+
+function unsupportedVersion(requested) {
+  return new RpcError(-32022, "Unsupported protocol version", { supported: PROTOCOLS, requested: typeof requested === "string" ? requested : String(requested) });
+}
+
+// The protocol version for one message: params._meta wins, else the header. Throws -32022 / -32020 per 2026-07-28.
+function messageVersion(msg, headerPv) {
+  const meta = msg.params && typeof msg.params === "object" && msg.params._meta;
+  const mv = meta && typeof meta === "object" ? meta[PV_META] : undefined;
+  if (mv !== undefined) {
+    if (typeof mv !== "string" || !PROTOCOLS.includes(mv)) throw unsupportedVersion(mv);
+    if (headerPv && headerPv !== mv) throw new RpcError(-32020, "MCP-Protocol-Version header does not match _meta protocolVersion");
+    return mv;
+  }
+  return headerPv || null;
+}
+
+async function handleOne(msg, fetchText, headerPv, note = () => {}) {
   // A JSON-RPC response sent to us (we never send requests, so there's nothing to match): accept it with no reply.
   if (msg && msg.jsonrpc === "2.0" && msg.method === undefined && msg.id !== undefined && ("result" in msg || "error" in msg)) return null;
   if (!msg || msg.jsonrpc !== "2.0" || typeof msg.method !== "string") {
     return { jsonrpc: "2.0", id: msg && msg.id !== undefined ? msg.id : null, error: { code: -32600, message: "Invalid request" } };
   }
   const isNotification = msg.id === undefined || msg.id === null;
-  const reply = (result) => (isNotification ? null : { jsonrpc: "2.0", id: msg.id, result });
+  let modern = false;
+  // In 2026-07-28 mode every result carries resultType and serverInfo; cacheable results add ttlMs and cacheScope.
+  const reply = (result, cacheable = false) => {
+    if (isNotification) return null;
+    if (modern) {
+      result = { ...result, resultType: "complete", _meta: { "io.modelcontextprotocol/serverInfo": SERVER_INFO } };
+      if (cacheable) { result.ttlMs = LIST_TTL_MS; result.cacheScope = "public"; }
+    }
+    return { jsonrpc: "2.0", id: msg.id, result };
+  };
   try {
+    const version = messageVersion(msg, headerPv);
+    modern = version === MODERN;
     switch (msg.method) {
+      case "server/discover":
+        modern = true; // a 2026-07-28 method: always answer in its shape
+        return reply({ supportedVersions: PROTOCOLS, capabilities: CAPABILITIES, instructions: INSTRUCTIONS }, true);
       case "initialize": {
         const asked = msg.params && msg.params.protocolVersion;
+        modern = false; // initialize is the 2025 handshake; it only negotiates 2025 versions
         return reply({
-          protocolVersion: PROTOCOLS.includes(asked) ? asked : PROTOCOLS[0],
-          capabilities: { tools: { listChanged: false }, prompts: { listChanged: false }, resources: { listChanged: false } },
+          protocolVersion: LEGACY.includes(asked) ? asked : LEGACY[0],
+          capabilities: CAPABILITIES,
           serverInfo: SERVER_INFO,
           instructions: INSTRUCTIONS,
         });
@@ -345,7 +385,7 @@ async function handleOne(msg, fetchText) {
       case "ping":
         return reply({});
       case "tools/list":
-        return reply({ tools: TOOLS });
+        return reply({ tools: TOOLS }, true);
       case "tools/call": {
         const p = msg.params || {};
         try {
@@ -357,26 +397,35 @@ async function handleOne(msg, fetchText) {
         }
       }
       case "prompts/list":
-        return reply({ prompts: PROMPTS });
+        return reply({ prompts: PROMPTS }, true);
       case "prompts/get": {
         const p = msg.params || {};
         return reply(getPrompt(p.name, p.arguments));
       }
       case "resources/list":
-        return reply({ resources: RESOURCES });
+        return reply({ resources: RESOURCES }, true);
       case "resources/templates/list":
-        return reply({ resourceTemplates: [] });
+        return reply({ resourceTemplates: [] }, true);
       case "resources/read": {
         const p = msg.params || {};
-        return reply({ contents: [await readResource(p.uri, fetchText)] });
+        try {
+          return reply({ contents: [await readResource(p.uri, fetchText)] }, true);
+        } catch (e) {
+          if (modern && e.code === -32002) throw new RpcError(-32602, e.message); // 2026-07-28 renumbered resource-not-found
+          throw e;
+        }
       }
       default:
         if (msg.method.startsWith("notifications/")) return null;
         throw new RpcError(-32601, "Method not found");
     }
   } catch (e) {
+    const code = e.code || -32603;
+    note({ error: code });
     if (isNotification) return null;
-    return { jsonrpc: "2.0", id: msg.id, error: { code: e.code || -32603, message: e instanceof RpcError ? e.message : "Internal error" } };
+    const error = { code, message: e instanceof RpcError ? e.message : "Internal error" };
+    if (e instanceof RpcError && e.data !== undefined) error.data = e.data;
+    return { jsonrpc: "2.0", id: msg.id, error };
   }
 }
 
@@ -384,7 +433,7 @@ function cors(origin) {
   const h = {
     Vary: "Origin",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id, Mcp-Method, Mcp-Name",
   };
   if (origin) h["Access-Control-Allow-Origin"] = origin; // only reached for allowed origins
   return h;
@@ -423,7 +472,8 @@ async function readBounded(request, max) {
   return new TextDecoder().decode(all);
 }
 
-// opts.fetchText(path): returns a repo file's text. opts.onMessage({method, tool}): optional, for request counting.
+// opts.fetchText(path): returns a repo file's text. opts.onMessage({method, tool, pv, error, reason}): optional, for request
+// counting. It may be called more than once per request; later calls add fields (error code, reason for a 4xx).
 export async function handleMcp(request, opts = {}) {
   const fetchText = opts.fetchText || defaultFetchText;
   // Origin check (Streamable HTTP spec): browsers may call only from the allowed origins.
@@ -439,9 +489,13 @@ export async function handleMcp(request, opts = {}) {
       status: 405, headers: { ...h, Allow: "POST, OPTIONS", "Content-Type": "text/plain; charset=utf-8" },
     });
   }
+  const note = (m) => { if (opts.onMessage) { try { opts.onMessage(m); } catch {} } };
   const pv = request.headers.get("mcp-protocol-version");
+  if (pv) note({ pv: oneLine(pv, 20) });
   if (pv && !PROTOCOLS.includes(pv)) {
-    return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: `Unsupported MCP-Protocol-Version: ${oneLine(pv, 40)}` } }, 400, h);
+    const e = unsupportedVersion(pv);
+    note({ error: e.code, reason: "version" });
+    return json({ jsonrpc: "2.0", id: null, error: { code: e.code, message: e.message, data: e.data } }, 400, h);
   }
   const len = Number(request.headers.get("content-length") || 0);
   if (len > MAX_BYTES) return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Request too large" } }, 413, h);
@@ -451,16 +505,29 @@ export async function handleMcp(request, opts = {}) {
   try {
     msg = JSON.parse(text);
   } catch {
+    note({ error: -32700, reason: "parse" });
     return json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, 400, h);
   }
-  if (opts.onMessage) {
-    try { opts.onMessage(Array.isArray(msg) ? { method: "batch", tool: null } : { method: msg && msg.method, tool: msg && msg.params && msg.params.name }); } catch {}
-  }
+  note(Array.isArray(msg) ? { method: "batch", tool: null } : { method: msg && msg.method, tool: msg && msg.params && msg.params.name });
   if (Array.isArray(msg)) {
-    if (msg.length === 0 || msg.length > 20) return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid batch" } }, 400, h);
-    const out = (await Promise.all(msg.map((m) => handleOne(m, fetchText)))).filter(Boolean);
-    return out.length ? json(out, 200, h) : new Response(null, { status: 202, headers: h });
+    if (msg.length === 0 || msg.length > 20) { note({ error: -32600, reason: "batch" }); return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid batch" } }, 400, h); }
+    const out = (await Promise.all(msg.map((m) => handleOne(m, fetchText, pv, note)))).filter(Boolean);
+    if (out.some(isVersionError)) note({ reason: "version" });
+    return out.length ? json(out, out.some(isVersionError) ? 400 : 200, h) : new Response(null, { status: 202, headers: h });
   }
-  const out = await handleOne(msg, fetchText);
-  return out ? json(out, 200, h) : new Response(null, { status: 202, headers: h });
+  // 2026-07-28: the Mcp-Method header, when sent, must match the body.
+  const hm = request.headers.get("mcp-method");
+  const hn = request.headers.get("mcp-name");
+  const p = msg && msg.params && typeof msg.params === "object" ? msg.params : {};
+  const bodyName = msg && msg.method === "resources/read" ? p.uri : p.name;
+  const named = msg && ["tools/call", "prompts/get", "resources/read"].includes(msg.method);
+  if ((hm && msg && typeof msg.method === "string" && hm !== msg.method) || (hn && named && hn !== bodyName)) {
+    note({ error: -32020, reason: "header" });
+    return json({ jsonrpc: "2.0", id: msg.id ?? null, error: { code: -32020, message: "Mcp-Method or Mcp-Name header does not match the request body" } }, 400, h);
+  }
+  const out = await handleOne(msg, fetchText, pv, note);
+  // Version errors are 400 on HTTP (UnsupportedProtocolVersion, HeaderMismatch).
+  const status = isVersionError(out) ? 400 : 200;
+  if (status === 400) note({ reason: "version" });
+  return out ? json(out, status, h) : new Response(null, { status: 202, headers: h });
 }
