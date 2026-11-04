@@ -4317,6 +4317,206 @@
    "recheck_on": "2026-11-17",
    "source_id": "deepmind",
    "status_at_publication": "face-value-T1"
+  },
+  {
+   "id": "2026-11-04-aca58f6a",
+   "date": "2026-11-04",
+   "category": "release",
+   "claim": "Dependabot version updates now support Agent Package Manager. Dependabot opens PRs to update git dependencies declared in apm.yml, such as agent skills, prompts and instructions, and regenerates apm.lock.yaml. It does version updates only, not security updates.",
+   "why_it_matters": "Teams that share agent skills and prompts as dependencies can keep them current with the same PR workflow they use for code.",
+   "try_this": "Add an entry with package-ecosystem \"apm\" to .github/dependabot.yml, point it at the directory holding apm.yml, and set a weekly schedule.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-03-dependabot-version-updates-support-agent-package-manager",
+     "kind": "primary"
+    },
+    {
+     "url": "https://docs.github.com/en/code-security/dependabot/ecosystems-supported-by-dependabot/supported-ecosystems-and-repositories",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "GitHub changelog read; GitHub Docs supported-ecosystems table lists APM as `apm` with version updates and no security updates",
+    "checked_at": "2026-11-04T05:33-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Dependabot opens pull requests to update supported git dependencies declared in apm.yml and regenerates apm.lock.yaml when it’s present.",
+   "excerpt_url": "https://github.blog/changelog/2026-11-03-dependabot-version-updates-support-agent-package-manager",
+   "item_url": "https://github.blog/changelog/2026-11-03-dependabot-version-updates-support-agent-package-manager",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-18",
+   "source_id": "github-changelog",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-04-a4caa58e",
+   "date": "2026-11-04",
+   "category": "release",
+   "claim": "GitHub Copilot is now an agent inside JetBrains Air through the Agent Client Protocol. It runs local tasks in the IDE, and cloud tasks run in isolated Docker VMs through Air Teams, billed to your Copilot plan rather than JetBrains AI credits.",
+   "why_it_matters": "Another editor now speaks ACP. Copilot users can delegate agent tasks from JetBrains without paying for a second AI subscription.",
+   "try_this": "Install Air in your JetBrains IDE, pick GitHub Copilot in the agent picker, connect your account, and run one small local task.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-03-github-copilot-is-now-available-in-jetbrains-air",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Read GitHub's own changelog entry; the JetBrains help URL I guessed returned 404, so this was not cross-checked there",
+    "checked_at": "2026-11-04T05:33-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "The integration uses the Agent Client Protocol (ACP) and supports tasks in your JetBrains IDE or in the cloud.",
+   "excerpt_url": "https://github.blog/changelog/2026-11-03-github-copilot-is-now-available-in-jetbrains-air",
+   "item_url": "https://github.blog/changelog/2026-11-03-github-copilot-is-now-available-in-jetbrains-air",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-18",
+   "source_id": "github-changelog",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-04-d1c69626",
+   "date": "2026-11-04",
+   "category": "release",
+   "claim": "CodeQL 2.27.3 adds an opt-in \"ai\" threat model for LLM-generated data. It ships no built-in sources, so you define them yourself with data extensions, which can now also be written in JSON.",
+   "why_it_matters": "You can now trace model output into dangerous sinks with static analysis, treating LLM text as untrusted input.",
+   "try_this": "Turn on the ai threat model in a test repo and add a data extension that marks your LLM client's response call as a source.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-03-codeql-2-27-3-adds-python-3-15-features-and-json-data-extensions",
+     "kind": "primary"
+    },
+    {
+     "url": "https://github.com/github/codeql/releases/tag/codeql-cli/v2.27.3",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "GitHub changelog read; the v2.27.3 release tag exists on the CodeQL repo, though the tag page has no notes",
+    "checked_at": "2026-11-04T05:33-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "We’ve added an opt-in ai threat model for LLM-generated data.",
+   "excerpt_url": "https://github.blog/changelog/2026-11-03-codeql-2-27-3-adds-python-3-15-features-and-json-data-extensions",
+   "item_url": "https://github.blog/changelog/2026-11-03-codeql-2-27-3-adds-python-3-15-features-and-json-data-extensions",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-18",
+   "source_id": "github-changelog",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-04-b23f52bc",
+   "date": "2026-11-04",
+   "category": "release",
+   "claim": "Claude Code v2.1.318 shows when a stored claude.ai sign-in expires: loginExpiresAt in claude auth status and credential_expires_at in claude -p JSON results. It also prints a stderr warning starting 10 days before expiry.",
+   "why_it_matters": "Headless and CI jobs that use a stored sign-in can now spot an expiring login before the jobs start failing.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.318",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "primary link exists: official anthropics/claude-code GitHub release v2.1.318 with these notes (face value not allowed for this source today)",
+    "checked_at": "2026-11-04T05:33-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Added a one-line stderr warning to claude -p text output, starting 10 days before a stored claude.ai sign-in ends",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.318",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.318",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-18",
+   "source_id": "anthropic",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-11-04-7ca4fcaa",
+   "date": "2026-11-04",
+   "category": "release",
+   "claim": "Google released Cheminformatics Skills for Antigravity through its Science plugin. They are built on RDKit with ChEMBL and PubChem connectors, and Google is offering 10,000 scientists the top Antigravity usage tier free for 6 months, by application.",
+   "why_it_matters": "It shows how to pair an agent with deterministic domain tools: the model orchestrates while tested libraries do the exact calculations.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://deepmind.google/blog/agentic-cheminformatics-with-google-antigravity/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "primary link exists: Google DeepMind's own post; antigravity.google homepage does not mention the plugin yet (face value not allowed for this source today)",
+    "checked_at": "2026-11-04T05:33-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Download the Antigravity App and install the Science plugin to start using these skills.",
+   "excerpt_url": "https://deepmind.google/blog/agentic-cheminformatics-with-google-antigravity/",
+   "item_url": "https://deepmind.google/blog/agentic-cheminformatics-with-google-antigravity/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-18",
+   "source_id": "deepmind",
+   "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-11-04-f2542ded",
+   "date": "2026-11-04",
+   "category": "release",
+   "claim": "Gemini CLI nightly v0.67.0-nightly.20261104 fixes SubagentStop hook event mapping and hook-definition merging. It also adds --userns=keep-id for rootless podman sandboxes.",
+   "why_it_matters": "Anyone using subagent hooks or a rootless podman sandbox in Gemini CLI had broken or flaky behavior that this fixes.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261104.g89e9d25d6",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "unverified",
+    "method": "primary link exists: official google-gemini/gemini-cli GitHub pre-release with these notes (face value not allowed for this source today)",
+    "checked_at": "2026-11-04T05:33-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "fix(hooks): support SubagentStop event mapping and merge hook definitions",
+   "excerpt_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261104.g89e9d25d6",
+   "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261104.g89e9d25d6",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-18",
+   "source_id": "deepmind",
+   "status_at_publication": "unverified"
   }
  ],
  "audits": [
@@ -4481,6 +4681,15 @@
    "source_id": "deepmind",
    "tier": "T1-seed",
    "verdict": "pass",
+   "removed": true
+  },
+  {
+   "date": "2026-11-04",
+   "item_id": "2026-11-04-a7a63e5f",
+   "source_id": "simonw",
+   "tier": "T1-seed",
+   "verdict": "fail",
+   "cause": "our summary",
    "removed": true
   }
  ],
@@ -4749,6 +4958,41 @@
    "id": "2026-11-03-ad69dcf6",
    "date": "2026-11-03",
    "reason": "review: benchmark conditions missing"
+  },
+  {
+   "id": "2026-11-04-66179424",
+   "date": "2026-11-04",
+   "reason": "review: repeats 2026-10-26-d9803b8d"
+  },
+  {
+   "id": "2026-11-04-f647e4fb",
+   "date": "2026-11-04",
+   "reason": "review: connector rule reversed vs release notes"
+  },
+  {
+   "id": "2026-11-04-a7a63e5f",
+   "date": "2026-11-04",
+   "reason": "review: our summary misstated timing (Freeway untimed)"
+  },
+  {
+   "id": "2026-11-04-265f246b",
+   "date": "2026-11-04",
+   "reason": "review: benchmark result only from authors, mislabeled Verified"
+  },
+  {
+   "id": "2026-11-04-f4246c71",
+   "date": "2026-11-04",
+   "reason": "review: ranking omits evaluation conditions"
+  },
+  {
+   "id": "2026-11-04-c5fa43d7",
+   "date": "2026-11-04",
+   "reason": "review: cost and consensus details not confirmable from primary evidence"
+  },
+  {
+   "id": "2026-11-04-c81a1638",
+   "date": "2026-11-04",
+   "reason": "review: why-it-matters overstated cost accuracy"
   }
  ]
 }

@@ -83,3 +83,12 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-03: removed 1 item(s) from 2026-11-03 (review: quote traced to X recap)
 - 2026-11-03: removed 1 item(s) from 2026-11-03 (review: Try this omits remote billed calls)
 - 2026-11-03: removed 1 item(s) from 2026-11-03 (review: benchmark conditions missing)
+- 2026-11-04: T1 research criterion tightened one level (>1 audit error in the last 20) until the next monthly review
+- 2026-11-04: removed 1 item(s) from 2026-11-04 (review: repeats 2026-10-26-d9803b8d)
+- 2026-11-04: removed 1 item(s) from 2026-11-04 (review: connector rule reversed vs release notes)
+- 2026-11-04: removed 1 item(s) from 2026-11-04 (review: our summary misstated timing (Freeway untimed))
+- 2026-11-04: removed 1 item(s) from 2026-11-04 (review: benchmark result only from authors, mislabeled Verified)
+- 2026-11-04: removed 1 item(s) from 2026-11-04 (review: ranking omits evaluation conditions)
+- 2026-11-04: removed 1 item(s) from 2026-11-04 (review: cost and consensus details not confirmable from primary evidence)
+- 2026-11-04: audit of 2026-11-04-a7a63e5f (Simon Willison): fail (Verdict: fail. Sources: https://simonwillison.net/2026/Nov/3/qwen-can-interpret-model-weights/, https://github.com/RikiyaT/lm_understand-logs); cause: our summary
+- 2026-11-04: removed 1 item(s) from 2026-11-04 (review: why-it-matters overstated cost accuracy)
