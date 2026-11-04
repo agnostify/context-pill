@@ -143,6 +143,12 @@ def audit_cause(r):
     return c if isinstance(c, str) and c == "our summary" else None
 
 
+def auditor_set_cause(r):
+    """True when r's stored cause is the scanner's own: cause_by 'auditor' and cause exactly 'our summary'. Any other cause is the
+    maintainer's (even with a leftover cause_by 'auditor', e.g. after changing the cause by hand) and is kept on re-audit."""
+    return isinstance(r, dict) and r.get("cause_by") == "auditor" and r.get("cause") == "our summary"
+
+
 def with_audit_cause(clean, raw, held=None):
     """(entry, invalid) for a freshly audited clean entry: merged with the maintainer's held fields, and given cause 'our summary'
     (cause_by 'auditor') when audit_cause(raw) says so and no cause is set; a maintainer's cause always wins.

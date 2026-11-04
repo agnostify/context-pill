@@ -189,6 +189,34 @@ def test_maintainer_cause_wins():
     shutil.rmtree(tmp.parent)
 
 
+def test_auditor_set_cause():
+    assert N.auditor_set_cause({"cause": "our summary", "cause_by": "auditor"})
+    for r in ({"cause": "source", "cause_by": "auditor"}, {"cause": "Our Summary", "cause_by": "auditor"}, {"cause": "our summary"},
+              {"cause": "our summary", "cause_by": "maintainer"}, {"cause_by": "auditor"}, {}, None, "our summary"):
+        assert not N.auditor_set_cause(r), r
+
+
+def test_maintainer_changed_auditor_cause_wins():
+    """The maintainer changes an auto-set cause to "source" and clears the verdict but leaves cause_by "auditor": the cause is
+    the maintainer's now, so a re-audit saying "our summary" must not replace it, and the source is demoted."""
+    tmp, work, raw, D = fixture()
+    am, reg, led, cl = run(tmp, work, D, auditor("our summary"))
+    iid = [x for x in led["audits"] if x["date"] == D][0]["item_id"]
+    ar = json.loads((raw / "audit.result.json").read_text())
+    assert ar[iid]["cause"] == "our summary" and ar[iid]["cause_by"] == "auditor", ar
+    ar[iid] |= {"verdict": "", "cause": "source"}
+    (raw / "audit.result.json").write_text(json.dumps(ar))
+    am, reg, led, cl = run(tmp, work, D, auditor("our summary"))
+    assert am.call_count == 1
+    s = reg["sources"][0]
+    assert s.get("audit_demoted") and not s["trust"]["tier"].startswith("T1"), s
+    ar = json.loads((raw / "audit.result.json").read_text())[iid]
+    assert ar["verdict"] == "fail" and ar["cause"] == "source" and "cause_by" not in ar, ar
+    rec = [x for x in led["audits"] if x["date"] == D]
+    assert rec[0]["cause"] == "source", rec
+    shutil.rmtree(tmp.parent)
+
+
 def test_removed_item_keeps_cause_and_does_not_demote():
     """A failed audit whose item has left the drop (the first loop in run.py) logs the cause and does not demote either."""
     tmp, work, raw, D = fixture()

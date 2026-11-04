@@ -231,10 +231,10 @@ def main():
     ares, why = notes.split(araw, "verdict", notes.VERDICTS, AKEEP)
     notes.save_reasoning(raw / "audit.reasoning.json", why)
     # an entry with an invalid verdict is re-audited, but its maintainer fields are kept (and written back with the new verdict)
-    # (an auditor-set cause is not the maintainer's: the re-audit decides it again)
+    # (an auditor-set cause is not the maintainer's: the re-audit decides it again; any other cause is the maintainer's)
     MKEEP = ("cause", "superseded_by")
     def mfields(r):
-        return {f: r[f] for f in MKEEP if r.get(f) and not (f == "cause" and r.get("cause_by") == "auditor")}
+        return {f: r[f] for f in MKEEP if r.get(f) and not (f == "cause" and notes.auditor_set_cause(r))}
     held = {k: mfields(r) for k, r in (araw.items() if isinstance(araw, dict) else ())
             if isinstance(k, str) and isinstance(r, dict) and k not in ares and mfields(r)}
     # a claim rewritten after a failed audit gets a new id; the maintainer links it ("superseded_by") and it is always re-audited
