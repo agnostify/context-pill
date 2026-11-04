@@ -8,6 +8,7 @@ from . import gate, util
 
 OUTCOMES = ("good", "docs-verified", "partial", "bad", "inconclusive")
 VERDICTS = ("pass", "fail", "inconclusive")
+AUDIT_CAUSES = ("our summary", "source", "unclear")   # the auditor's failure_cause on a "fail"; only "our summary" spares the source
 MAX_URLS = 3
 FLAG = "all_facts_on_cited_pages"             # the resolver's own statement that every part of the claim is on a cited page
 
@@ -131,6 +132,34 @@ def split(res, field, allowed, keep=()):
         if rest:
             why[k] = why.get(k, {}) | rest
     return clean, why
+
+
+def audit_cause(r):
+    """'our summary' when r (a raw auditor entry) is a fail whose failure_cause is exactly 'our summary', else None (no cause, so the
+    fail demotes the source): "source", "unclear", a case variant, a non-string or a missing value all count as no cause."""
+    if not isinstance(r, dict) or r.get("verdict") != "fail":
+        return None
+    c = r.get("failure_cause")
+    return c if isinstance(c, str) and c == "our summary" else None
+
+
+def auditor_set_cause(r):
+    """True when r's stored cause is the scanner's own: cause_by 'auditor' and cause exactly 'our summary'. Any other cause is the
+    maintainer's (even with a leftover cause_by 'auditor', e.g. after changing the cause by hand) and is kept on re-audit."""
+    return isinstance(r, dict) and r.get("cause_by") == "auditor" and r.get("cause") == "our summary"
+
+
+def with_audit_cause(clean, raw, held=None):
+    """(entry, invalid) for a freshly audited clean entry: merged with the maintainer's held fields, and given cause 'our summary'
+    (cause_by 'auditor') when audit_cause(raw) says so and no cause is set; a maintainer's cause always wins.
+    invalid is the auditor's failure_cause when it is present but not one of AUDIT_CAUSES (for the reasoning file), else None."""
+    out = dict(clean) | (held or {})
+    if out.get("cause"):
+        out.pop("cause_by", None)                   # the maintainer's cause stands as is
+    elif c := audit_cause(raw):
+        out["cause"] = c; out["cause_by"] = "auditor"
+    fc = raw.get("failure_cause") if isinstance(raw, dict) else None
+    return out, (fc if fc is not None and not (isinstance(fc, str) and fc in AUDIT_CAUSES) else None)
 
 
 def save_reasoning(path, why):
