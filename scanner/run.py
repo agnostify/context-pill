@@ -224,25 +224,34 @@ def main():
     t1 = [d for d in drop if (start_tier(d) or "").startswith("T1") and d["verification"]["status"] in CHECKED]
     sample = [d for d in t1 if _h(d["id"]) % AUDIT_RATE == 0] or sorted(t1, key=lambda d: _h(d["id"]))[:1]
     ares_p = raw / "audit.result.json"
-    # audit.result.json keeps only the verdict, source_urls and the fields below (cause/superseded_by are set by the maintainer)
-    AKEEP = ("cause", "superseded_by", "source_id", "tier", "evidence_url")
+    # audit.result.json keeps only the verdict, source_urls and the fields below (superseded_by is set by the maintainer; cause too,
+    # or by the scanner with cause_by "auditor" when the auditor says the fail was our summary's)
+    AKEEP = ("cause", "cause_by", "superseded_by", "source_id", "tier", "evidence_url")
     araw = json.loads(ares_p.read_text()) if (a.skip_extract and ares_p.exists()) else {}
     ares, why = notes.split(araw, "verdict", notes.VERDICTS, AKEEP)
     notes.save_reasoning(raw / "audit.reasoning.json", why)
     # an entry with an invalid verdict is re-audited, but its maintainer fields are kept (and written back with the new verdict)
+    # (an auditor-set cause is not the maintainer's: the re-audit decides it again)
     MKEEP = ("cause", "superseded_by")
-    held = {k: {f: r[f] for f in MKEEP if r.get(f)} for k, r in (araw.items() if isinstance(araw, dict) else ())
-            if isinstance(k, str) and isinstance(r, dict) and k not in ares and any(r.get(f) for f in MKEEP)}
+    def mfields(r):
+        return {f: r[f] for f in MKEEP if r.get(f) and not (f == "cause" and r.get("cause_by") == "auditor")}
+    held = {k: mfields(r) for k, r in (araw.items() if isinstance(araw, dict) else ())
+            if isinstance(k, str) and isinstance(r, dict) and k not in ares and mfields(r)}
     # a claim rewritten after a failed audit gets a new id; the maintainer links it ("superseded_by") and it is always re-audited
     replaces = {r["superseded_by"]: k for k, r in (held | ares).items() if r.get("superseded_by")}
     sample += [d for d in drop if d["id"] in replaces and d not in sample]
     sample_tier = {d["id"]: start_tier(d) for d in sample}             # recorded before any demotion below
     todo = [d for d in sample if d["id"] not in ares]
     if todo:
-        got, why = notes.split(extract.audit([{"id": d["id"], "claim": d["claim"], "evidence": d["evidence"], "source": d["source"]["name"]} for d in todo],
-                                             WORK, date, log), "verdict", notes.VERDICTS)
+        aout = extract.audit([{"id": d["id"], "claim": d["claim"], "evidence": d["evidence"], "source": d["source"]["name"]} for d in todo],
+                             WORK, date, log)
+        got, why = notes.split(aout, "verdict", notes.VERDICTS)
+        for k, r in got.items():
+            if k in {d["id"] for d in todo}:                                # never ids it wasn't asked about
+                ares[k], bad = notes.with_audit_cause(r, aout.get(k), held.get(k))   # METHOD 3: a fail that was our summary's
+                if bad is not None:
+                    why.setdefault(k, {})["failure_cause_invalid"] = bad
         notes.save_reasoning(raw / "audit.reasoning.json", why)
-        ares.update({k: r | held.get(k, {}) for k, r in got.items() if k in {d["id"] for d in todo}})      # never ids it wasn't asked about
         ares_p.write_text(json.dumps(held | ares, indent=1))
     log(f"audit: {sum(1 for d in sample if d['id'] in ares)} of {len(sample)} sampled items judged")
     ledger["audits"] = [x for x in ledger["audits"] if x["date"] != date]
@@ -286,14 +295,15 @@ def main():
         note = notes.audit_note(r["verdict"], notes.pick_urls(r.get("source_urls"), d["evidence"]))
         v = d["verification"]; v["t1_audit_sample"] = True; v["audit_verdict"] = r["verdict"]; v["audit_note"] = note
         ledger["audits"].append({"date": date, "item_id": d["id"], "source_id": d["source"]["id"],
-                                 "tier": sample_tier.get(d["id"]) or start_tier(d), "verdict": r["verdict"]})
+                                 "tier": sample_tier.get(d["id"]) or start_tier(d), "verdict": r["verdict"]}
+                                | ({"cause": r["cause"]} if r.get("cause") else {}))
         if d["id"] in ares:                          # remembered so the record survives if the item is later rewritten or removed
             ares[d["id"]].setdefault("source_id", d["source"]["id"]); ares[d["id"]].setdefault("tier", ledger["audits"][-1]["tier"])
             if ev := notes.pick_url(None, d["evidence"]):      # the audit note's fallback URL once the item has left the drop
                 ares[d["id"]]["evidence_url"] = ev
         if d["id"] in replaces:
             v["method"] += f"; an earlier draft of this summary ({replaces[d['id']]}) failed the full audit and was corrected, then re-audited"
-        changelog(f"audit of {d['id']} ({d['source']['name']}): {r['verdict']} ({note})"
+        changelog(f"audit of {d['id']} ({d['source']['name']}): {r['verdict']} ({note})" + (f"; cause: {r['cause']}" if r.get("cause") else "")
                   + (f"; re-audit of the corrected {replaces[d['id']]}" if d["id"] in replaces else ""))
         if r["verdict"] == "fail":
             v["status"] = "unverified"; v["method"] += "; failed the full audit"; d["try_this"] = None
