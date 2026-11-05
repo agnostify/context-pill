@@ -4,12 +4,18 @@
 
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 5, 9:02 AM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 5, 12:06 PM PT; refreshed every 3 hours.
 
-1. **[NVIDIA RTX PRO 5500 Blackwell appears at $17,999 MSRP, higher than RTX PRO 6000 at $16,000 MSRP set some months ago by NVIDIA - VideoCardz](https://www.reddit.com/r/LocalLLaMA/comments/1xojryw/nvidia_rtx_pro_5500_blackwell_appears_at_17999/)**
+1. **[GPT‑6 Cyber: Advancing the frontier of aligned cybersecurity agents](https://openai.com/index/introducing-gpt-6-cyber)**
+   - Reddit (r/singularity): 323 upvotes*, 49 comments · First-party: OpenAI (and Sam Altman's blog) · source: OpenAI (and Sam Altman's blog)
+   - `b-75d1d048b4` · also: [company](https://openai.com/index/introducing-gpt-6-cyber/), [reddit](https://www.reddit.com/r/singularity/comments/1xoo9ob/openai_has_just_announced_gpt6_cyber_a_major_step/)
+2. **[Gemini Omni 1.2 Flash: Fast and cost-effective with longer clips](https://deepmind.google/blog/gemini-omni-12-flash-fast-and-cost-effective-with-longer-clips/)**
+   - Reddit (r/singularity): 19 upvotes*, 2 comments · First-party: Google DeepMind / Google AI · source: Google DeepMind / Google AI
+   - `b-bbe256b333` · also: [company](https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/), [company](https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/?utm_source=deepmind.google&utm_medium=referral&utm_campaign=gdm&utm_content=), [reddit](https://www.reddit.com/r/singularity/comments/1xoo9s0/gemini_omni_12_flash_fast_and_costeffective_with/)
+3. **[NVIDIA RTX PRO 5500 Blackwell appears at $17,999 MSRP, higher than RTX PRO 6000 at $16,000 MSRP set some months ago by NVIDIA - VideoCardz](https://www.reddit.com/r/LocalLLaMA/comments/1xojryw/nvidia_rtx_pro_5500_blackwell_appears_at_17999/)**
    - Reddit (r/LocalLLaMA): 135 upvotes*, 55 comments · source: r/LocalLLaMA
    - `b-007520316e`
-2. **[We have to organize. The Ban Artificial Superintelligence Act is real, and the "day 1" push has started](https://www.reddit.com/r/singularity/comments/1xojr9f/we_have_to_organize_the_ban_artificial/)**
+4. **[We have to organize. The Ban Artificial Superintelligence Act is real, and the "day 1" push has started](https://www.reddit.com/r/singularity/comments/1xojr9f/we_have_to_organize_the_ban_artificial/)**
    - Reddit (r/singularity): 0 upvotes*, 77 comments · source: r/singularity
    - `b-d25f590834`
 
