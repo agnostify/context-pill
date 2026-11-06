@@ -96,3 +96,5 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-05: removed 1 item(s) from 2026-11-05 (repeat of 2026-10-24-161a1c39 Gemini CLI models/--list-models (Codex r1))
 - 2026-11-05: removed 1 item(s) from 2026-11-05 (X-derived Latent Space/Twitter recap evidence (Codex r1); hold OpenAI LPE claim for clean primary-only rewrite next round)
 - 2026-11-05: audit of 2026-11-05-2dafb73e (Anthropic): pass (Verdict: pass. Source: https://www.anthropic.com/research/investigating-vault-particles-with-claude)
+- 2026-11-06: audit of 2026-11-06-23c902bd (Anthropic): not run (Verdict: not run.)
+- 2026-11-06: audit of 2026-11-06-23c902bd (Anthropic): pass (Verdict: pass. Source: https://www.anthropic.com/research/how-researchers-use-claude)
