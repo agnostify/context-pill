@@ -4517,6 +4517,106 @@
    "recheck_on": "2026-11-18",
    "source_id": "deepmind",
    "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-11-05-2dafb73e",
+   "date": "2026-11-05",
+   "category": "research",
+   "claim": "Anthropic's biology research lab published what it describes as the first 3D structure of a prokaryotic vault particle. The vault comes from a bacteriophage and is built from 96 copies of a single protein; human vaults use 78. Anthropic says Claude helped with database search, DNA construct design, isolation-method optimization and microscopy data processing. A preprint has been submitted to bioRxiv.",
+   "why_it_matters": "This is a concrete case of an AI lab using its model across a wet-lab structural biology workflow. The reported speedups are self-reported: purification took about 90 minutes instead of three days, and a first structural model was ready 34 hours later. They are not yet peer-reviewed.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/investigating-vault-particles-with-claude",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Confirmed on Anthropic's own research page (snapshot) that the publication exists and states these details; scientific findings and speedups remain Anthropic-reported pending the preprint",
+    "checked_at": "2026-11-05T23:26-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://www.anthropic.com/research/investigating-vault-particles-with-claude"
+   },
+   "excerpt": "the first 3D structure of a vault particle found in prokaryotic cells.",
+   "excerpt_url": "https://www.anthropic.com/research/investigating-vault-particles-with-claude",
+   "item_url": "https://www.anthropic.com/research/investigating-vault-particles-with-claude",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-19",
+   "source_id": "anthropic",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-05-50f4e37b",
+   "date": "2026-11-05",
+   "category": "release",
+   "claim": "OpenAI is bringing GPT-Image-2.6 to Codex and the API. It says the 2.6 versions of its Flare and Sunburst image models generate images 50% faster than before in the API. Flare is positioned for quick first passes, and Sunburst for consistent detail across edits.",
+   "why_it_matters": "Faster API image generation lowers latency for iterative design workflows. The 50% speed figure is a vendor claim.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.youtube.com/watch?v=9ZxCOHkfn_8",
+     "kind": "primary"
+    },
+    {
+     "url": "https://www.youtube.com/watch?v=bJldMYfRvMQ",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Stated in OpenAI's official video descriptions; openai.com announcement page not snapshotted and speed figure not independently measured",
+    "checked_at": "2026-11-05T23:26-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "In the API, the 2.6 versions of Flare and Sunburst generate images 50% faster than before.",
+   "excerpt_url": "https://www.youtube.com/watch?v=9ZxCOHkfn_8",
+   "item_url": "https://www.youtube.com/watch?v=9ZxCOHkfn_8",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-19",
+   "source_id": "openai",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-05-e424d037",
+   "date": "2026-11-05",
+   "category": "tool",
+   "claim": "GitHub Copilot can now be used in Xcode's built-in coding assistant, in public preview. Requirements are Xcode 27.3 beta and macOS Tahoe 26.6 or later. All Copilot plans are supported, and the separate Copilot for Xcode extension remains available.",
+   "why_it_matters": "iOS and macOS developers can use Copilot inside Xcode's native assistant instead of relying only on a third-party extension.",
+   "try_this": "In Xcode 27.3 beta, open Xcode > Settings > Intelligence to set up GitHub Copilot in the coding assistant.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-04-github-copilot-is-now-available-in-xcodes-coding-assistant",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Confirmed on the GitHub Changelog page (snapshot); not tested in Xcode",
+    "checked_at": "2026-11-05T23:26-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "The integration is now in public preview, available starting with Xcode 27.3 beta.",
+   "excerpt_url": "https://github.blog/changelog/2026-11-04-github-copilot-is-now-available-in-xcodes-coding-assistant",
+   "item_url": "https://github.blog/changelog/2026-11-04-github-copilot-is-now-available-in-xcodes-coding-assistant",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-19",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -4691,6 +4791,13 @@
    "verdict": "fail",
    "cause": "our summary",
    "removed": true
+  },
+  {
+   "date": "2026-11-05",
+   "item_id": "2026-11-05-2dafb73e",
+   "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "pass"
   }
  ],
  "removed": [
@@ -4993,6 +5100,16 @@
    "id": "2026-11-04-c81a1638",
    "date": "2026-11-04",
    "reason": "review: why-it-matters overstated cost accuracy"
+  },
+  {
+   "id": "2026-11-05-aefa9809",
+   "date": "2026-11-05",
+   "reason": "repeat of 2026-10-24-161a1c39 Gemini CLI models/--list-models (Codex r1)"
+  },
+  {
+   "id": "2026-11-05-6a971663",
+   "date": "2026-11-05",
+   "reason": "X-derived Latent Space/Twitter recap evidence (Codex r1); hold OpenAI LPE claim for clean primary-only rewrite next round"
   }
  ]
 }

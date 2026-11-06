@@ -92,3 +92,7 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-04: removed 1 item(s) from 2026-11-04 (review: cost and consensus details not confirmable from primary evidence)
 - 2026-11-04: audit of 2026-11-04-a7a63e5f (Simon Willison): fail (Verdict: fail. Sources: https://simonwillison.net/2026/Nov/3/qwen-can-interpret-model-weights/, https://github.com/RikiyaT/lm_understand-logs); cause: our summary
 - 2026-11-04: removed 1 item(s) from 2026-11-04 (review: why-it-matters overstated cost accuracy)
+- 2026-11-05: audit of 2026-11-05-2dafb73e (Anthropic): not run (Verdict: not run.; superseded by pass re-run below)
+- 2026-11-05: removed 1 item(s) from 2026-11-05 (repeat of 2026-10-24-161a1c39 Gemini CLI models/--list-models (Codex r1))
+- 2026-11-05: removed 1 item(s) from 2026-11-05 (X-derived Latent Space/Twitter recap evidence (Codex r1); hold OpenAI LPE claim for clean primary-only rewrite next round)
+- 2026-11-05: audit of 2026-11-05-2dafb73e (Anthropic): pass (Verdict: pass. Source: https://www.anthropic.com/research/investigating-vault-particles-with-claude)
