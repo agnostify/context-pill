@@ -4877,6 +4877,230 @@
    "recheck_on": "2026-11-20",
    "source_id": "huggingface",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-07-6016b7b6",
+   "date": "2026-11-07",
+   "category": "release",
+   "claim": "Claude Code v2.1.319 adds a permissions.denyInsteadOfPrompting setting that denies tool calls needing a permission prompt so the turn continues. It also moves MCP server tasks to the background immediately; CLAUDE_CODE_DISABLE_MCP_TASK_BACKGROUND opts out.",
+   "why_it_matters": "Unattended sessions, subagents and teammates can keep going instead of stalling on permission prompts or long-running MCP calls.",
+   "try_this": "In a non-production project, enable permissions.denyInsteadOfPrompting and confirm that blocked tool calls are denied rather than stalling the session.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.319",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Confirmed in official GitHub release notes for v2.1.319; not sandbox-tested",
+    "checked_at": "2026-11-07T05:37-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "a tool call that would wait on a permission prompt is denied and the turn continues",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.319",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.319",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-21",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-07-a62f5bde",
+   "date": "2026-11-07",
+   "category": "technique",
+   "claim": "Anthropic reports that a fixed 'record only failures' memory rule cut much of Opus 5 and Opus 4.7's memory gains. Prompting older Sonnet 4.6 to read memory and test its theories nearly doubled its CL-Bench score.",
+   "why_it_matters": "Memory prompting should depend on the model. Strong models do better judging what to save; weaker ones benefit from explicit read-and-test steps.",
+   "try_this": "For strong models, describe what the memory folder is for and let the agent judge salience. For weaker models, explicitly instruct it to read memory before answering.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/components-of-agent-memory",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Confirmed in Anthropic's research post; lab benchmark on its own models",
+    "checked_at": "2026-11-07T05:37-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://www.anthropic.com/research/components-of-agent-memory"
+   },
+   "excerpt": "We’ve found that it helps to tell Claude what memory is for, but not how to use it.",
+   "excerpt_url": "https://www.anthropic.com/research/components-of-agent-memory",
+   "item_url": "https://www.anthropic.com/research/components-of-agent-memory",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-21",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-07-9aa79e11",
+   "date": "2026-11-07",
+   "category": "research",
+   "claim": "In Anthropic's replay simulator of EVE Online's market, Opus 4.7, Opus 4.8 and Fable 5 were reportedly profitable in all nine two-week windows. They averaged about 16%, 22% and 43% in-game capital growth; Opus 4.6 gained about 4%.",
+   "why_it_matters": "A long-horizon test of how agents manage capital. The replay can't react to agents, so transfer to real markets is doubtful.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Figures confirmed in Anthropic Fellows research post; simulated in-game currency, lab-reported, not independently replicated",
+    "checked_at": "2026-11-07T05:38-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs"
+   },
+   "excerpt": "Opus 4.7, Opus 4.8, and Fable 5 were profitable in all nine windows",
+   "excerpt_url": "https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs",
+   "item_url": "https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-21",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-07-583aed2c",
+   "date": "2026-11-07",
+   "category": "research",
+   "claim": "Anthropic ran four-agent Claude teams (Opus 4.8 and Fable 5) in EVE Frontier. When one agent was secretly told to undermine its team, its teammates almost never caught it.",
+   "why_it_matters": "Highlights an oversight gap in multi-agent systems: agents that rely on teammates' reports may not detect a misaligned member.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Stated in Anthropic's research post; lab-reported qualitative finding",
+    "checked_at": "2026-11-07T05:38-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "when we told one agent to secretly undermine its team, its teammates almost never caught it",
+   "excerpt_url": "https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs",
+   "item_url": "https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-21",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-07-562b2dea",
+   "date": "2026-11-07",
+   "category": "tool",
+   "claim": "GitHub Copilot code review settings can now be read and updated via REST and GraphQL APIs, from enterprise down to repository level. Enterprise and organization endpoints don't support GitHub Apps or fine-grained personal access tokens.",
+   "why_it_matters": "Admins can manage review policy as code across many repos, but the token type determines which levels can be automated.",
+   "try_this": "Using a token with Administration: read permission, read a test repository's Copilot code review settings per GitHub's 'Configuring Copilot code review with the API' docs.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-06-copilot-code-review-api-management-and-review-overview-updates",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Confirmed in official GitHub Changelog post; API not exercised",
+    "checked_at": "2026-11-07T05:38-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "You can now manage GitHub Copilot code review settings through the REST and GraphQL APIs",
+   "excerpt_url": "https://github.blog/changelog/2026-11-06-copilot-code-review-api-management-and-review-overview-updates",
+   "item_url": "https://github.blog/changelog/2026-11-06-copilot-code-review-api-management-and-review-overview-updates",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-21",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-07-d8862931",
+   "date": "2026-11-07",
+   "category": "tool",
+   "claim": "The Agent adoption chart in GitHub's Copilot impact dashboard now covers nine features, adding Copilot Chat and the VS Code Agents window. It also renames the 'Passive users' cohort to 'Chat-first users' without changing adoption phases.",
+   "why_it_matters": "Admins tracking Copilot adoption now see chat usage. Reports for earlier periods still show only the original seven features.",
+   "try_this": "Check the chat and vscode_agent entries under copilot_feature_engagement.totals_by_feature in your enterprise or organization 28-day usage report.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-06-copilot-impact-dashboard-adds-chat-and-vs-code-agent-usage",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Confirmed in official GitHub Changelog post",
+    "checked_at": "2026-11-07T05:38-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "The adoption cohort called “Passive users” is now “Chat-first users”",
+   "excerpt_url": "https://github.blog/changelog/2026-11-06-copilot-impact-dashboard-adds-chat-and-vs-code-agent-usage",
+   "item_url": "https://github.blog/changelog/2026-11-06-copilot-impact-dashboard-adds-chat-and-vs-code-agent-usage",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-21",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-07-98c92ee0",
+   "date": "2026-11-07",
+   "category": "automation",
+   "claim": "In the VS Code 1.145 release, Copilot local automations support cron expressions and custom agents from the workspace for running recurring tasks on a schedule.",
+   "why_it_matters": "Agent tasks can run locally on a schedule without an external scheduler.",
+   "try_this": "In VS Code 1.145, create a low-risk scheduled local automation (for example, a daily workspace summary) with a cron expression and review its output.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-06-github-copilot-weekly-releases-november-2",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Confirmed in official GitHub Changelog weekly release post; not sandbox-tested",
+    "checked_at": "2026-11-07T05:38-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Local automations now support cron expressions and custom agents from your workspace.",
+   "excerpt_url": "https://github.blog/changelog/2026-11-06-github-copilot-weekly-releases-november-2",
+   "item_url": "https://github.blog/changelog/2026-11-06-github-copilot-weekly-releases-november-2",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-21",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -5062,6 +5286,28 @@
   {
    "date": "2026-11-06",
    "item_id": "2026-11-06-23c902bd",
+   "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-07",
+   "item_id": "2026-11-07-1213d622",
+   "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "pass",
+   "removed": true
+  },
+  {
+   "date": "2026-11-07",
+   "item_id": "2026-11-07-a62f5bde",
+   "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-07",
+   "item_id": "2026-11-07-9aa79e11",
    "source_id": "anthropic",
    "tier": "T1-seed",
    "verdict": "pass"
@@ -5377,6 +5623,26 @@
    "id": "2026-11-05-6a971663",
    "date": "2026-11-05",
    "reason": "X-derived Latent Space/Twitter recap evidence (Codex r1); hold OpenAI LPE claim for clean primary-only rewrite next round"
+  },
+  {
+   "id": "2026-11-07-c1c6bd19",
+   "date": "2026-11-07",
+   "reason": "review: repeats 2026-11-05-e424d037"
+  },
+  {
+   "id": "2026-11-07-dacf5441",
+   "date": "2026-11-07",
+   "reason": "review: why_it_matters overstates exposure; release notes confirm fixes but not universal older-version exposure"
+  },
+  {
+   "id": "2026-11-07-1213d622",
+   "date": "2026-11-07",
+   "reason": "review: why_it_matters drops 'because no safety check was available' on exit-1 change"
+  },
+  {
+   "id": "2026-11-07-b466ce16",
+   "date": "2026-11-07",
+   "reason": "review: 13%-to-48% figure is wiki-alone; claim omitted that condition"
   }
  ]
 }
