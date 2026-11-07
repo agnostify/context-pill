@@ -4,20 +4,14 @@
 
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 6, 9:07 PM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 7, 6:05 AM PT; refreshed every 3 hours.
 
-1. **[68% of Americans support an AI pause and a ban on superintelligence](https://www.reddit.com/r/OpenAI/comments/1xpkrrv/68_of_americans_support_an_ai_pause_and_a_ban_on/)**
-   - Reddit (r/OpenAI): 210 upvotes*, 383 comments · source: r/OpenAI
-   - `b-37404b0785`
-2. **[NousResearch/Arete-27B · Hugging Face (Qwen finetune)](https://www.reddit.com/r/LocalLLaMA/comments/1xpmj33/nousresearcharete27b_hugging_face_qwen_finetune/)**
-   - Reddit (r/LocalLLaMA): 169 upvotes*, 186 comments · source: r/LocalLLaMA
-   - `b-0c664eccb4`
-3. **[Six Pallets of NVIDIA Hardware Worth $11.4 Million Stolen on the Way to Texas](https://www.reddit.com/r/LocalLLaMA/comments/1xpqx1p/six_pallets_of_nvidia_hardware_worth_114_million/)**
-   - Reddit (r/LocalLLaMA): 224 upvotes*, 61 comments · source: r/LocalLLaMA
-   - `b-4c58f9193b`
-4. **[I'm going to try to turn a 4B model into a genuinely useful coding agent that can compete with much larger models](https://www.reddit.com/r/LocalLLaMA/comments/1xppw37/im_going_to_try_to_turn_a_4b_model_into_a/)**
-   - Reddit (r/LocalLLaMA): 55 upvotes*, 68 comments · source: r/LocalLLaMA
-   - `b-19c9e2cc27`
+1. **[The author of AI 2027 agrees to a ban on RSI.](https://www.reddit.com/r/singularity/comments/1xq1m8w/the_author_of_ai_2027_agrees_to_a_ban_on_rsi/)**
+   - Reddit (r/singularity): 83 upvotes*, 95 comments · source: r/singularity
+   - `b-40b82101b7`
+2. **[Good Luck Getting a Cheap GPU. AMD Is a 'Data Center First Company,' CEO Says](https://www.reddit.com/r/LocalLLaMA/comments/1xpx0on/good_luck_getting_a_cheap_gpu_amd_is_a_data/)**
+   - Reddit (r/LocalLLaMA): 278 upvotes*, 94 comments · source: r/LocalLLaMA
+   - `b-2626a7287e`
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
