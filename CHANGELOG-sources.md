@@ -109,3 +109,5 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-07: removed 1 item(s) from 2026-11-07 (review: 13%-to-48% figure is wiki-alone; claim omitted that condition)
 - 2026-11-07: audit of 2026-11-07-9aa79e11 (Anthropic): pass (Verdict: pass. Source: https://www.anthropic.com/research/project-eve-claude-plays-mmorpgs)
 - 2026-11-07: audit of 2026-11-07-a62f5bde (Anthropic): pass (Verdict: pass. Source: https://www.anthropic.com/research/components-of-agent-memory)
+- 2026-11-08: audit of 2026-11-08-9b31eb47 (OpenAI (and Sam Altman's blog)): pass (Verdict: pass. Sources: https://github.com/openai/codex/releases/tag/rust-v0.169.0-alpha.3, https://github.com/openai/codex/releases)
+- 2026-11-08: removed 1 item(s) from 2026-11-08 (review: omitted that Ask first rules apply only with Auto Review on)

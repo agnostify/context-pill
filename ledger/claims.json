@@ -1342,10 +1342,13 @@
    "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.307",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "anthropic",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Sources: https://github.com/anthropics/claude-code/releases/tag/v2.1.307, https://platform.claude.com/docs/en/api/versioning"
   },
   {
    "id": "2026-10-22-6d130a10",
@@ -1374,10 +1377,13 @@
    "item_url": "https://www.latent.space/p/claude-mods",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "latentspace",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: docs-verified. Source: https://code.claude.com/docs/en/plugins/mods/overview.md"
   },
   {
    "id": "2026-10-22-a63046b7",
@@ -1442,10 +1448,13 @@
    "item_url": "https://www.anthropic.com/research/glm-5-3-and-the-spread-of-advanced-cyber-capabilities",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "anthropic",
-   "status_at_publication": "vendor-claim"
+   "status_at_publication": "vendor-claim",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Sources: https://www.anthropic.com/research/glm-5-3-and-the-spread-of-advanced-cyber-capabilities, https://huggingface.co/zai-org/GLM-5.3"
   },
   {
    "id": "2026-10-22-f9f58aa2",
@@ -1474,10 +1483,13 @@
    "item_url": "https://huggingface.co/blog/ibm-granite/granite-speech-5",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "huggingface",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://huggingface.co/ibm-granite/granite-speech-5.0-2b"
   },
   {
    "id": "2026-10-22-7338e0ff",
@@ -1510,10 +1522,13 @@
    "item_url": "https://huggingface.co/blog/nvidia/kumo-relational",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "huggingface",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: docs-verified. Sources: https://huggingface.co/nvidia/Kumo-Relational, https://github.com/NVIDIA/structured-data-models"
   },
   {
    "id": "2026-10-22-f1d29074",
@@ -1542,10 +1557,13 @@
    "item_url": "https://huggingface.co/blog/Dharma-AI/vocabx-vocabulary-specialization",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "huggingface",
-   "status_at_publication": "vendor-claim"
+   "status_at_publication": "vendor-claim",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://huggingface.co/blog/Dharma-AI/vocabx-vocabulary-specialization"
   },
   {
    "id": "2026-10-22-ea260260",
@@ -1574,10 +1592,13 @@
    "item_url": "https://huggingface.co/blog/ibm-research/granite-timeseries-ensemble-r1",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "huggingface",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: docs-verified. Source: https://huggingface.co/ibm-granite/granite-timeseries-ensemble-r1"
   },
   {
    "id": "2026-10-22-6baede17",
@@ -1606,10 +1627,13 @@
    "item_url": "https://www.anthropic.com/research/yes-claude-can-do-nine-loops",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "anthropic",
-   "status_at_publication": "vendor-claim"
+   "status_at_publication": "vendor-claim",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://www.anthropic.com/research/yes-claude-can-do-nine-loops"
   },
   {
    "id": "2026-10-22-6ac6804c",
@@ -1638,10 +1662,13 @@
    "item_url": "https://openai.com/index/openai-models-google-cloud",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-05",
    "source_id": "openai",
-   "status_at_publication": "unverified"
+   "status_at_publication": "unverified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://openai.com/news/rss.xml"
   },
   {
    "id": "2026-10-23-276c68b5",
@@ -1670,10 +1697,13 @@
    "item_url": "https://www.youtube.com/watch?v=USeyDcWyVCc",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-06",
    "source_id": "theo",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://blog.railway.com/p/security-disclosure-wednesday-october-21st"
   },
   {
    "id": "2026-10-23-4fdf9482",
@@ -1702,10 +1732,13 @@
    "item_url": "https://www.youtube.com/watch?v=USeyDcWyVCc",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-06",
    "source_id": "theo",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://www.wiz.io/blog/php2shell-php-rce"
   },
   {
    "id": "2026-10-23-ac6aeeff",
@@ -1738,10 +1771,13 @@
    "item_url": "https://www.youtube.com/watch?v=USeyDcWyVCc",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-06",
    "source_id": "theo",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://openai.com/news/rss.xml"
   },
   {
    "id": "2026-10-23-adc4220c",
@@ -1774,10 +1810,13 @@
    "item_url": "https://www.youtube.com/watch?v=l16Gw7oVLNQ",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-06",
    "source_id": "openai",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "partial",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: partial. Source: https://openai.com/news/rss.xml"
   },
   {
    "id": "2026-10-23-ba6839b4",
@@ -1810,10 +1849,13 @@
    "item_url": "https://www.youtube.com/watch?v=RLQR5_5fJDA",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-06",
    "source_id": "openai",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "partial",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: partial. Source: https://openai.com/news/rss.xml"
   },
   {
    "id": "2026-10-23-255c82f1",
@@ -1842,10 +1884,13 @@
    "item_url": "https://www.youtube.com/watch?v=M4jImIU-vQI",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-06",
    "source_id": "ray",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "partial",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: partial. Source: https://www.anthropic.com/news/claude-opus-5-5"
   },
   {
    "id": "2026-10-24-c98f14c8",
@@ -1878,10 +1923,13 @@
    "item_url": "https://www.youtube.com/watch?v=SMGg7iisHmc",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-07",
    "source_id": "fireship",
-   "status_at_publication": "unverified"
+   "status_at_publication": "unverified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Sources: https://github.com/BerriAI/litellm/issues/47826, https://pypi.org/pypi/litellm/1.107.0/json"
   },
   {
    "id": "2026-10-24-4f61f359",
@@ -1910,10 +1958,13 @@
    "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.310",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-07",
    "source_id": "anthropic",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/anthropics/claude-code/releases/tag/v2.1.310"
   },
   {
    "id": "2026-10-24-6bb618bf",
@@ -1942,10 +1993,13 @@
    "item_url": "https://github.blog/changelog/2026-10-23-usage-metrics-api-adds-usage-from-tools-like-opencode",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-07",
    "source_id": "github-changelog",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.blog/changelog/2026-10-23-usage-metrics-api-adds-usage-from-tools-like-opencode"
   },
   {
    "id": "2026-10-24-c4684c53",
@@ -1974,10 +2028,13 @@
    "item_url": "https://www.youtube.com/watch?v=6f7ojkd4_Wc",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-07",
    "source_id": "openai",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "partial",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: partial. Source: https://learn.chatgpt.com/docs/dots"
   },
   {
    "id": "2026-10-24-161a1c39",
@@ -2006,10 +2063,13 @@
    "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261024.gcd1b45c2d",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-07",
    "source_id": "deepmind",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261024.gcd1b45c2d"
   },
   {
    "id": "2026-10-24-316e4acb",
@@ -2070,10 +2130,13 @@
    "item_url": "https://huggingface.co/blog/allenai/litpivot",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-07",
    "source_id": "huggingface",
-   "status_at_publication": "vendor-claim"
+   "status_at_publication": "vendor-claim",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://huggingface.co/blog/allenai/litpivot"
   },
   {
    "id": "2026-10-25-234255f5",
@@ -2102,10 +2165,13 @@
    "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-08",
    "source_id": "interconnects",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "partial",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: partial. Source: https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain"
   },
   {
    "id": "2026-10-25-53c5cd3b",
@@ -2134,10 +2200,13 @@
    "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-08",
    "source_id": "interconnects",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://www.kimi.com/blog/kimi-k3-1-pro"
   },
   {
    "id": "2026-10-25-ba3c5be6",
@@ -2166,10 +2235,13 @@
    "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-08",
    "source_id": "interconnects",
-   "status_at_publication": "vendor-claim"
+   "status_at_publication": "vendor-claim",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://www.kimi.com/blog/kimi-k3-1-pro"
   },
   {
    "id": "2026-10-25-b6651c86",
@@ -2198,10 +2270,13 @@
    "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-08",
    "source_id": "interconnects",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "bad",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: bad. Source: https://artificialanalysis.ai/models/kimi-k3-1-pro"
   },
   {
    "id": "2026-10-25-3bedbe12",
@@ -2230,10 +2305,13 @@
    "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261025.gcd1b45c2d",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-08",
    "source_id": "deepmind",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-08",
+   "resolution_note": "Outcome: good. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261025.gcd1b45c2d"
   },
   {
    "id": "2026-10-26-ab022244",
@@ -5101,6 +5179,174 @@
    "recheck_on": "2026-11-21",
    "source_id": "github-changelog",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-08-2934b770",
+   "date": "2026-11-08",
+   "category": "tool",
+   "claim": "A Ray Fu video says each Grok Bot gets its own virtual computer. xAI's docs say otherwise: all Bots on an account share one cloud computer, with separate screens that are not security boundaries.",
+   "why_it_matters": "Files and sign-ins are not isolated per Bot, so anything one Bot is signed into or saves is within reach of the others.",
+   "try_this": "Before signing a Grok Bot into any service, assume every Bot on your account can use that session and read its files.",
+   "evidence": [
+    {
+     "url": "https://docs.x.ai/grok-bot/computer-and-apps",
+     "kind": "primary"
+    },
+    {
+     "url": "https://docs.x.ai/grok-bot/bots",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read xAI docs on computer and bots; they contradict the video's per-bot computer claim. No hands-on test.",
+    "checked_at": "2026-11-08T05:25-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=aIJYFG2VGMk",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-22",
+   "source_id": "ray",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-08-edd8c692",
+   "date": "2026-11-08",
+   "category": "tool",
+   "claim": "Grok Bot's Teach a task feature, where available, lets you perform a workflow once in a one-to-one chat. It records visible computer interaction for up to ten minutes and produces a draft skill to review.",
+   "why_it_matters": "You can capture a repeatable browser workflow without writing it out, though the result is a draft that still needs checking.",
+   "try_this": "Teach one short, read-only task, then read the draft skill's steps and approval requirements before putting it on a schedule.",
+   "evidence": [
+    {
+     "url": "https://docs.x.ai/grok-bot/skills-routines-and-automations",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Video notes matched against xAI's skills and routines docs. No hands-on test.",
+    "checked_at": "2026-11-08T05:25-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=aIJYFG2VGMk",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-22",
+   "source_id": "ray",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-08-d9ef5bdb",
+   "date": "2026-11-08",
+   "category": "automation",
+   "claim": "Grok Bot routines can run on schedules or on events: a Slack message, GitHub, Linear, Sentry or PagerDuty events, an email to the Bot's own address, or a webhook call.",
+   "why_it_matters": "Agent work can start from engineering alerts or messages, not only timers, which widens what can run unattended.",
+   "try_this": "Start with a Slack trigger on explicit mentions rather than any message, so a busy channel cannot set off constant runs.",
+   "evidence": [
+    {
+     "url": "https://docs.x.ai/grok-bot/skills-routines-and-automations",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Video's schedule and email trigger examples checked against xAI's routines docs. No hands-on test.",
+    "checked_at": "2026-11-08T05:25-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=aIJYFG2VGMk",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-22",
+   "source_id": "ray",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-08-24ec9994",
+   "date": "2026-11-08",
+   "category": "tool",
+   "claim": "Several Grok Bots can share a group chat and pass work among themselves, but xAI's docs say every Bot reply counts toward usage and no switch stops Bots messaging each other.",
+   "why_it_matters": "A multi-agent team can spend usage on its own chatter, and approval requests do not appear in the group, so they are easy to miss.",
+   "try_this": "Give each stage one owner in the kickoff message and use as few Bots as the job needs.",
+   "evidence": [
+    {
+     "url": "https://docs.x.ai/grok-bot/chat-and-collaboration",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Video's group chat and handoff claim checked against xAI's chat and collaboration docs. No hands-on test.",
+    "checked_at": "2026-11-08T05:25-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=aIJYFG2VGMk",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-22",
+   "source_id": "ray",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-08-9b31eb47",
+   "date": "2026-11-08",
+   "category": "release",
+   "claim": "OpenAI published Codex 0.169.0-alpha.3 on November 7, 2026, marked pre-release with no release notes. The releases page lists 0.167.0 as the latest stable version.",
+   "why_it_matters": "With no notes, this alpha gives builders nothing specific to act on, and anyone wanting a stable Codex should not pick it up by accident.",
+   "try_this": "If you pin Codex in scripts or CI, keep the pin on stable 0.167.0 rather than this alpha.",
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.169.0-alpha.3",
+     "kind": "primary"
+    },
+    {
+     "url": "https://github.com/openai/codex/releases",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Read the release page and releases list on GitHub; confirmed tag, date, pre-release label and missing notes.",
+    "checked_at": "2026-11-08T05:25-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Sources: https://github.com/openai/codex/releases/tag/rust-v0.169.0-alpha.3, https://github.com/openai/codex/releases"
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.169.0-alpha.3",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-22",
+   "source_id": "openai",
+   "status_at_publication": "verified"
   }
  ],
  "audits": [
@@ -5309,6 +5555,13 @@
    "date": "2026-11-07",
    "item_id": "2026-11-07-9aa79e11",
    "source_id": "anthropic",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-08",
+   "item_id": "2026-11-08-9b31eb47",
+   "source_id": "openai",
    "tier": "T1-seed",
    "verdict": "pass"
   }
@@ -5643,6 +5896,11 @@
    "id": "2026-11-07-b466ce16",
    "date": "2026-11-07",
    "reason": "review: 13%-to-48% figure is wiki-alone; claim omitted that condition"
+  },
+  {
+   "id": "2026-11-08-4d5977ac",
+   "date": "2026-11-08",
+   "reason": "review: omitted that Ask first rules apply only with Auto Review on"
   }
  ]
 }
