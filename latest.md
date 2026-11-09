@@ -5,20 +5,14 @@
 <!-- breaking:start -->
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 8, 9:04 PM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 9, 9:04 AM PT; refreshed every 3 hours.
 
-1. **[Nvidia Opens Investigation Into Jensen Huang’s Relationship With Chinese Spy](https://www.reddit.com/r/singularity/comments/1xr7wb5/nvidia_opens_investigation_into_jensen_huangs/)**
-   - Reddit (r/singularity): 402 upvotes*, 138 comments · Covered by: nytimes.com · source: r/singularity
-   - `b-8730fecbf7` · also: [outlet](https://www.nytimes.com/2026/11/08/technology/nvidia-investigation-jensen-huang-china.html?unlocked_article_code=1.O1E.C0XQ.hmhC4S2csLxh&smid=nytcore-ios-share)
-2. **[Users have started buying RTX 5060 Ti 16GB graphics cards en masse for the sake of AI.](https://www.reddit.com/r/LocalLLaMA/comments/1xr01bj/users_have_started_buying_rtx_5060_ti_16gb/)**
-   - Reddit (r/LocalLLaMA): 446 upvotes*, 290 comments · source: r/LocalLLaMA
-   - `b-6d2b78fefb`
-3. **["Ram Altman" Is Now a Linux Script That Emails Sam Altman Daily to Report How Much Unused RAM Is in Your PC](https://www.reddit.com/r/LocalLLaMA/comments/1xqwn5n/ram_altman_is_now_a_linux_script_that_emails_sam/)**
-   - Reddit (r/LocalLLaMA): 1,493 upvotes*, 75 comments · source: r/LocalLLaMA
-   - `b-125563ee49`
-4. **[GPT-5.5 dataset across my used 25 billion tokens!](https://www.reddit.com/r/LocalLLaMA/comments/1xr3ymf/gpt55_dataset_across_my_used_25_billion_tokens/)**
-   - Reddit (r/LocalLLaMA): 230 upvotes*, 38 comments · source: r/LocalLLaMA
-   - `b-e808c73364`
+1. **[Trump claims that he threatened to arrest a major lab CEO who was "doing something bad with AI" that "could've been malicious"](https://www.reddit.com/r/singularity/comments/1xrhqeh/trump_claims_that_he_threatened_to_arrest_a_major/)**
+   - Reddit (r/singularity): 381 upvotes*, 157 comments · source: r/singularity
+   - `b-b3b8a86806`
+2. **[Has Anthropic Nerfed Opus 5.5? LiveNerf Day 47 Update](https://www.reddit.com/r/ClaudeAI/comments/1xriv9l/has_anthropic_nerfed_opus_55_livenerf_day_47/)**
+   - Reddit (r/ClaudeAI): 257 upvotes*, 55 comments · source: r/ClaudeAI
+   - `b-981a0c8a69`
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
