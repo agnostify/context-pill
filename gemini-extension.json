@@ -1,0 +1,10 @@
+{
+  "name": "context-pill",
+  "version": "0.1.0",
+  "description": "Daily feed of AI releases, tools and techniques, each labeled with how it was checked.",
+  "mcpServers": {
+    "context-pill": {
+      "httpUrl": "https://contextpill.com/mcp"
+    }
+  }
+}
