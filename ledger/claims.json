@@ -846,11 +846,11 @@
    "item_url": "https://www.youtube.com/watch?v=mEulEkuxCnM",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "closed-inconclusive",
    "recheck_on": "2026-11-09",
    "source_id": "openai",
    "status_at_publication": "unverified",
-   "inconclusive_count": 1
+   "inconclusive_count": 2
   },
   {
    "id": "2026-10-19-c8e4fb74",
@@ -2340,10 +2340,13 @@
    "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-09",
    "source_id": "theo",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/t3dotgg/tstack"
   },
   {
    "id": "2026-10-26-35d3b69c",
@@ -2372,10 +2375,13 @@
    "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-09",
    "source_id": "theo",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: good. Source: https://code.claude.com/docs/en/skills"
   },
   {
    "id": "2026-10-26-db52b859",
@@ -2405,7 +2411,7 @@
    "scorable": true,
    "prediction_deadline": null,
    "state": "pending",
-   "recheck_on": "2026-11-09",
+   "recheck_on": "2026-11-17",
    "source_id": "theo",
    "status_at_publication": "docs-verified"
   },
@@ -2437,7 +2443,7 @@
    "scorable": true,
    "prediction_deadline": null,
    "state": "pending",
-   "recheck_on": "2026-11-09",
+   "recheck_on": "2026-11-17",
    "source_id": "theo",
    "status_at_publication": "docs-verified"
   },
@@ -2468,10 +2474,13 @@
    "item_url": "https://www.youtube.com/watch?v=5Bmp9cz1JN8",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-09",
    "source_id": "theo",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/pingdotgg/t3code"
   },
   {
    "id": "2026-10-26-49c9a624",
@@ -2501,7 +2510,7 @@
    "scorable": true,
    "prediction_deadline": null,
    "state": "pending",
-   "recheck_on": "2026-11-09",
+   "recheck_on": "2026-11-17",
    "source_id": "theo",
    "status_at_publication": "docs-verified"
   },
@@ -2533,9 +2542,10 @@
    "scorable": true,
    "prediction_deadline": null,
    "state": "pending",
-   "recheck_on": "2026-11-09",
+   "recheck_on": "2026-11-17",
    "source_id": "theo",
-   "status_at_publication": "unverified"
+   "status_at_publication": "unverified",
+   "inconclusive_count": 1
   },
   {
    "id": "2026-10-26-b3619b07",
@@ -2564,10 +2574,13 @@
    "item_url": "https://simonwillison.net/2026/Oct/25/seam-cutter/",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-09",
    "source_id": "simonw",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "partial",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: partial. Sources: https://tools.simonwillison.net/seam-cutter, https://tools.simonwillison.net/colophon"
   },
   {
    "id": "2026-10-27-789335ea",
@@ -2604,10 +2617,13 @@
    "item_url": "https://www.youtube.com/watch?v=tTuk4pGnT0A",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "openai",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: good. Sources: https://developers.openai.com/api/docs/models/gpt-6.1-terra, https://simonwillison.net/2026/Oct/26/gpt-61-terra/"
   },
   {
    "id": "2026-10-27-393ec241",
@@ -2636,10 +2652,13 @@
    "item_url": "https://github.blog/changelog/2026-10-26-gpt-6-1-terra-in-github-copilot",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "github-changelog",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: good. Source: https://github.blog/changelog/2026-10-26-gpt-6-1-terra-in-github-copilot"
   },
   {
    "id": "2026-10-27-89459c15",
@@ -2672,10 +2691,13 @@
    "item_url": "https://github.blog/changelog/2026-10-26-github-copilot-assisted-permissions-generally-available",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "github-changelog",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.blog/changelog/2026-10-26-github-copilot-assisted-permissions-generally-available"
   },
   {
    "id": "2026-10-27-83b7ff34",
@@ -2704,10 +2726,13 @@
    "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "anthropic",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/anthropics/claude-code/releases/tag/v2.1.311"
   },
   {
    "id": "2026-10-27-693183fe",
@@ -2736,10 +2761,13 @@
    "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "anthropic",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/anthropics/claude-code/releases/tag/v2.1.311"
   },
   {
    "id": "2026-10-27-8099cfc6",
@@ -2768,10 +2796,13 @@
    "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.311",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "anthropic",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/anthropics/claude-code/releases/tag/v2.1.311"
   },
   {
    "id": "2026-10-27-e913a936",
@@ -2831,10 +2862,13 @@
    "item_url": "https://simonwillison.net/2026/Oct/26/webframe-evaluation/",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "simonw",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/tractordev/webframe"
   },
   {
    "id": "2026-10-27-8e03f2e9",
@@ -2863,10 +2897,13 @@
    "item_url": "https://importai.substack.com/p/import-ai-478-math-for-alignment",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "importai",
-   "status_at_publication": "verified"
+   "status_at_publication": "verified",
+   "outcome": "good",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: good. Source: https://arxiv.org/abs/2605.03546"
   },
   {
    "id": "2026-10-27-11a50222",
@@ -2927,10 +2964,13 @@
    "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261027.g363a13119",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "pending",
+   "state": "resolved",
    "recheck_on": "2026-11-10",
    "source_id": "deepmind",
-   "status_at_publication": "docs-verified"
+   "status_at_publication": "docs-verified",
+   "outcome": "docs-verified",
+   "resolved_on": "2026-11-10",
+   "resolution_note": "Outcome: docs-verified. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.67.0-nightly.20261027.g363a13119"
   },
   {
    "id": "2026-10-28-9b42804a",
@@ -5347,6 +5387,198 @@
    "recheck_on": "2026-11-22",
    "source_id": "openai",
    "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-10-615dd1b8",
+   "date": "2026-11-10",
+   "category": "tool",
+   "claim": "Claude Code v2.1.321 fixes MCP OAuth requests that sent secrets such as refresh tokens to another host after a server redirect. It also fixes a read-only Bash command running outside the sandbox without a permission prompt.",
+   "why_it_matters": "Older versions could leak MCP sign-in tokens or skip sandbox and permission checks. Anyone who uses MCP servers with OAuth should update.",
+   "try_this": "Run claude update, then check that claude --version reports 2.1.321 or later.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.321",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Read the official GitHub release notes for v2.1.321; no sandbox test today",
+    "checked_at": "2026-11-10T05:29-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Fixed MCP OAuth requests sending secrets such as refresh tokens to another host when a server redirected them",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.321",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.321",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-24",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-10-7076405d",
+   "date": "2026-11-10",
+   "category": "technique",
+   "claim": "Anthropic's docs (quoted by Simon Willison) say Fable 5.2 merged repeated code in about half of small coding tasks when told the codebase is its own, and in under a tenth without that sentence.",
+   "why_it_matters": "One sentence in the system prompt changes how much the model refactors. The same docs warn it also adds unrequested changes and about 1.5x the output tokens.",
+   "try_this": "Add the ownership sentence only in repos where you want refactoring, and review the full diff, not only the model's summary.",
+   "evidence": [
+    {
+     "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Found the quoted text and numbers in Anthropic's prompting guide; these are Anthropic's own test results",
+    "checked_at": "2026-11-10T05:29-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "This codebase is yours: what it's for and how it's built are your call, and you'll keep building on it.",
+   "excerpt_url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2",
+   "item_url": "https://simonwillison.net/2026/Nov/10/prompting-claude-fable-52/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-24",
+   "source_id": "simonw",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-10-e4e41821",
+   "date": "2026-11-10",
+   "category": "research",
+   "claim": "Anthropic and Diode report that Fable 5.2 designed a speakerphone, a voice-assistant hub and a handheld pet, covering PCB layout, enclosure and firmware. They say the boards worked without circuit fixes, and Fable 5.2 scored 69% on Diode's PCB Gym versus 25% for Fable 5.",
+   "why_it_matters": "This is a concrete test of agents doing hardware design. Anthropic has a commercial relationship with Diode, and the devices are unvalidated prototypes.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/claude-electronics-design",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "Read Anthropic's research post; the results and benchmark scores are reported by Anthropic and its partner only",
+    "checked_at": "2026-11-10T05:29-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Fable 5.2 scored 69% on the benchmark, compared with 25% for Fable 5 (Figure 2).",
+   "excerpt_url": "https://www.anthropic.com/research/claude-electronics-design",
+   "item_url": "https://www.anthropic.com/research/claude-electronics-design",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-24",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-10-9a13dba4",
+   "date": "2026-11-10",
+   "category": "release",
+   "claim": "NVIDIA and Elith released Nemotron-Personas-Finance-Japan, a synthetic Japanese persona dataset. It has 1M records with 50 fields each, adds household finance and financial literacy data, and uses the CC BY 4.0 license.",
+   "why_it_matters": "Teams building financial agents for Japan get commercially usable test users without touching real customer data.",
+   "try_this": "Load nvidia/Nemotron-Personas-Finance-Japan with the Hugging Face datasets library and look at a few records before using them as simulation seeds.",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-Finance-Japan",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "Checked the dataset page: exists, CC BY 4.0, 1M rows, 50 fields",
+    "checked_at": "2026-11-10T05:29-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Released under the CC BY 4.0 license, it is available for commercial use.",
+   "excerpt_url": "https://huggingface.co/blog/nvidia/nemotron-personas-finance-japan",
+   "item_url": "https://huggingface.co/blog/nvidia/nemotron-personas-finance-japan",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-24",
+   "source_id": "huggingface",
+   "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-10-8b34a6cf",
+   "date": "2026-11-10",
+   "category": "tool",
+   "claim": "llm-anthropic 0.31, released November 9, 2026, adds Claude Fable 5.2 to Simon Willison's LLM command-line tool as claude-fable-5.2.",
+   "why_it_matters": "You can try Fable 5.2 from the terminal, or compare it with other models, without writing API code.",
+   "try_this": "If you already use LLM, run llm install -U llm-anthropic and check that claude-fable-5.2 appears in llm models.",
+   "evidence": [
+    {
+     "url": "https://pypi.org/project/llm-anthropic/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "PyPI shows version 0.31 dated Nov 9, 2026, with claude-fable-5.2 usage; no sandbox test",
+    "checked_at": "2026-11-10T05:29-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Sources: https://pypi.org/project/llm-anthropic/, https://github.com/simonw/llm-anthropic/releases"
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://simonwillison.net/2026/Nov/9/llm-anthropic/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-24",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-10-1ab35504",
+   "date": "2026-11-10",
+   "category": "technique",
+   "claim": "In t3code PR #22557, merged October 21, 2026, about 11,000 of 25,928 tests judged low-signal were deleted to make CI faster and less flaky. Review restored 22 auth-boundary tests.",
+   "why_it_matters": "It is a real, inspectable example of cutting agent-era test bloat. The video's claim that only 4 tests came back is not confirmed by the PR page.",
+   "try_this": "Read PR #22557 in pingdotgg/t3code to see which kinds of tests were judged low-signal before you prune your own suite.",
+   "evidence": [
+    {
+     "url": "https://github.com/pingdotgg/t3code/pull/22557",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "verified",
+    "method": "The GitHub PR page confirms the title, test counts, merge date and restored tests",
+    "checked_at": "2026-11-10T05:29-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=GtJKFhztgdM",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-11-24",
+   "source_id": "theo",
+   "status_at_publication": "verified"
   }
  ],
  "audits": [
@@ -5562,6 +5794,13 @@
    "date": "2026-11-08",
    "item_id": "2026-11-08-9b31eb47",
    "source_id": "openai",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-10",
+   "item_id": "2026-11-10-8b34a6cf",
+   "source_id": "simonw",
    "tier": "T1-seed",
    "verdict": "pass"
   }
@@ -5901,6 +6140,46 @@
    "id": "2026-11-08-4d5977ac",
    "date": "2026-11-08",
    "reason": "review: omitted that Ask first rules apply only with Auto Review on"
+  },
+  {
+   "id": "2026-11-10-5ff08c38",
+   "date": "2026-11-10",
+   "reason": "review: U.S. availability and connector details not confirmed on evidence"
+  },
+  {
+   "id": "2026-11-10-ac489fe9",
+   "date": "2026-11-10",
+   "reason": "review: human-written summary misstates Willison's practice"
+  },
+  {
+   "id": "2026-11-10-4b801943",
+   "date": "2026-11-10",
+   "reason": "review: why-it-matters sentence traces to X posts"
+  },
+  {
+   "id": "2026-11-10-3a3245d8",
+   "date": "2026-11-10",
+   "reason": "review: vendor-only result labeled Verified"
+  },
+  {
+   "id": "2026-11-10-4a10a3b1",
+   "date": "2026-11-10",
+   "reason": "review: check note says no Meta page but research.meta.ai has one"
+  },
+  {
+   "id": "2026-11-10-ad5d9e82",
+   "date": "2026-11-10",
+   "reason": "review: why-it-matters and try-this overstate the API changes vs Fable 5.1"
+  },
+  {
+   "id": "2026-11-10-9baf8710",
+   "date": "2026-11-10",
+   "reason": "review: data retention sentence omits the temporary zero-retention exception"
+  },
+  {
+   "id": "2026-11-10-de693227",
+   "date": "2026-11-10",
+   "reason": "review: authors' own benchmark result labeled Docs-verified"
   }
  ]
 }
