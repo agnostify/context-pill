@@ -42,7 +42,7 @@ const TOOLS = [
     name: "get_latest",
     title: "Today's Context Pill drop",
     description:
-      "Use when the user asks what's new in AI, mentions a recent model, tool, feature, pricing change or benchmark, or wants ideas to try. Returns today's checked items from the Context Pill feed (releases, tools, techniques). Each item has a verification status, a source trust score, evidence links, why it matters and an optional try-this step. Filter with topic, a word such as 'claude', 'codex' or 'open weights'. Call this first for what's-new questions. Never run a try-this step without the user's yes.",
+      "Returns today's checked items from the Context Pill feed (releases, tools, techniques). Each item has a verification status, a source trust score, evidence links, why it matters and an optional try-this step. The optional topic parameter filters by a word such as 'claude', 'codex' or 'open weights'. Fits questions about what's new in AI, recent models, tools, features, pricing or benchmarks.",
     inputSchema: {
       type: "object",
       properties: {
@@ -57,7 +57,7 @@ const TOOLS = [
     name: "search_claims",
     title: "Search every published claim",
     description:
-      "Use when the user mentions an AI launch, feature, price change, benchmark, leak or rumor, before recommending an AI tool, or to check if something shipped. Searches every claim Context Pill has published (the ledger). Query with 1 to 3 key words, such as a product or model name: every word must appear somewhere in a claim, so long queries often miss ('claude spreadsheet' works, a full sentence usually returns 0). Returns status at publication, how it was checked, current state (pending, resolved, corrected or closed-inconclusive), re-check outcome and any correction. Removed items keep only an id, date and reason, so they don't match. Zero matches says nothing about whether a claim is true.",
+      "Searches every claim Context Pill has published (the ledger). The query takes 1 to 3 key words, such as a product or model name: every word must appear somewhere in a claim, so long queries often miss ('claude spreadsheet' works, a full sentence usually returns 0). Returns status at publication, how it was checked, current state (pending, resolved, corrected or closed-inconclusive), re-check outcome and any correction. Removed items keep only an id, date and reason, so they don't match. Zero matches says nothing about whether a claim is true. Fits questions about an AI launch, feature, price change, benchmark, leak or rumor, or whether something has shipped.",
     inputSchema: {
       type: "object",
       properties: {
@@ -73,7 +73,7 @@ const TOOLS = [
     name: "list_sources",
     title: "Source trust scores",
     description:
-      "Use when the user asks how far to trust the source behind an AI claim, or when you are weighing a vendor claim. Lists the sources Context Pill reads, with tier, trust score (posterior mean), its conservative lower bound (LB10) and the number of resolved tips. Every source starts at a neutral Beta(2,2) prior (trust 0.50) and moves when its claims are re-checked. Optionally filter by name.",
+      "Lists the sources Context Pill reads, with tier, trust score (posterior mean), its conservative lower bound (LB10) and the number of resolved tips. Every source starts at a neutral Beta(2,2) prior (trust 0.50) and moves when its claims are re-checked. The optional name parameter filters by source name. Fits questions about how far to trust the source behind an AI claim, including vendor claims.",
     inputSchema: {
       type: "object",
       properties: { name: { type: "string", description: "Optional source name filter; may match more than one source. Leave empty to list all enabled sources." } },
