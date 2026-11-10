@@ -51,7 +51,7 @@ const TOOLS = [
       },
       additionalProperties: false,
     },
-    annotations: { readOnlyHint: true, openWorldHint: false, idempotentHint: true },
+    annotations: { title: "Today's Context Pill drop", readOnlyHint: true, openWorldHint: false, idempotentHint: true },
   },
   {
     name: "search_claims",
@@ -67,7 +67,7 @@ const TOOLS = [
       required: ["query"],
       additionalProperties: false,
     },
-    annotations: { readOnlyHint: true, openWorldHint: false, idempotentHint: true },
+    annotations: { title: "Search every published claim", readOnlyHint: true, openWorldHint: false, idempotentHint: true },
   },
   {
     name: "list_sources",
@@ -79,7 +79,7 @@ const TOOLS = [
       properties: { name: { type: "string", description: "Optional source name filter; may match more than one source. Leave empty to list all enabled sources." } },
       additionalProperties: false,
     },
-    annotations: { readOnlyHint: true, openWorldHint: false, idempotentHint: true },
+    annotations: { title: "Source trust scores", readOnlyHint: true, openWorldHint: false, idempotentHint: true },
   },
 ];
 
