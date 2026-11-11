@@ -7,7 +7,10 @@ Sources (the `breaking:` block in sources.yaml, weights X > Reddit > company):
   in WORK/breaking/x_accounts.txt (never in this public repo). X counts rank stories; X links are never published.
 - Reddit: reddit.com/robots.txt disallows all crawlers, so posts come from the Arctic Shift API. Its upvotes are a
   snapshot taken soon after posting (understated), so comments weigh more.
-- Company releases: the registry's lab feeds (rss/sitemap). Signal = pickup on X/Reddit plus a first-party prior.
+- Company releases: the registry's lab feeds (rss/sitemap) plus breaking-only feeds (breaking.company.feeds), read over
+  their own window (company_hours). Signal = pickup on X/Reddit plus a first-party prior. A company-only story with no pickup
+  can't reach min_score, so a fresh first-party AI announcement (company_fresh_hours) gets one of company_cap slots after
+  the engagement-ranked stories; its score is left as is. A sitemap's first run only seeds its seen set.
 - News outlets count only as a cross-link signal.
 Writes breaking.json + breaking.md and re-renders only the Breaking block of latest.md/latest.json. A failed refresh keeps
 the last good files. Private state (history, ids, archive, raw) lives in WORK/breaking and is never pushed."""
@@ -35,6 +38,8 @@ AI_RE = re.compile(r"(?i)\b(a\.?i\.?|artificial intelligence|llms?|gpt[-\w.]*|ch
 NEWS_RE = re.compile(r"(?i)\b(launch\w*|releas\w*|announc\w*|unveil\w*|introduc\w*|ships?|open[- ]sourc\w*|acquir\w*|raises?|"
                      r"funding|valuation|lawsuit|sues?|ban\w*|block\w*|leak\w*|outage|breach|ceo|reports?|reported|says|available|"
                      r"benchmark|model|weights|update|deal|partner\w*|billion|policy|regulat\w*)\b")
+NAME_RE = re.compile(r"(?i)\b(openai|anthropic|nvidia|deepmind|google|meta|microsoft|mistral|xai|hugging ?face|perplexity|deepseek|"
+                     r"altman|amodei|hassabis|musk)\b")   # names alone don't make a fresh company post AI news
 SELF_DOMAINS = ("reddit.com", "redd.it", "i.redd.it", "v.redd.it", "self.")
 
 
@@ -44,6 +49,10 @@ def cfg(repo=REPO):
     c["min_score"] = float(env.get("BREAKING_MIN_SCORE", c.get("min_score", 0.6)))
     c["max_stories"] = int(env.get("BREAKING_MAX", c.get("max_stories", 10)))
     c["refresh_hours"] = int(env.get("BREAKING_REFRESH_HOURS", c.get("refresh_hours", 3)))
+    cc = c["company"] = dict(c.get("company") or {})
+    cc["hours"] = int(env.get("BREAKING_COMPANY_HOURS", cc.get("hours", 36)))
+    cc["fresh_hours"] = float(env.get("BREAKING_COMPANY_FRESH_HOURS", cc.get("fresh_hours", 12)))
+    cc["cap"] = int(env.get("BREAKING_COMPANY_CAP", cc.get("cap", 3)))
     return c
 
 
@@ -169,25 +178,31 @@ def fetch_company(c, since, repo, work, log):
     srcs = {s["id"]: s for s in yaml.safe_load((repo / "sources.yaml").read_text())["sources"]}
     seen_p = work / "breaking" / "seen-sitemaps.json"
     seen = json.loads(seen_p.read_text()) if seen_p.exists() else {}
-    items, errors, ok = [], [], 0
-    for sid in cc.get("sources", []):
-        s = srcs.get(sid)
-        if not s or not s.get("enabled"):
-            continue
-        for f in s.get("feeds", []):
-            if f["type"] not in ("rss", "sitemap_new") or "github.com" in f["url"]:
-                continue                       # release notes of CLIs are not news; YouTube needs the Data API
-            try:
-                got = fetch.feed_items(s, f, since) if f["type"] == "rss" else fetch.sitemap_items(s, f, since, seen)[0]
-                ok += 1
-            except Exception as e:
-                errors.append(f"{sid}: {type(e).__name__}"); continue
-            for i in got:
-                items.append({"platform": "company", "id": "url:" + repeats.norm_url(i["url"]), "title": (i["title"] or _slug_title(i["url"]))[:300],
-                              "url": i["url"], "created": i.get("published") or dt.datetime.now(dt.timezone.utc).isoformat(),
-                              "raw": {}, "links": [i["url"]], "company": s["name"], "aggregator": False})
+    items, errors, ok, seeded = [], [], 0, 0
+    pairs = [(srcs[sid], f) for sid in cc.get("sources", []) if (srcs.get(sid) or {}).get("enabled") for f in srcs[sid].get("feeds", [])]
+    # breaking-only feeds: public, keyless company feeds that stay out of the registry and the daily checked-claims drop
+    pairs += [({"id": f["id"], "name": f["name"]}, {"type": "rss", "url": f["url"]}) for f in cc.get("feeds", [])]
+    for s, f in pairs:
+        sid = s["id"]
+        if f["type"] not in ("rss", "sitemap_new") or "github.com" in f["url"]:
+            continue                       # release notes of CLIs are not news; YouTube needs the Data API
+        try:
+            if f["type"] == "rss":
+                got = fetch.feed_items(s, f, since)
+            else:                          # first run: seed the seen set and emit nothing (no whole-sitemap flood)
+                got, first_run = fetch.sitemap_items(s, f, since, seen)[:2]
+                if first_run:
+                    seeded += 1; got = []
+            ok += 1
+        except Exception as e:
+            errors.append(f"{sid}: {type(e).__name__}"); continue
+        for i in got:
+            items.append({"platform": "company", "id": "url:" + repeats.norm_url(i["url"]), "title": (i["title"] or _slug_title(i["url"]))[:300],
+                          "url": i["url"], "created": i.get("published") or dt.datetime.now(dt.timezone.utc).isoformat(),
+                          "raw": {}, "links": [i["url"]], "company": s["name"], "aggregator": False,
+                      "dated": bool(i.get("published"))})   # undated: collected-at time, never fresh
     seen_p.parent.mkdir(parents=True, exist_ok=True); seen_p.write_text(json.dumps(seen))
-    log(f"company: {len(items)} items from {ok} feeds" + (f"; errors: {', '.join(errors)}" if errors else ""))
+    log(f"company: {len(items)} items from {ok} feeds" + (f"; {seeded} sitemaps seeded (first run)" if seeded else "") + (f"; errors: {', '.join(errors)}" if errors else ""))
     if errors and not ok:
         return [], "company feeds unreachable"
     return items, None
@@ -364,8 +379,23 @@ def assign_ids(groups, prev_keys, date):
     return out
 
 
-def select(cands, c):
+def fresh_company(g, s, c, now):
+    """A story led by a dated first-party post from a company_domains host, newest within company_fresh_hours, about AI once
+    company and people names are taken out of the title. Pickup that still leaves it under min_score doesn't disqualify it."""
+    comp = [i for i in g if i["platform"] == "company" and i.get("dated", True)]
+    if not comp or not domain_in(s["primary_url"], tuple(c.get("company_domains", []))):
+        return False
+    age_h = (now - max(dt.datetime.fromisoformat(i["created"]) for i in comp)).total_seconds() / 3600
+    return age_h <= c["company"]["fresh_hours"] and is_ai(NAME_RE.sub(" ", s["title"]))
+
+
+def select(cands, c, fresh=()):
+    """Engagement-ranked stories that clear min_score first; then up to company_cap fresh first-party stories (fresh =
+    their ids) in the slots left under max_stories. Their scores stay real, so they never jump an engagement story."""
     ok = sorted((x for x in cands if x[0]["score"] >= c["min_score"]), key=lambda x: -x[0]["score"])[:c["max_stories"]]
+    room = min(c["company"]["cap"], c["max_stories"] - len(ok))
+    if room > 0:
+        ok += sorted((x for x in cands if x[0]["id"] in fresh and x[0]["score"] < c["min_score"]), key=lambda x: -x[0]["score"])[:room]
     for n, (s, _) in enumerate(ok, 1):
         s["rank"] = n
     return ok
@@ -409,10 +439,11 @@ def run(date, hours, dry_run, repo=REPO, work=WORK, log=print, fetchers=None, ch
     bw = work / "breaking"; bw.mkdir(parents=True, exist_ok=True)
     now = now or dt.datetime.now(dt.timezone.utc)
     since = now - dt.timedelta(hours=hours)
+    since_company = now - dt.timedelta(hours=c["company"]["hours"])   # labs post less often than Reddit/X: own window
     util.init_state(bw, date)
     util.HOST_DAILY_BUDGET = max(util.HOST_DAILY_BUDGET, HOST_BUDGET)
     fetchers = fetchers or {"x": lambda: fetch_x(c, since, work, log), "reddit": lambda: fetch_reddit(c, since, log),
-                            "company": lambda: fetch_company(c, since, repo, work, log)}
+                            "company": lambda: fetch_company(c, since_company, repo, work, log)}
     items, missing = [], []
     for plat, f in fetchers.items():
         try:
@@ -439,7 +470,7 @@ def run(date, hours, dry_run, repo=REPO, work=WORK, log=print, fetchers=None, ch
             old_keys |= set(ks)
     sp = bw / "state" / f"ids-{date}.json"
     prev_keys = json.loads(sp.read_text()) if sp.exists() else {}
-    cands, repeated, x_only = [], 0, 0
+    cands, repeated, x_only, fresh = [], 0, 0, set()
     for sid, keys, g in assign_ids(cluster(items), prev_keys, date):
         if keys & old_keys:
             repeated += 1; continue
@@ -447,7 +478,10 @@ def run(date, hours, dry_run, repo=REPO, work=WORK, log=print, fetchers=None, ch
         if s is None:
             x_only += 1; continue
         cands.append((s, (keys, [i["id"] for i in g])))
-    chosen = select(cands, c)
+        if fresh_company(g, s, c, now):
+            fresh.add(s["id"])
+    chosen = select(cands, c, fresh)
+    n_fresh = sum(1 for s, _ in chosen if s["id"] in fresh and s["score"] < c["min_score"])
     stories = [s for s, _ in chosen]
     upd = now.astimezone(PT)
     b = {"schema": "https://raw.githubusercontent.com/agnostify/context-pill/main/schema/breaking.schema.json",
@@ -459,8 +493,8 @@ def run(date, hours, dry_run, repo=REPO, work=WORK, log=print, fetchers=None, ch
          "platforms_missing": missing, "stories": stories}
     if x_only:
         b["notes"] = [f"{x_only} X-only stories left out: X links are never published here and they had no other public link."]
-    log(f"breaking: {len(cands)} candidate stories, {len(stories)} cleared {c['min_score']} (cap {c['max_stories']}); "
-        f"{repeated} featured yesterday; missing: {', '.join(m['platform'] for m in missing) or 'none'}")
+    log(f"breaking: {len(cands)} candidate stories, {len(stories) - n_fresh} cleared {c['min_score']} (cap {c['max_stories']}); "
+        f"{n_fresh} fresh company-only (cap {c['company']['cap']}); {repeated} featured yesterday; missing: {', '.join(m['platform'] for m in missing) or 'none'}")
     raw_by_id = {i["id"]: i for i in items}
     members_of = {s["id"]: m[1] for s, m in chosen}
     schema = json.loads((repo / "schema" / "breaking.schema.json").read_text())

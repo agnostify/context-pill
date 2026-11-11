@@ -966,10 +966,26 @@ breaking:
   company:
     weight: 0.8
     prior: 0.55
+    hours: 36
+    fresh_hours: 12
+    cap: 3
+    note: Company feeds read over their own window (hours). A company-only story can't reach min_score without pickup,
+      so up to cap fresh (fresh_hours) first-party AI announcements fill slots left after the engagement-ranked stories.
+      feeds are breaking-only (not registry sources, never in the checked-claims drop); each URL returned items on
+      2026-10-27. Checked and left out that day - Microsoft AI blog feed (403), xAI sitemap (403), Meta AI blog feed (404),
+      Mistral sitemap (no URL entries).
     sources:
     - anthropic
     - openai
     - deepmind
+    - huggingface
+    feeds:
+    - id: nvidia-blog
+      name: NVIDIA
+      url: https://blogs.nvidia.com/feed/
+    - id: nvidia-newsroom
+      name: NVIDIA
+      url: https://nvidianews.nvidia.com/rss.xml
   company_domains:
   - anthropic.com
   - claude.com
@@ -983,6 +999,7 @@ breaking:
   - perplexity.ai
   - deepseek.com
   - qwen.ai
+  - huggingface.co
   outlets:
   - reuters.com
   - bloomberg.com
