@@ -5,14 +5,11 @@
 <!-- breaking:start -->
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 11, 6:17 PM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 12, 6:16 AM PT; refreshed every 3 hours.
 
-1. **[Nvidia is Preparing to Oust Nvidia CEO Jensen Huang](https://www.reddit.com/r/LocalLLaMA/comments/1xtvsi7/nvidia_is_preparing_to_oust_nvidia_ceo_jensen/)**
-   - Reddit (r/LocalLLaMA): 538 upvotes*, 375 comments across 2 posts · Covered by: wsj.com · source: r/LocalLLaMA
-   - `b-08e1ad9259` · also: [outlet](https://www.wsj.com/business/nvidia-is-preparing-to-oust-nvidia-ceo-jensen-huang-30f421ad)
-2. **[NVIDIA reportedly cancels GeForce RTX 5080 24GB launch, brings back 16GB model over GDDR7 costs](https://www.reddit.com/r/LocalLLaMA/comments/1xtdwps/nvidia_reportedly_cancels_geforce_rtx_5080_24gb/)**
-   - Reddit (r/LocalLLaMA): 675 upvotes*, 157 comments · source: r/LocalLLaMA
-   - `b-6a78031111`
+1. **[AlphaGenome 2: Deciphering how cells read DNA to better understand disease](https://deepmind.google/blog/alphagenome-2-deciphering-how-cells-read-dna-to-better-understand-disease/)**
+   - Reddit (r/singularity): 322 upvotes*, 27 comments · First-party: Google DeepMind / Google AI · source: Google DeepMind / Google AI
+   - `b-061aaf582f` · also: [reddit](https://www.reddit.com/r/singularity/comments/1xtkckl/google_deepmind_unveils_alphagenome_2_an_ai_model/)
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
