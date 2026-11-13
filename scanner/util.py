@@ -62,6 +62,17 @@ def add_page(host):
     _state.setdefault("pages", {})[host] = page_count(host) + 1; _save()
 
 
+def host_count(host):
+    """Requests made to this host today (all runs sharing today's state file)."""
+    return _state["count"].get(host, 0)
+
+
+def robots_cached(url):
+    """True once this process has robots.txt for the URL's site, so the next get() to it costs exactly one request."""
+    p = urllib.parse.urlsplit(url)
+    return f"{p.scheme}://{p.netloc}" in _robots
+
+
 def stopped_hosts():
     return dict(_state["stopped"])
 
