@@ -230,3 +230,172 @@ try:
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 print("breaking tests: OK")
+
+
+# ---------- Arctic Shift budget sharing (fake HTTP; util's real counting and state file)
+import urllib.parse
+from scanner import util as U
+
+SUBS = ["LocalLLaMA", "MachineLearning", "OpenAI", "ClaudeAI", "singularity"]
+DAY = "2026-11-12"
+
+
+def at(h, m=15):
+    return dt.datetime(2026, 11, 12, h, m, tzinfo=B.PT).astimezone(dt.timezone.utc)
+
+
+class FakeArctic:
+    """Every subreddit has `deep` full pages of 100 posts, then a short page. Records each search request in order."""
+    def __init__(self, deep=5, hops=0):
+        self.deep, self.calls, self.hops, self.redirects = deep, [], hops, 0
+
+    def __call__(self, url, **kw):
+        q = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+        r = type("R", (), {"is_redirect": False, "headers": {}, "text": ""})()
+        if url.endswith("/robots.txt"):
+            r.status_code = 404
+            return r
+        hop = int(q.get("hop", ["0"])[0])
+        if hop < self.hops:                      # same-host redirect chain before the real answer
+            self.redirects += 1
+            r.status_code, r.is_redirect, r.headers = 302, True, {"location": url.split("&hop=")[0] + f"&hop={hop + 1}"}
+            return r
+        sub, page = q["subreddit"][0], 1 + sum(1 for c in self.calls if c[0] == q["subreddit"][0])
+        self.calls.append((sub, page))
+        n = 100 if page <= self.deep else 3
+        base = 1762900000 - page * 1000
+        data = [{"id": f"{sub}-{page}-{i}", "title": f"{sub} OpenAI model launch {page}-{i}", "created_utc": base - i,
+                 "score": 10, "num_comments": 2, "subreddit": sub} for i in range(n)]
+        r.status_code, r.json = 200, (lambda: {"data": data})
+        return r
+
+
+class Env:
+    """A fresh process (no robots.txt cached) on a given day's util state, with the fake Arctic Shift."""
+    def __init__(self, state_dir, used=0, deep=5, hops=0):
+        self.dir, self.fake = Path(state_dir), FakeArctic(deep, hops)
+        U.init_state(self.dir, DAY)
+        if used:
+            U._state["count"][B.ARCTIC_HOST] = used; U._save()
+
+    def __enter__(self):
+        self.saved = (U.requests.get, U.MIN_GAP, U.HOST_DAILY_BUDGET, dict(U._robots), dict(U._last))
+        U.requests.get, U.MIN_GAP = self.fake, 0
+        U.HOST_DAILY_BUDGET = max(U.HOST_DAILY_BUDGET, B.HOST_BUDGET)
+        U._robots.clear(); U._last.clear()
+        return self
+
+    def __exit__(self, *a):
+        U.requests.get, U.MIN_GAP, U.HOST_DAILY_BUDGET = self.saved[:3]
+        U._run_limit.clear()
+        U._robots.clear(); U._robots.update(self.saved[3]); U._last.clear(); U._last.update(self.saved[4])
+
+    def fetch(self, now, hours=24, log=None):
+        c = {"reddit": {"subreddits": SUBS}}
+        return B.fetch_reddit(c, now - dt.timedelta(hours=hours), log or (lambda m: None), now=now, cache_dir=self.dir, date=DAY)
+
+
+def test_runs_left_schedule():
+    assert [B.runs_left(at(h)) for h in (6, 9, 12, 15, 18, 21, 23)] == [6, 5, 4, 3, 2, 1, 1]
+    assert B.runs_left(at(5)) == 7, "an early run before 6 AM still leaves all six scheduled runs"
+
+
+def test_cap_60_left_at_6am_is_10():
+    with tempfile.TemporaryDirectory() as d, Env(d, used=0):
+        assert B.reddit_cap(len(SUBS), at(6, 13))[0] == 10
+
+
+def test_cap_10_left_at_9pm_is_10():
+    with tempfile.TemporaryDirectory() as d, Env(d, used=50):
+        assert B.reddit_cap(len(SUBS), at(21, 20))[0] == 10
+    with tempfile.TemporaryDirectory() as d, Env(d, used=57):
+        assert B.reddit_cap(len(SUBS), at(21, 20))[0] == 3, "never more than what's left today"
+
+
+def test_page_one_of_every_subreddit_before_any_page_two():
+    with tempfile.TemporaryDirectory() as d, Env(d) as e:
+        items, note = e.fetch(at(6, 13))
+        assert note is None and items
+        pages = [p for _, p in e.fake.calls]
+        assert pages[:len(SUBS)] == [1] * len(SUBS) and {s for s, _ in e.fake.calls[:len(SUBS)]} == set(SUBS), e.fake.calls
+        assert pages == sorted(pages), "breadth first: pages never go back down"
+        assert U.host_count(B.ARCTIC_HOST) == 10, "cap 10 at 6 AM with 60 left (robots.txt + 9 searches)"
+
+
+def test_retry_within_15_min_makes_no_requests():
+    with tempfile.TemporaryDirectory() as d:
+        with Env(d) as e:
+            first, _ = e.fetch(at(9, 16))
+            used = U.host_count(B.ARCTIC_HOST)
+        with Env(d) as e:                       # the retry pass is a new process, 8 minutes later
+            logs = []
+            again, note = e.fetch(at(9, 24), log=logs.append)
+            assert e.fake.calls == [] and U.host_count(B.ARCTIC_HOST) == used and note is None
+            assert again == first and any(m.startswith("reddit budget: used 0 this run") for m in logs), logs
+        with Env(d) as e:                       # 20 minutes later it fetches again
+            e.fetch(at(9, 36))
+            assert e.fake.calls
+
+
+def test_redirect_hops_never_push_a_run_past_its_cap():
+    for used, h in ((0, 6), (50, 21), (40, 18)):
+        with tempfile.TemporaryDirectory() as d, Env(d, used=used, hops=3) as e:
+            cap = B.reddit_cap(len(SUBS), at(h))[0]
+            e.fetch(at(h))
+            assert e.fake.redirects, "the fake really redirected"
+            spent = U.host_count(B.ARCTIC_HOST) - used
+            assert 0 < spent <= cap, (h, spent, cap)
+            assert U._run_limit == {}, "the run limit is cleared after the fetch"
+            assert U.host_count(B.ARCTIC_HOST) <= B.HOST_BUDGET
+
+
+def test_cache_key_is_the_exact_window():
+    now = at(9, 16)
+    k = B._cache_key(DAY, now - dt.timedelta(hours=24), now, SUBS)
+    assert k == B._cache_key(DAY, at(9, 24) - dt.timedelta(hours=24), at(9, 24), SUBS), "same-window retry shares the key"
+    assert k != B._cache_key(DAY, now - dt.timedelta(hours=24, minutes=20), now, SUBS), "a 24h20m window is not a 24h one"
+    assert k != B._cache_key(DAY, now - dt.timedelta(hours=23, minutes=50), now, SUBS)
+    with tempfile.TemporaryDirectory() as d:
+        with Env(d) as e:
+            e.fetch(at(9, 16))
+        with Env(d) as e:
+            e.fetch(at(9, 20), hours=24.4)
+            assert e.fake.calls, "a different fractional window is fetched, not reused"
+
+
+def test_simulated_heavy_day_stays_in_budget():
+    """Nov 12-style day: every subreddit has deep pages; 6 scheduled runs, each followed by a retry pass."""
+    with tempfile.TemporaryDirectory() as d:
+        for h in B.SCHEDULE_PT:
+            for retry in (0, 1):
+                with Env(d) as e:
+                    logs = []
+                    items, note = e.fetch(at(h, 15 + 5 * retry), log=logs.append)
+                    assert note is None and items, (h, retry, logs)
+                    assert U.host_count(B.ARCTIC_HOST) <= B.HOST_BUDGET, (h, U.host_count(B.ARCTIC_HOST))
+                    if retry:
+                        assert e.fake.calls == [], (h, e.fake.calls)
+                    else:
+                        assert {s for s, p in e.fake.calls if p == 1} == set(SUBS), (h, e.fake.calls)
+                    assert any(m.startswith("reddit budget: used ") and f"/{B.HOST_BUDGET} today" in m for m in logs), logs
+        assert U.host_count(B.ARCTIC_HOST) == B.HOST_BUDGET
+
+
+def test_daily_drop_budget_unchanged():
+    import subprocess, sys
+    out = subprocess.run([sys.executable, "-c", "from scanner import util; print(util.HOST_DAILY_BUDGET)"],
+                         cwd=REPO, capture_output=True, text=True, check=True).stdout.strip()
+    assert out == "30", "the daily drop scanner's per-host budget stays 30"
+    saved = U.HOST_DAILY_BUDGET
+    with tempfile.TemporaryDirectory() as d, Env(d) as e:
+        U.HOST_DAILY_BUDGET = 30
+        e.fetch(at(6, 13))
+        assert U.HOST_DAILY_BUDGET == 30, "fetch_reddit never changes the shared per-host budget"
+    U.HOST_DAILY_BUDGET = saved
+
+
+if __name__ == "__main__":
+    for _name, _fn in list(globals().items()):
+        if _name.startswith("test_") and callable(_fn):
+            _fn()
+    print("breaking budget tests: OK")

@@ -20,7 +20,8 @@ from . import util, repeats, fetch, render, gate
 REPO = Path(__file__).resolve().parent.parent
 WORK = Path(os.environ.get("CP_WORK", REPO.parent / "context-pill-work"))
 PT = ZoneInfo("America/Los_Angeles")
-HOST_BUDGET = 60               # per host per day for breaking refreshes (own state file; 8 refreshes x 1-6 requests)
+HOST_BUDGET = 60               # per host per day for breaking refreshes (own state file). Arctic Shift spends it across the
+                               # 6 scheduled refreshes (SCHEDULE_PT): each run gets a fair share, at least page 1 of every subreddit
 HISTORY_DAYS = 14
 REF_FLOOR = {"x": 5000, "reddit": 1000}   # a quiet day's best post isn't scored as a giant
 MIN_HISTORY = 100              # pooled values from earlier days needed before history percentiles replace within-day ones
@@ -28,6 +29,9 @@ HALF_LIFE_H = 48               # recency: a story's score halves every 48 h (fre
 CROSS_BONUS = 0.2              # +20% per extra platform
 ARCTIC = "https://arctic-shift.photon-reddit.com/api/posts/search"
 ARCTIC_PAGES = 5               # up to 500 posts per subreddit per refresh
+ARCTIC_HOST = util.host_of(ARCTIC)
+SCHEDULE_PT = (6, 9, 12, 15, 18, 21)   # scheduled breaking refreshes (PT hours)
+RETRY_REUSE_MIN = 15           # a second pass within this many minutes reuses the cached Reddit result
 AI_RE = re.compile(r"(?i)\b(a\.?i\.?|artificial intelligence|llms?|gpt[-\w.]*|chatgpt|openai|anthropic|claude|gemini|deepmind|grok|xai|"
                    r"llama|mistral|nvidia|gpus?|copilot|machine learning|neural|chatbots?|agents?|agentic|deepseek|qwen|kimi|"
                    r"hugging ?face|perplexity|sora|midjourney|transformer|inference|datacenters?|data centers?|frontier model|"
@@ -59,26 +63,92 @@ def is_ai(text):
 # ---------- fetchers: each returns (items, note). note=None means the platform worked.
 # item: {platform, id, title, url (public link), created (iso), raw (counts dict), aggregator, links: [urls], ...}
 
-def fetch_reddit(c, since, log):
+def runs_left(now):
+    """Scheduled refreshes left today (PT), counting this one. After 21:00 it is 1; before 6 AM, this run plus all six."""
+    return 1 + sum(1 for h in SCHEDULE_PT if h > now.astimezone(PT).hour)
+
+
+def reddit_cap(n_subs, now, url=None):
+    """This run's Arctic Shift request cap: a fair share of what's left today, at least enough for page 1 of every
+    subreddit (plus robots.txt if this process hasn't fetched it yet), never more than what's left.
+    Returns (cap, used_today, runs_left)."""
+    used = util.host_count(ARCTIC_HOST)
+    remaining = max(0, HOST_BUDGET - used)
+    n = runs_left(now)
+    floor = n_subs + (0 if util.robots_cached(url or ARCTIC) else 1)
+    return min(remaining, max(floor, remaining // n)), used, n
+
+
+def _cache_key(date, since, now, subs):
+    return f"{date}|{int((now - since).total_seconds())}s|{','.join(subs)}"
+
+
+def _read_cache(path, key, now):
+    try:
+        d = json.loads(path.read_text())
+        age = (now - dt.datetime.fromisoformat(d["at"])).total_seconds()
+        if d.get("key") == key and 0 <= age <= RETRY_REUSE_MIN * 60:
+            return d["items"]
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return None
+
+
+def fetch_reddit(c, since, log, now=None, cache_dir=None, date=None):
     rc = c.get("reddit") or {}
-    items, errors = [], []
-    for sub in rc.get("subreddits", []):
-        posts, before = [], ""
-        try:
-            for _ in range(ARCTIC_PAGES):        # newest first; page back with before=<oldest seen> until the window is covered
-                r = util.get(f"{ARCTIC}?subreddit={sub}&after={int(since.timestamp())}{before}&limit=100&sort=desc", timeout=40)
+    subs = list(rc.get("subreddits", []))
+    now = now or dt.datetime.now(dt.timezone.utc)
+    date = date or now.astimezone(PT).date().isoformat()
+    cache = Path(cache_dir) / "reddit-cache.json" if cache_dir else None
+    key = _cache_key(date, since, now, subs)
+    cap, used_before, n_left = reddit_cap(len(subs), now)
+    if cache:
+        hit = _read_cache(cache, key, now)
+        if hit is not None:
+            log(f"reddit: reused {len(hit)} posts from a pass under {RETRY_REUSE_MIN} min ago")
+            log(f"reddit budget: used 0 this run, cap {cap}, {used_before}/{HOST_BUDGET} today, {n_left} runs left")
+            return hit, None
+    start = util.host_count(ARCTIC_HOST)
+    util.set_run_limit(ARCTIC_HOST, start + cap)   # enforced on every request and redirect hop, not just here
+    try:
+        return _fetch_reddit_pages(subs, since, log, now, cache, key, cap, used_before, n_left, start)
+    finally:
+        util.set_run_limit(ARCTIC_HOST, None)
+
+
+def _fetch_reddit_pages(subs, since, log, now, cache, key, cap, used_before, n_left, start):
+    posts = {s: [] for s in subs}
+    before = {s: "" for s in subs}
+    open_subs, errors, capped = list(subs), [], False
+    for _ in range(ARCTIC_PAGES):                # breadth first: page 1 of every subreddit before any page 2
+        for sub in list(open_subs):              # newest first; page back with before=<oldest seen> until the window is covered
+            url = f"{ARCTIC}?subreddit={sub}&after={int(since.timestamp())}{before[sub]}&limit=100&sort=desc"
+            need = 1 if util.robots_cached(url) else 2
+            if util.host_count(ARCTIC_HOST) - start + need > cap:
+                capped = True
+                break
+            try:
+                r = util.get(url, timeout=40)
                 if r.status_code >= 400:
                     raise RuntimeError(f"HTTP {r.status_code}")
                 page = r.json().get("data") or []
-                posts += page
-                if len(page) < 100:
+            except Exception as e:
+                if util.host_count(ARCTIC_HOST) - start >= cap:   # a redirect hop reached the run cap
+                    capped = True
                     break
-                before = f"&before={min(p['created_utc'] for p in page)}"
-        except Exception as e:
-            errors.append(f"r/{sub}: {type(e).__name__}")
-            if not posts:
+                errors.append(f"r/{sub}: {type(e).__name__}")
+                open_subs.remove(sub)
                 continue
-        for p in {p["id"]: p for p in posts}.values():
+            posts[sub] += page
+            if len(page) < 100:
+                open_subs.remove(sub)
+            else:
+                before[sub] = f"&before={min(p['created_utc'] for p in page)}"
+        if capped or not open_subs:
+            break
+    items = []
+    for sub in subs:
+        for p in {p["id"]: p for p in posts[sub]}.values():
             if p.get("over_18") or p.get("stickied") or p.get("removed_by_category") or not p.get("title"):
                 continue
             perm = "https://www.reddit.com" + (p.get("permalink") or f"/r/{sub}/comments/{p['id']}/")
@@ -89,9 +159,21 @@ def fetch_reddit(c, since, log):
                           "raw": {"upvotes": int(p.get("score") or 0), "comments": int(p.get("num_comments") or 0)},
                           "subreddit": p.get("subreddit") or sub, "links": [ext] if external else [], "external": external,
                           "understated": True, "aggregator": False})
-    log(f"reddit: {len(items)} posts from {len(rc.get('subreddits', [])) - len(errors)} subreddits" + (f"; errors: {', '.join(errors)}" if errors else ""))
-    if errors and not items:
-        return [], "Arctic Shift unreachable (" + ", ".join(errors[:3]) + ")"
+    used = util.host_count(ARCTIC_HOST) - start
+    log(f"reddit: {len(items)} posts from {len(subs) - len(errors)} subreddits" + (f"; errors: {', '.join(errors)}" if errors else "")
+        + (f"; stopped at the run cap with {len(open_subs)} subreddits not fully paged" if capped else ""))
+    log(f"reddit budget: used {used} this run, cap {cap}, {util.host_count(ARCTIC_HOST)}/{HOST_BUDGET} today, {n_left} runs left")
+    if not items:
+        if errors:
+            return [], "Arctic Shift unreachable (" + ", ".join(errors[:3]) + ")"
+        if cap == 0:
+            return [], f"Arctic Shift daily budget used up ({used_before}/{HOST_BUDGET})"
+    if cache and items:
+        try:
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps({"key": key, "at": now.isoformat(), "items": items}, ensure_ascii=False))
+        except OSError:
+            pass
     return items, None
 
 
@@ -411,7 +493,7 @@ def run(date, hours, dry_run, repo=REPO, work=WORK, log=print, fetchers=None, ch
     since = now - dt.timedelta(hours=hours)
     util.init_state(bw, date)
     util.HOST_DAILY_BUDGET = max(util.HOST_DAILY_BUDGET, HOST_BUDGET)
-    fetchers = fetchers or {"x": lambda: fetch_x(c, since, work, log), "reddit": lambda: fetch_reddit(c, since, log),
+    fetchers = fetchers or {"x": lambda: fetch_x(c, since, work, log), "reddit": lambda: fetch_reddit(c, since, log, now=now, cache_dir=bw / "state", date=date),
                             "company": lambda: fetch_company(c, since, repo, work, log)}
     items, missing = [], []
     for plat, f in fetchers.items():
