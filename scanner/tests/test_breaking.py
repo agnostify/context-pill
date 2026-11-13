@@ -246,14 +246,19 @@ def at(h, m=15):
 
 class FakeArctic:
     """Every subreddit has `deep` full pages of 100 posts, then a short page. Records each search request in order."""
-    def __init__(self, deep=5):
-        self.deep, self.calls = deep, []
+    def __init__(self, deep=5, hops=0):
+        self.deep, self.calls, self.hops, self.redirects = deep, [], hops, 0
 
     def __call__(self, url, **kw):
         q = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
         r = type("R", (), {"is_redirect": False, "headers": {}, "text": ""})()
         if url.endswith("/robots.txt"):
             r.status_code = 404
+            return r
+        hop = int(q.get("hop", ["0"])[0])
+        if hop < self.hops:                      # same-host redirect chain before the real answer
+            self.redirects += 1
+            r.status_code, r.is_redirect, r.headers = 302, True, {"location": url.split("&hop=")[0] + f"&hop={hop + 1}"}
             return r
         sub, page = q["subreddit"][0], 1 + sum(1 for c in self.calls if c[0] == q["subreddit"][0])
         self.calls.append((sub, page))
@@ -267,8 +272,8 @@ class FakeArctic:
 
 class Env:
     """A fresh process (no robots.txt cached) on a given day's util state, with the fake Arctic Shift."""
-    def __init__(self, state_dir, used=0, deep=5):
-        self.dir, self.fake = Path(state_dir), FakeArctic(deep)
+    def __init__(self, state_dir, used=0, deep=5, hops=0):
+        self.dir, self.fake = Path(state_dir), FakeArctic(deep, hops)
         U.init_state(self.dir, DAY)
         if used:
             U._state["count"][B.ARCTIC_HOST] = used; U._save()
@@ -282,6 +287,7 @@ class Env:
 
     def __exit__(self, *a):
         U.requests.get, U.MIN_GAP, U.HOST_DAILY_BUDGET = self.saved[:3]
+        U._run_limit.clear()
         U._robots.clear(); U._robots.update(self.saved[3]); U._last.clear(); U._last.update(self.saved[4])
 
     def fetch(self, now, hours=24, log=None):
@@ -329,6 +335,32 @@ def test_retry_within_15_min_makes_no_requests():
         with Env(d) as e:                       # 20 minutes later it fetches again
             e.fetch(at(9, 36))
             assert e.fake.calls
+
+
+def test_redirect_hops_never_push_a_run_past_its_cap():
+    for used, h in ((0, 6), (50, 21), (40, 18)):
+        with tempfile.TemporaryDirectory() as d, Env(d, used=used, hops=3) as e:
+            cap = B.reddit_cap(len(SUBS), at(h))[0]
+            e.fetch(at(h))
+            assert e.fake.redirects, "the fake really redirected"
+            spent = U.host_count(B.ARCTIC_HOST) - used
+            assert 0 < spent <= cap, (h, spent, cap)
+            assert U._run_limit == {}, "the run limit is cleared after the fetch"
+            assert U.host_count(B.ARCTIC_HOST) <= B.HOST_BUDGET
+
+
+def test_cache_key_is_the_exact_window():
+    now = at(9, 16)
+    k = B._cache_key(DAY, now - dt.timedelta(hours=24), now, SUBS)
+    assert k == B._cache_key(DAY, at(9, 24) - dt.timedelta(hours=24), at(9, 24), SUBS), "same-window retry shares the key"
+    assert k != B._cache_key(DAY, now - dt.timedelta(hours=24, minutes=20), now, SUBS), "a 24h20m window is not a 24h one"
+    assert k != B._cache_key(DAY, now - dt.timedelta(hours=23, minutes=50), now, SUBS)
+    with tempfile.TemporaryDirectory() as d:
+        with Env(d) as e:
+            e.fetch(at(9, 16))
+        with Env(d) as e:
+            e.fetch(at(9, 20), hours=24.4)
+            assert e.fake.calls, "a different fractional window is fetched, not reused"
 
 
 def test_simulated_heavy_day_stays_in_budget():

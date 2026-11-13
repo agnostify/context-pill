@@ -17,6 +17,7 @@ BLOCKED_DOMAINS = ("x.com", "twitter.com", "t.co", "instagram.com", "instagr.am"
                    "fixupx.com", "nitter.net", "threads.net")
 
 _last, _robots = {}, {}
+_run_limit = {}               # host -> request count ceiling for this run (set by a caller; empty for the daily drop)
 _state = {"path": None, "date": None, "stopped": {}, "count": {}, "feeds": [], "pages": {}}
 
 
@@ -60,6 +61,20 @@ def page_count(host):
 
 def add_page(host):
     _state.setdefault("pages", {})[host] = page_count(host) + 1; _save()
+
+
+def set_run_limit(host, ceiling):
+    """Cap this host at `ceiling` requests counted today, checked before every request and redirect hop.
+    None clears it. Never persisted, so other runs and HOST_DAILY_BUDGET are unaffected."""
+    if ceiling is None:
+        _run_limit.pop(host, None)
+    else:
+        _run_limit[host] = ceiling
+
+
+def _over(host):
+    n = _state["count"].get(host, 0)
+    return n >= HOST_DAILY_BUDGET or (host in _run_limit and n >= _run_limit[host])
 
 
 def host_count(host):
@@ -113,7 +128,7 @@ def _robots_request(url):
     the host budget, and skipped if the host is stopped today. Returns None if any hop is not allowed."""
     for _ in range(MAX_REDIRECTS + 1):
         host = host_of(url)
-        if blocked(url) or host in _state["stopped"] or _state["count"].get(host, 0) >= HOST_DAILY_BUDGET:
+        if blocked(url) or host in _state["stopped"] or _over(host):
             return None
         gap = time.time() - _last.get(host, 0)
         if gap < MIN_GAP:
@@ -143,14 +158,14 @@ def get(url, timeout=25, **kw):
         host = host_of(url)
         if host in _state["stopped"]:
             raise Stop(f"{host} stopped for today ({_state['stopped'][host]})")
-        if _state["count"].get(host, 0) >= HOST_DAILY_BUDGET:
-            raise Stop(f"{host} over daily request budget")
+        if _over(host):
+            raise Stop(f"{host} over daily request budget" if host not in _run_limit else f"{host} over budget (run cap)")
         if not robots_ok(url):
             raise PermissionError(f"robots.txt disallows {url}")
         if host in _state["stopped"]:                     # re-check after the robots.txt request(s)
             raise Stop(f"{host} stopped for today ({_state['stopped'][host]})")
-        if _state["count"].get(host, 0) >= HOST_DAILY_BUDGET:
-            raise Stop(f"{host} over daily request budget")
+        if _over(host):
+            raise Stop(f"{host} over daily request budget" if host not in _run_limit else f"{host} over budget (run cap)")
         gap = time.time() - _last.get(host, 0)
         if gap < MIN_GAP:
             time.sleep(MIN_GAP - gap)

@@ -80,7 +80,7 @@ def reddit_cap(n_subs, now, url=None):
 
 
 def _cache_key(date, since, now, subs):
-    return f"{date}|{round((now - since).total_seconds() / 3600)}h|{','.join(subs)}"
+    return f"{date}|{int((now - since).total_seconds())}s|{','.join(subs)}"
 
 
 def _read_cache(path, key, now):
@@ -109,6 +109,14 @@ def fetch_reddit(c, since, log, now=None, cache_dir=None, date=None):
             log(f"reddit budget: used 0 this run, cap {cap}, {used_before}/{HOST_BUDGET} today, {n_left} runs left")
             return hit, None
     start = util.host_count(ARCTIC_HOST)
+    util.set_run_limit(ARCTIC_HOST, start + cap)   # enforced on every request and redirect hop, not just here
+    try:
+        return _fetch_reddit_pages(subs, since, log, now, cache, key, cap, used_before, n_left, start)
+    finally:
+        util.set_run_limit(ARCTIC_HOST, None)
+
+
+def _fetch_reddit_pages(subs, since, log, now, cache, key, cap, used_before, n_left, start):
     posts = {s: [] for s in subs}
     before = {s: "" for s in subs}
     open_subs, errors, capped = list(subs), [], False
@@ -125,6 +133,9 @@ def fetch_reddit(c, since, log, now=None, cache_dir=None, date=None):
                     raise RuntimeError(f"HTTP {r.status_code}")
                 page = r.json().get("data") or []
             except Exception as e:
+                if util.host_count(ARCTIC_HOST) - start >= cap:   # a redirect hop reached the run cap
+                    capped = True
+                    break
                 errors.append(f"r/{sub}: {type(e).__name__}")
                 open_subs.remove(sub)
                 continue
