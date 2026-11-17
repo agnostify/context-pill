@@ -140,3 +140,6 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-13: removed 1 item(s) from 2026-11-13 (review: changelog evidence not fetchable by a reviewer; preview/credit details unconfirmed)
 - 2026-11-13: removed 1 item(s) from 2026-11-13 (review: try-this names an Ultra plan the source does not state)
 - 2026-11-13: removed 1 item(s) from 2026-11-13 (review: why-it-matters asserts AI-built software not supported by cited pages)
+- 2026-11-17: audit of 2026-11-17-391cd44b (Anthropic): not run (Verdict: not run.; item dropped before publication as a stale August post)
+- 2026-11-17: audit of 2026-11-17-c2b5291e (Anthropic): not run (Verdict: not run.; superseded by pass re-run below)
+- 2026-11-17: audit of 2026-11-17-c2b5291e (Anthropic): pass (Verdict: pass. Source: https://github.com/anthropics/claude-code/releases/tag/v2.1.327)
