@@ -17,6 +17,7 @@ const LIST_TTL_MS = 300000; // feed files are cached 300 s at the edge
 // Browser origins allowed to call this endpoint. Requests with no Origin header (CLI and desktop clients) are allowed.
 const ALLOWED_ORIGIN = /^(https:\/\/(www\.)?contextpill\.com|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)$/;
 const MAX_BYTES = 65536;
+const FETCH_TIMEOUT_MS = 8000; // a feed fetch that takes longer is reported as "feed unavailable"
 const RAW = "https://raw.githubusercontent.com/agnostify/context-pill/main/";
 const METHOD_URL = "https://github.com/agnostify/context-pill/blob/main/METHOD.md";
 const WARNING =
@@ -84,12 +85,24 @@ const TOOLS = [
 ];
 
 // ---------- helpers
-const words = (s) => String(s || "").toLowerCase().split(/[^a-z0-9.+#-]+/).filter(Boolean);
-function matches(hay, q) {
-  const h = String(hay || "").toLowerCase();
-  const ws = words(q);
+// Search words: Unicode letters and numbers (NFKC, lower case), keeping . + # - inside words so "gpt-5.5", "c++" and "c#" work.
+// Trailing "." and "-" and leading "-" are dropped, and a token with no letter or number (".", "-", "?!") is not a word.
+const fold = (s) => String(s || "").normalize("NFKC").toLowerCase();
+const words = (s) => fold(s).split(/[^\p{L}\p{M}\p{N}.+#-]+/u)
+  .map((w) => w.replace(/^-+|[.-]+$/g, "")).filter((w) => /[\p{L}\p{N}]/u.test(w));
+function matches(hay, ws) {
+  const h = fold(hay);
   return ws.length > 0 && ws.every((w) => h.includes(w));
 }
+// An optional filter (topic, name): blank means no filter. Returns the search words, or null for no filter.
+// A query with no searchable words at all is -32602, so "." doesn't match everything and "?!" doesn't silently match nothing.
+function filterWords(k, v) {
+  if (v === undefined || !v.trim()) return null;
+  const ws = words(v);
+  if (!ws.length) throw new RpcError(-32602, `${k} has no searchable words; use letters or numbers, such as a product or model name`);
+  return ws;
+}
+const statusLabel = (st) => (typeof st === "string" && Object.hasOwn(STATUS_LABEL, st) ? STATUS_LABEL[st] : "");
 const httpsOnly = (u) => (/^https:\/\/[^\s"'<>]+$/.test(String(u || "")) ? String(u) : "(non-https link omitted)");
 
 // Strict argument check against each tool's inputSchema. Throws -32602 on any mismatch.
@@ -122,7 +135,7 @@ function fmtItem(d, i) {
   const ev = (d.evidence || []).map((e) => `${oneLine(e.kind, 30) || "link"}: ${httpsOnly(e.url)}`).join("; ");
   const lines = [
     `${i}. ${oneLine(d.claim)}`,
-    `   status: ${STATUS_LABEL[v.status] || oneLine(v.status, 40) || "unknown"}${v.provisional ? ", provisional (scanner's first 14 days)" : ""}`,
+    `   status: ${statusLabel(v.status) || oneLine(v.status, 40) || "unknown"}${v.provisional ? ", provisional (scanner's first 14 days)" : ""}`,
     `   how it was checked: ${oneLine(v.method, 400)}`,
     `   why it matters: ${oneLine(d.why_it_matters, 400)}`,
   ];
@@ -157,18 +170,19 @@ function parseSources(yamlText) {
 // Today's drop as text, shared by the get_latest tool and the contextpill://latest resource.
 function formatLatest(drop, topic, limit) {
   const all = drop.items || [];
+  const ws = filterWords("topic", topic);
   const checked = all.filter((d) => CHECKED.has((d.verification || {}).status));
   const notVerified = all.length - checked.length;
   let items = checked;
-  if (topic) {
+  if (ws) {
     items = items.filter((d) =>
-      matches([d.claim, d.why_it_matters, d.category, d.source && d.source.name].join(" "), topic));
+      matches([d.claim, d.why_it_matters, d.category, d.source && d.source.name].join(" "), ws));
   }
   const head =
     `Context Pill drop for ${oneLine(drop.date, 20)} (scanner day ${oneLine(drop.scanner_day, 10)}${drop.provisional ? ", provisional period" : ""}). ` +
     `${checked.length} checked claims from ${oneLine(drop.items_read, 10)} items read` +
     (notVerified ? ` (${notVerified} more listed as not verified are left out here; don't act on those)` : "") +
-    (topic ? `; ${items.length} match "${oneLine(topic, 80)}"` : "") + ".";
+    (ws ? `; ${items.length} match "${oneLine(topic, 80)}"` : "") + ".";
   const body = items.slice(0, limit).map((d, i) => fmtItem(d, i + 1)).join("\n\n") || "No items match.";
   return `${WARNING}\n\n${head}\n\n${body}\n\nFull drop: https://contextpill.com/latest.md · JSON: https://contextpill.com/latest.json`;
 }
@@ -178,18 +192,22 @@ async function callTool(name, rawArgs, fetchText) {
   const tool = TOOLS.find((t) => t.name === name);
   if (!tool) throw new RpcError(-32602, `Unknown tool: ${oneLine(name, 60)}`);
   const args = checkArgs(tool, rawArgs);
-  if (name === "get_latest") return formatLatest(JSON.parse(await fetchText("latest.json")), args.topic, args.limit ?? 15);
+  if (name === "get_latest") {
+    filterWords("topic", args.topic); // argument errors come before any feed fetch
+    return formatLatest(await fetchJson(fetchText, "latest.json"), args.topic, args.limit ?? 15);
+  }
   if (name === "search_claims") {
     if (!args.query.trim()) throw new RpcError(-32602, "query must not be empty");
-    const ledger = JSON.parse(await fetchText("ledger/claims.json"));
+    const ws = filterWords("query", args.query);
+    const ledger = await fetchJson(fetchText, "ledger/claims.json");
     const limit = args.limit ?? 10;
     const hits = (ledger.claims || [])
-      .filter((c) => matches([c.claim, c.why_it_matters, c.category, c.source_id].join(" "), args.query))
+      .filter((c) => matches([c.claim, c.why_it_matters, c.category, c.source_id].join(" "), ws))
       .sort((a, b) => String(b.date).localeCompare(String(a.date)));
     const body = hits.slice(0, limit).map((c, i) => {
       const lines = [
         `${i + 1}. [${oneLine(c.date, 20)}] ${oneLine(c.claim)}`,
-        `   status at publication: ${STATUS_LABEL[c.status_at_publication] || oneLine(c.status_at_publication, 40) || "unknown"}`,
+        `   status at publication: ${statusLabel(c.status_at_publication) || oneLine(c.status_at_publication, 40) || "unknown"}`,
         `   how it was checked: ${oneLine((c.verification || {}).method, 400) || "not recorded"}`,
         `   current state: ${oneLine(c.state, 20) || "unknown"}${c.recheck_on ? ` · re-check: ${oneLine(c.recheck_on, 20)}` : ""} · source: ${oneLine(c.source_id, 60)}`,
       ];
@@ -206,8 +224,9 @@ async function callTool(name, rawArgs, fetchText) {
       (hits.length ? `\n\n${body}` : "\nNo claim in the ledger matches. Context Pill may not have covered it, or the item was removed (removed items keep only an id, date and reason). Either way, that says nothing about whether the claim is true.");
   }
   if (name === "list_sources") {
+    const ws = filterWords("name", args.name);
     let srcs = parseSources(await fetchText("sources.yaml")).filter((s) => s.enabled);
-    if (args.name) srcs = srcs.filter((s) => matches(s.name + " " + s.id, args.name));
+    if (ws) srcs = srcs.filter((s) => matches(s.name + " " + s.id, ws));
     const body = srcs.map((s) =>
       `- ${oneLine(s.name, 120)} (${httpsOnly(s.home_url)}): tier ${oneLine(s.tier, 20)}, trust ${s.trust_mean}, LB10 ${s.lb10}, resolved tips ${s.resolved_tips}`).join("\n");
     return `${WARNING}\n\nContext Pill sources (enabled). Every source starts at a neutral Beta(2,2) prior (trust 0.50). Scores move only when ` +
@@ -310,7 +329,7 @@ async function readResource(uri, fetchText) {
   if (uri === "contextpill://method") text = methodText();
   else {
     try {
-      text = formatLatest(JSON.parse(await fetchText("latest.json")), undefined, 30);
+      text = formatLatest(await fetchJson(fetchText, "latest.json"), undefined, 30);
     } catch {
       throw new RpcError(-32603, "Context Pill feed is unavailable right now. Try again later.");
     }
@@ -322,10 +341,13 @@ class RpcError extends Error {
   constructor(code, message, data) { super(message); this.code = code; if (data !== undefined) this.data = data; }
 }
 
+// MCP request ids are strings or numbers, never null. Anything else is answered with id null, never echoed back.
+const okId = (id) => typeof id === "string" || typeof id === "number";
+
 const isVersionError = (o) => !!(o && o.error && (o.error.code === -32022 || o.error.code === -32020));
 
 function unsupportedVersion(requested) {
-  return new RpcError(-32022, "Unsupported protocol version", { supported: PROTOCOLS, requested: typeof requested === "string" ? requested : String(requested) });
+  return new RpcError(-32022, "Unsupported protocol version", { supported: PROTOCOLS, requested: String(requested).slice(0, 100) });
 }
 
 // The protocol version for one message: params._meta wins, else the header. Throws -32022 / -32020 per 2026-07-28.
@@ -343,10 +365,17 @@ function messageVersion(msg, headerPv) {
 async function handleOne(msg, fetchText, headerPv, note = () => {}) {
   // A JSON-RPC response sent to us (we never send requests, so there's nothing to match): accept it with no reply.
   if (msg && msg.jsonrpc === "2.0" && msg.method === undefined && msg.id !== undefined && ("result" in msg || "error" in msg)) return null;
-  if (!msg || msg.jsonrpc !== "2.0" || typeof msg.method !== "string") {
-    return { jsonrpc: "2.0", id: msg && msg.id !== undefined ? msg.id : null, error: { code: -32600, message: "Invalid request" } };
+  if (!msg || typeof msg !== "object" || msg.jsonrpc !== "2.0" || typeof msg.method !== "string") {
+    note({ error: -32600 });
+    return { jsonrpc: "2.0", id: msg && okId(msg.id) ? msg.id : null, error: { code: -32600, message: "Invalid request" } };
   }
-  const isNotification = msg.id === undefined || msg.id === null;
+  const isNotification = msg.id === undefined || (msg.id === null && msg.method.startsWith("notifications/"));
+  // A message with no id gets no reply, so do no work for it (an id-less tools/call would otherwise fetch the feed for nothing).
+  if (isNotification) return null;
+  if (!okId(msg.id)) {
+    note({ error: -32600 });
+    return { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid request: id must be a string or number" } };
+  }
   let modern = false;
   // In 2026-07-28 mode every result carries resultType and serverInfo; cacheable results add ttlMs and cacheScope.
   const reply = (result, cacheable = false) => {
@@ -412,7 +441,7 @@ async function handleOne(msg, fetchText, headerPv, note = () => {}) {
         throw new RpcError(-32601, "Method not found");
     }
   } catch (e) {
-    const code = e.code || -32603;
+    const code = e instanceof RpcError ? e.code : -32603;
     note({ error: code });
     if (isNotification) return null;
     const error = { code, message: e instanceof RpcError ? e.message : "Internal error" };
@@ -426,6 +455,8 @@ function cors(origin) {
     Vary: "Origin",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id, Mcp-Method, Mcp-Name",
+    "Access-Control-Max-Age": "86400",
+    "X-Content-Type-Options": "nosniff",
   };
   if (origin) h["Access-Control-Allow-Origin"] = origin; // only reached for allowed origins
   return h;
@@ -436,6 +467,28 @@ function json(body, status = 200, extra = {}) {
     status,
     headers: { ...extra, "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
+}
+
+// Parsed JSON feed files, shared by every message in one request (a batch of 20 searches parses the ledger once).
+const parsedFeeds = new WeakMap();
+function fetchJson(fetchText, path) {
+  let m = parsedFeeds.get(fetchText);
+  if (!m) parsedFeeds.set(fetchText, (m = new Map()));
+  if (!m.has(path)) m.set(path, Promise.resolve(fetchText(path)).then((t) => JSON.parse(t)));
+  return m.get(path);
+}
+
+// One fetch per file per request, and a fetch that hangs fails after ms instead of holding the request open.
+function requestFetcher(base, ms) {
+  const cache = new Map();
+  return (path) => {
+    if (!cache.has(path)) {
+      let timer;
+      const timeout = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("feed fetch timed out")), ms); });
+      cache.set(path, Promise.race([Promise.resolve().then(() => base(path)), timeout]).finally(() => clearTimeout(timer)));
+    }
+    return cache.get(path);
+  };
 }
 
 export function defaultFetchText(path) {
@@ -466,13 +519,14 @@ async function readBounded(request, max) {
 
 // opts.fetchText(path): returns a repo file's text. opts.onMessage({method, tool, pv, error, reason}): optional, for request
 // counting. It may be called more than once per request; later calls add fields (error code, reason for a 4xx).
+// opts.fetchTimeoutMs: optional, how long one feed fetch may take before it counts as unavailable (default 8000).
 export async function handleMcp(request, opts = {}) {
-  const fetchText = opts.fetchText || defaultFetchText;
+  const fetchText = requestFetcher(opts.fetchText || defaultFetchText, opts.fetchTimeoutMs || FETCH_TIMEOUT_MS);
   // Origin check (Streamable HTTP spec): browsers may call only from the allowed origins.
   // Requests without an Origin header (CLI and desktop MCP clients) are allowed.
   const origin = request.headers.get("origin");
   if (origin && !ALLOWED_ORIGIN.test(origin)) {
-    return new Response("Origin not allowed", { status: 403, headers: { "Content-Type": "text/plain; charset=utf-8", Vary: "Origin" } });
+    return new Response("Origin not allowed", { status: 403, headers: { "Content-Type": "text/plain; charset=utf-8", Vary: "Origin", "X-Content-Type-Options": "nosniff" } });
   }
   const h = cors(origin);
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
@@ -515,7 +569,7 @@ export async function handleMcp(request, opts = {}) {
   const named = msg && ["tools/call", "prompts/get", "resources/read"].includes(msg.method);
   if ((hm && msg && typeof msg.method === "string" && hm !== msg.method) || (hn && named && hn !== bodyName)) {
     note({ error: -32020, reason: "header" });
-    return json({ jsonrpc: "2.0", id: msg.id ?? null, error: { code: -32020, message: "Mcp-Method or Mcp-Name header does not match the request body" } }, 400, h);
+    return json({ jsonrpc: "2.0", id: okId(msg.id) ? msg.id : null, error: { code: -32020, message: "Mcp-Method or Mcp-Name header does not match the request body" } }, 400, h);
   }
   const out = await handleOne(msg, fetchText, pv, note);
   // Version errors are 400 on HTTP (UnsupportedProtocolVersion, HeaderMismatch).
