@@ -4,17 +4,17 @@
 
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 17, 9:11 PM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 18, 6:12 AM PT; refreshed every 3 hours.
 
-1. **[Introducing GPT-6.2 Astra and Sol](https://openai.com/index/introducing-gpt-6-2-astra-sol/)**
-   - Reddit (r/OpenAI, r/singularity): 2,374 upvotes*, 474 comments across 12 posts · First-party: openai.com · source: openai.com
-   - `b-fab3fd9584` · also: [reddit](https://www.reddit.com/r/singularity/comments/1xyr3ia/introducing_gpt62_astra_and_sol/)
-2. **[Google confirms an "era of autonomous attacks has arrived" as 178 companies including banks, airlines and more are hit](https://www.reddit.com/r/OpenAI/comments/1xyee33/google_confirms_an_era_of_autonomous_attacks_has/)**
-   - Reddit (r/OpenAI, r/singularity): 1,452 upvotes*, 152 comments across 2 posts · source: r/OpenAI
-   - `b-07cea0cce6`
-3. **[Intel Shares First Benchmarks of Its Next-Gen Crescent Island "D270" GPU, Claiming a 5.9x Throughput Over RTX PRO 6000 As Xe3P Goes Big On FP64](https://www.reddit.com/r/LocalLLaMA/comments/1xyioi8/intel_shares_first_benchmarks_of_its_nextgen/)**
-   - Reddit (r/LocalLLaMA): 359 upvotes*, 158 comments · source: r/LocalLLaMA
-   - `b-4e841e75f3`
+1. **[tencent/Hy4-flash · Hugging Face](https://www.reddit.com/r/LocalLLaMA/comments/1xz5tym/tencenthy4flash_hugging_face/)**
+   - Reddit (r/LocalLLaMA, r/singularity): 254 upvotes*, 58 comments across 3 posts · source: r/LocalLLaMA
+   - `b-7242aab0ec`
+2. **[Gemini neon releasing today 💀 who hurted you google](https://www.reddit.com/r/singularity/comments/1xz9ua2/gemini_neon_releasing_today_who_hurted_you_google/)**
+   - Reddit (r/singularity): 164 upvotes*, 51 comments · source: r/singularity
+   - `b-7786c14123`
+3. **[Nvidia says its open source AI strategy remains intact after Jensen Huang's exit](https://www.reddit.com/r/LocalLLaMA/comments/1xzb9rz/nvidia_says_its_open_source_ai_strategy_remains/)**
+   - Reddit (r/LocalLLaMA): 139 upvotes*, 39 comments · Covered by: techcrunch.com · source: r/LocalLLaMA
+   - `b-558563c59c` · also: [outlet](https://techcrunch.com/2026/11/17/nvidia-says-its-open-source-ai-strategy-remains-intact-after-jensen-huangs-exit/)
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
