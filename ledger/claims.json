@@ -6997,6 +6997,222 @@
    "recheck_on": "2026-12-01",
    "source_id": "deepmind",
    "status_at_publication": "verified"
+  },
+  {
+   "id": "2026-11-18-ce0a148a",
+   "date": "2026-11-18",
+   "category": "release",
+   "claim": "OpenAI released GPT-6.2 Astra (frontier) and GPT-6.2 Sol (efficient) in ChatGPT Work and Codex, and in the API as gpt-6.2-astra and gpt-6.2-sol.",
+   "why_it_matters": "Two new OpenAI models are now available in Codex and the API, and Sol is positioned as the everyday default.",
+   "try_this": "Run one of your existing Codex or API tasks on gpt-6.2-sol and compare its output and token use with gpt-6.1-sol.",
+   "evidence": [
+    {
+     "url": "https://openai.com/index/introducing-gpt-6-2-astra-sol",
+     "kind": "primary"
+    },
+    {
+     "url": "https://learn.chatgpt.com/docs/changelog",
+     "kind": "primary"
+    },
+    {
+     "url": "https://developers.openai.com/api/docs/models/gpt-6.2-astra",
+     "kind": "primary"
+    },
+    {
+     "url": "https://developers.openai.com/api/docs/models/gpt-6.2-sol",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "OpenAI news feed and ChatGPT changelog (Nov 17); OpenAI API model docs list gpt-6.2-astra and gpt-6.2-sol",
+    "checked_at": "2026-11-18T05:44-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Sources: https://learn.chatgpt.com/docs/changelog, https://developers.openai.com/api/docs/models/gpt-6.2-astra, https://developers.openai.com/api/docs/models/gpt-6.2-sol"
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://openai.com/index/introducing-gpt-6-2-astra-sol",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-02",
+   "source_id": "openai",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-18-4e04216d",
+   "date": "2026-11-18",
+   "category": "release",
+   "claim": "OpenAI says Ultrafast mode is available to Pro 200 subscribers with GPT-6.2 Sol, while Pro 500 subscribers can use it with both Astra and Sol.",
+   "why_it_matters": "The cheaper Pro tier now gets the faster serving mode, which could change which plan a small team needs.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://learn.chatgpt.com/docs/changelog",
+     "kind": "primary"
+    },
+    {
+     "url": "https://www.youtube.com/watch?v=C1zYX5jwqq4",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "OpenAI's ChatGPT changelog (Nov 17) and YouTube description; video not analyzed",
+    "checked_at": "2026-11-18T05:44-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://learn.chatgpt.com/docs/changelog"
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=C1zYX5jwqq4",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-02",
+   "source_id": "openai",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-18-2af6a693",
+   "date": "2026-11-18",
+   "category": "release",
+   "claim": "OpenAI says GPT-6.2 Sol lets you complete more tasks on the same paid plan than GPT-6.1 Sol.",
+   "why_it_matters": "If the claim holds, the same ChatGPT subscription covers more agent work.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://learn.chatgpt.com/docs/changelog",
+     "kind": "primary"
+    },
+    {
+     "url": "https://www.youtube.com/watch?v=C1zYX5jwqq4",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "vendor claim from OpenAI's ChatGPT changelog and YouTube description",
+    "checked_at": "2026-11-18T05:44-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://www.youtube.com/watch?v=C1zYX5jwqq4",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-02",
+   "source_id": "openai",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-18-b0f9beb6",
+   "date": "2026-11-18",
+   "category": "release",
+   "claim": "OpenAI launched ChatGPT for Sales: a Sales plugin plus 30+ new and expanded partner plugins for researching prospects, preparing pitches, updating the CRM and following up on deals inside ChatGPT.",
+   "why_it_matters": "Sales teams can work CRM and prospect research inside ChatGPT, which overlaps with custom sales tooling agencies sell.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://openai.com/index/introducing-chatgpt-for-sales",
+     "kind": "primary"
+    },
+    {
+     "url": "https://www.youtube.com/watch?v=pmOJIq7Ah00",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "OpenAI feed summary and OpenAI YouTube description; openai.com page returned 403 on fetch; video not analyzed",
+    "checked_at": "2026-11-18T05:44-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://openai.com/index/introducing-chatgpt-for-sales",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-02",
+   "source_id": "openai",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-18-b4742e1e",
+   "date": "2026-11-18",
+   "category": "tool",
+   "claim": "Codex CLI 0.170.0 adds WebRTC realtime voice calls in the terminal UI, auto-refreshed auth headers for OpenTelemetry HTTP exporters, and experimental support for same-named MCP servers across environments.",
+   "why_it_matters": "Voice control in the Codex terminal, and MCP setups with the same server name in several environments no longer collide.",
+   "try_this": "Update Codex CLI to 0.170.0 and check the release notes before trying the experimental same-named MCP server support.",
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.170.0",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read GitHub release notes; no sandbox test",
+    "checked_at": "2026-11-18T05:44-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Added WebRTC negotiation for realtime voice calls in the TUI.",
+   "excerpt_url": "https://github.com/openai/codex/releases/tag/rust-v0.170.0",
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.170.0",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-02",
+   "source_id": "openai",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-18-f49b6bcc",
+   "date": "2026-11-18",
+   "category": "tool",
+   "claim": "Codex CLI 0.170.0 fixes child threads and permission updates losing existing sandbox restrictions, fixes MCP OAuth credential races during login and logout, and makes oversized WebSocket requests fall back to HTTP.",
+   "why_it_matters": "Before this fix, subagent threads could quietly lose sandbox limits, so anyone running Codex subagents should update.",
+   "try_this": "Update Codex CLI to 0.170.0 if you run subagents or child threads with sandbox restrictions.",
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.170.0",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read GitHub release notes; no sandbox test",
+    "checked_at": "2026-11-18T05:44-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Fixed permission updates and child threads losing existing sandbox restrictions.",
+   "excerpt_url": "https://github.com/openai/codex/releases/tag/rust-v0.170.0",
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.170.0",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-02",
+   "source_id": "openai",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -7249,6 +7465,27 @@
    "item_id": "2026-11-17-c2b5291e",
    "source_id": "anthropic",
    "tier": "T1",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-18",
+   "item_id": "2026-11-18-b5f377a9",
+   "source_id": "openai",
+   "tier": "T1-seed",
+   "verdict": "inconclusive"
+  },
+  {
+   "date": "2026-11-18",
+   "item_id": "2026-11-18-4e04216d",
+   "source_id": "openai",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-18",
+   "item_id": "2026-11-18-ce0a148a",
+   "source_id": "openai",
+   "tier": "T1-seed",
    "verdict": "pass"
   }
  ],
@@ -7692,6 +7929,46 @@
    "id": "2026-11-13-a3b1c08f",
    "date": "2026-11-13",
    "reason": "review: why-it-matters asserts AI-built software not supported by cited pages"
+  },
+  {
+   "id": "2026-11-18-2b547000",
+   "date": "2026-11-18",
+   "reason": "review: repeats 2026-11-17-68cb2b10"
+  },
+  {
+   "id": "2026-11-18-82b9d8e7",
+   "date": "2026-11-18",
+   "reason": "review: drawn from Latent Space AI Twitter recap (X sourcing off)"
+  },
+  {
+   "id": "2026-11-18-b9f38cd4",
+   "date": "2026-11-18",
+   "reason": "review: drawn from Latent Space AI Twitter recap (X sourcing off)"
+  },
+  {
+   "id": "2026-11-18-eb8fec60",
+   "date": "2026-11-18",
+   "reason": "review: drawn from Latent Space AI Twitter recap (X sourcing off)"
+  },
+  {
+   "id": "2026-11-18-80435c9c",
+   "date": "2026-11-18",
+   "reason": "review: drawn from Latent Space AI Twitter recap (X sourcing off)"
+  },
+  {
+   "id": "2026-11-18-9ad4af43",
+   "date": "2026-11-18",
+   "reason": "review: drawn from Latent Space AI Twitter recap (X sourcing off)"
+  },
+  {
+   "id": "2026-11-18-403d009a",
+   "date": "2026-11-18",
+   "reason": "review: drawn from Latent Space AI Twitter recap (X sourcing off)"
+  },
+  {
+   "id": "2026-11-18-d507ec06",
+   "date": "2026-11-18",
+   "reason": "review: 15% cost comparison not confirmable from a non-X source"
   }
  ]
 }
