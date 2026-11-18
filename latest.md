@@ -5,17 +5,17 @@
 <!-- breaking:start -->
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 18, 6:12 AM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 18, 9:10 AM PT; refreshed every 3 hours.
 
-1. **[tencent/Hy4-flash · Hugging Face](https://www.reddit.com/r/LocalLLaMA/comments/1xz5tym/tencenthy4flash_hugging_face/)**
-   - Reddit (r/LocalLLaMA, r/singularity): 254 upvotes*, 58 comments across 3 posts · source: r/LocalLLaMA
-   - `b-7242aab0ec`
-2. **[Gemini neon releasing today 💀 who hurted you google](https://www.reddit.com/r/singularity/comments/1xz9ua2/gemini_neon_releasing_today_who_hurted_you_google/)**
-   - Reddit (r/singularity): 164 upvotes*, 51 comments · source: r/singularity
+1. **[Gemini neon releasing today 💀 who hurted you google](https://www.reddit.com/r/singularity/comments/1xz9ua2/gemini_neon_releasing_today_who_hurted_you_google/)**
+   - Reddit (r/singularity): 323 upvotes*, 83 comments · source: r/singularity
    - `b-7786c14123`
-3. **[Nvidia says its open source AI strategy remains intact after Jensen Huang's exit](https://www.reddit.com/r/LocalLLaMA/comments/1xzb9rz/nvidia_says_its_open_source_ai_strategy_remains/)**
-   - Reddit (r/LocalLLaMA): 139 upvotes*, 39 comments · Covered by: techcrunch.com · source: r/LocalLLaMA
+2. **[Nvidia says its open source AI strategy remains intact after Jensen Huang's exit](https://www.reddit.com/r/LocalLLaMA/comments/1xzb9rz/nvidia_says_its_open_source_ai_strategy_remains/)**
+   - Reddit (r/LocalLLaMA): 256 upvotes*, 64 comments · Covered by: techcrunch.com · source: r/LocalLLaMA
    - `b-558563c59c` · also: [outlet](https://techcrunch.com/2026/11/17/nvidia-says-its-open-source-ai-strategy-remains-intact-after-jensen-huangs-exit/)
+3. **[tencent/Hy4-flash · Hugging Face](https://www.reddit.com/r/LocalLLaMA/comments/1xz5tym/tencenthy4flash_hugging_face/)**
+   - Reddit (r/LocalLLaMA, r/singularity): 263 upvotes*, 59 comments across 3 posts · source: r/LocalLLaMA
+   - `b-7242aab0ec`
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
