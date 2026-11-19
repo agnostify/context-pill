@@ -154,3 +154,6 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-18: removed 1 item(s) from 2026-11-18 (review: drawn from Latent Space AI Twitter recap (X sourcing off))
 - 2026-11-18: removed 1 item(s) from 2026-11-18 (review: drawn from Latent Space AI Twitter recap (X sourcing off))
 - 2026-11-18: removed 1 item(s) from 2026-11-18 (review: 15% cost comparison not confirmable from a non-X source)
+- 2026-11-19: Anthropic tier T1 -> T2 (mean 0.894, LB10 0.799, 20 resolved)
+- 2026-11-19: audit of 2026-11-19-93422ffe (Google DeepMind / Google AI): pass (Verdict: pass. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.69.0)
+- 2026-11-19: removed 1 item(s) from 2026-11-19 (review: stale, the program merger was announced Oct 6)
