@@ -4,11 +4,11 @@
 
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 19, 9:10 AM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 19, 12:17 PM PT; refreshed every 3 hours.
 
-1. **[Google teases yet ANOTHER Gemini model drop!](https://www.reddit.com/r/singularity/comments/1y0awmz/google_teases_yet_another_gemini_model_drop/)**
-   - Reddit (r/singularity): 376 upvotes*, 80 comments · source: r/singularity
-   - `b-5df0a99ade`
+1. **[They're going to go after open weight models](https://www.reddit.com/r/LocalLLaMA/comments/1xzvqaa/theyre_going_to_go_after_open_weight_models/)**
+   - Reddit (r/LocalLLaMA): 338 upvotes*, 196 comments · source: r/LocalLLaMA
+   - `b-3a39df2bec`
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
