@@ -118,3 +118,31 @@ test("E-MCP3: initialize instructions carry one concrete search_claims example a
   const d = await call({ jsonrpc: "2.0", id: 2, method: "server/discover", params: modernMeta() }, H26);
   assert.equal(d.body.result.instructions, ins);
 });
+
+test("search_claims: a bad re-check reads as corrected, with the recorded correction or a plain fallback", async () => {
+  const ledger = { claims: [
+    { id: "x1", date: "2026-10-25", claim: "Zeta model scores 55 on an index", category: "research", source_id: "s", status_at_publication: "verified",
+      state: "corrected", outcome: "bad", resolved_on: "2026-11-08", correction: { on: "2026-11-19", reason: "page now shows 46", state_before: "resolved" }, evidence: [] },
+    { id: "x2", date: "2026-10-26", claim: "Zeta tool ships today", category: "release", source_id: "s", status_at_publication: "verified",
+      state: "resolved", outcome: "bad", resolved_on: "2026-11-09", evidence: [] },
+    { id: "x3", date: "2026-10-27", claim: "Zeta price drops", category: "release", source_id: "s", status_at_publication: "verified",
+      state: "resolved", outcome: "partial", resolved_on: "2026-11-10", evidence: [] },
+  ] };
+  const ft = async (p) => (p === "ledger/claims.json" ? JSON.stringify(ledger) : readFileSync(new URL(p, root), "utf8"));
+  const req = new Request("https://contextpill.com/mcp", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", "MCP-Protocol-Version": "2025-11-25" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "search_claims", arguments: { query: "zeta" } } }) });
+  const t = JSON.parse(await (await handleMcp(req, { fetchText: ft })).text()).result.content[0].text;
+  const [b1, b2, b3] = ["x1", "x2", "x3"].map((id) => t.split("\n\n").find((s) => s.includes(`id: ${id}`)));
+  assert.match(b1, /current state: corrected/); assert.match(b1, /CORRECTED on 2026-11-19: page now shows 46/);
+  assert.match(b2, /current state: corrected/); assert.match(b2, /CORRECTED on 2026-11-09: the re-check found the claim no longer matches its source/);
+  assert.match(b3, /current state: resolved/); assert.match(b3, /re-check outcome: partial \(only part of the claim held up\)/);
+});
+
+test("descriptions: search_claims fits 'was it checked / did it hold up', get_latest says it is for today", async () => {
+  const l = await call({ jsonrpc: "2.0", id: 1, method: "tools/list" }, { "MCP-Protocol-Version": "2025-11-25" });
+  const by = Object.fromEntries(l.body.result.tools.map((x) => [x.name, x]));
+  assert.match(by.search_claims.description, /whether a claim was checked, was verified, held up or turned out to be wrong/);
+  assert.match(by.get_latest.description, /not whether an older claim was checked or held up/);
+  for (const x of Object.values(by)) assert.doesNotMatch(x.description, /\b(you must|always call|never call|IMPORTANT)\b/i);
+  assert.equal(by.search_claims.annotations.title, "Search every published claim");
+});
