@@ -158,3 +158,5 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-19: audit of 2026-11-19-93422ffe (Google DeepMind / Google AI): pass (Verdict: pass. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.69.0)
 - 2026-11-19: removed 1 item(s) from 2026-11-19 (review: stale, the program merger was announced Oct 6)
 - 2026-11-19: correction on 2026-10-25-b6651c86 (interconnects): Re-checked 2026-11-19: the Artificial Analysis page now shows a score of 46 on its Intelligence Index (v5.0.1), not 55, and ranks it #1 of 32 in its comparison class (open-weights models of its size). It no longer shows a rank of 4th of 215. (no trust change (already scored bad at its re-check))
+- 2026-11-20: audit of 2026-11-20-8210e817 (OpenAI (and Sam Altman's blog)): pass (Verdict: pass. Source: https://github.com/openai/codex/releases/tag/rust-v0.171.0)
+- 2026-11-20: removed 1 item(s) from 2026-11-20 (review: repeats 2026-11-19-93422ffe (/stats heatmap already shipped in Gemini CLI v0.69.0))

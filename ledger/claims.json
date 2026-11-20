@@ -7670,6 +7670,358 @@
    "recheck_on": "2026-12-03",
    "source_id": "simonw",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-7366eb35",
+   "date": "2026-11-20",
+   "category": "release",
+   "claim": "Gemini API Tool Retrieval is in preview in the Interactions API: add a tool_search tool and set defer_loading true so parameter schemas load only when the model asks for a tool. Works with Gemini 3.6 and later.",
+   "why_it_matters": "Agents with dozens or hundreds of tools can cut input tokens and keep tool picking accurate without building their own retrieval index.",
+   "try_this": "In a test Interactions API call, add {\"type\":\"tool_search\"} and mark rarely used tools defer_loading true, then compare input token counts against the same request without deferral.",
+   "evidence": [
+    {
+     "url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read vendor launch post with code sample; no sandbox test",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Load tool parameter schemas on demand instead of sending your full tool library in every prompt",
+   "excerpt_url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+   "item_url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "deepmind",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-b728c98c",
+   "date": "2026-11-20",
+   "category": "tool",
+   "claim": "Gemini Tool Retrieval can defer a whole remote MCP server by setting defer_loading true on an mcp_server tool. It has no separate charge, and loaded schemas are billed as normal input tokens.",
+   "why_it_matters": "Large MCP servers can be connected without paying for every tool schema in every prompt.",
+   "try_this": "Test with a trusted MCP server you control that exposes only read-only tools and synthetic data: set defer_loading true on it in a Gemini Interactions API test and check interaction.steps for tool_search_call entries.",
+   "evidence": [
+    {
+     "url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read vendor launch post; no sandbox test",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Set defer_loading: true on an mcp_server tool and every tool that server exposes is loaded on demand",
+   "excerpt_url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+   "item_url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "deepmind",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-33db3a16",
+   "date": "2026-11-20",
+   "category": "technique",
+   "claim": "Gemini Tool Retrieval supports client-side search: declare tool_search with execution set to client, run your own registry or permission filter, and return matching function schemas. This adds one round trip per search.",
+   "why_it_matters": "Teams can keep per-user tool permissions in their own code and add tools in the middle of a conversation.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read vendor launch post; no sandbox test",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Client-side retrieval adds one round trip per search, because your app runs the lookup.",
+   "excerpt_url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+   "item_url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-tool-retrieval/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "deepmind",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-bc963310",
+   "date": "2026-11-20",
+   "category": "release",
+   "claim": "Codex CLI 0.171.0 (20 Nov 2026) makes GPT-6.2 Sol the default model catalog selection and adds GPT-6.2 Sol and GPT-6.2 Astra to its model catalogs.",
+   "why_it_matters": "After updating the CLI, the default model changes to Sol, so check it before long or costly jobs.",
+   "try_this": "Update Codex CLI to 0.171.0 and check which model is selected by default before running long jobs.",
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read official GitHub release notes",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Added GPT-6.2 Sol and Astra to model catalogs, with Sol as the default catalog selection.",
+   "excerpt_url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "openai",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-89eaddef",
+   "date": "2026-11-20",
+   "category": "tool",
+   "claim": "Codex CLI 0.171.0 adds a --remote flag to codex exec that takes a server address and starts or resumes non-interactive sessions on an existing app server, plus /rc and /remote commands to manage remote control and show pairing codes.",
+   "why_it_matters": "Scripted Codex runs can target an already running server instead of starting a fresh local process each time.",
+   "try_this": "Run codex exec --help after updating to 0.171.0 to confirm the --remote flag and its options.",
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read official GitHub release notes; no sandbox test",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "openai",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-8210e817",
+   "date": "2026-11-20",
+   "category": "tool",
+   "claim": "Codex CLI 0.171.0 turns the TUI workspace on by default. It shows searchable document previews, image previews and subagent transcripts next to the main conversation.",
+   "why_it_matters": "The default Codex terminal layout changes, and subagent work is easier to inspect without leaving the session.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read official GitHub release notes; no sandbox test",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://github.com/openai/codex/releases/tag/rust-v0.171.0"
+   },
+   "excerpt": "Enabled the TUI workspace by default, with searchable document previews, image previews, and subagent transcripts",
+   "excerpt_url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+   "item_url": "https://github.com/openai/codex/releases/tag/rust-v0.171.0",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "openai",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-3943ba63",
+   "date": "2026-11-20",
+   "category": "release",
+   "claim": "Claude Code v2.1.329 (19 Nov 2026) adds a trust-dialog warning naming where a folder's hooks are declared, and a warning when hooks in managed settings fail to load in Claude Desktop and other non-interactive hosts.",
+   "why_it_matters": "Makes it easier to spot unexpected hooks in a cloned repo before trusting the folder.",
+   "try_this": "After updating, create a throwaway local test folder whose only hook is a harmless echo command, open it, and stop at the trust dialog to check that it names the file declaring the hook. Do not trust the folder.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read official GitHub release notes",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Added a trust dialog warning that says where a folder's hooks are declared",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-3be342c3",
+   "date": "2026-11-20",
+   "category": "tool",
+   "claim": "Claude Code v2.1.329 fixes /code-review with a PR number sometimes reviewing the checked-out branch instead of the pull request. It now reads the PR with gh pr diff, or says when it can't.",
+   "why_it_matters": "Earlier PR reviews may have checked the wrong code without saying so, so they are worth rerunning on important PRs.",
+   "try_this": "Update Claude Code and rerun /code-review on any recent PR you reviewed from a different checked-out branch.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read official GitHub release notes; no sandbox test",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "it now reads the pull request with gh pr diff , or says when it can't",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-a8403474",
+   "date": "2026-11-20",
+   "category": "tool",
+   "claim": "Claude Code v2.1.329 lets Code Mode run while OpenTelemetry events and metrics are enabled, with each tool call sending its events. Tracing still keeps Code Mode off. It also adds scheduled tasks and /loop wakeups to /tasks.",
+   "why_it_matters": "Teams that monitor Claude Code with OpenTelemetry no longer have to choose between metrics and Code Mode.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read official GitHub release notes; no sandbox test",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Added support for turning on Code Mode while OpenTelemetry events and metrics are enabled",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.329",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-584d1116",
+   "date": "2026-11-20",
+   "category": "tool",
+   "claim": "Gemini CLI v0.70.0 (19 Nov 2026) skips system MCP servers whose command files have insecure permissions, and changes the canonical-link consent prompt to default to no.",
+   "why_it_matters": "A safer default against tampered MCP server configs on shared machines. Some existing MCP setups may stop loading after the update.",
+   "try_this": "If the update skips a system MCP server, read the warning and confirm where that server's command file came from and who owns it before changing permissions, and repair permissions only on an installation you trust.",
+   "evidence": [
+    {
+     "url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.70.0",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read official GitHub release notes; no sandbox test",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "fix(cli): skip system MCP servers with insecure command permissions",
+   "excerpt_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.70.0",
+   "item_url": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.70.0",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "deepmind",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-20-c13c5fd4",
+   "date": "2026-11-20",
+   "category": "technique",
+   "claim": "Google's Ads Decoded guidance for testing AI Max and Smart Bidding says to use templated 50/50 experiments, measure qualified conversions, run tests 4 to 6 weeks, and accept 80% confidence for small tweaks but 95% for structural changes.",
+   "why_it_matters": "A simple rule of thumb from the vendor for setting test length and confidence before trusting AI bidding changes.",
+   "try_this": "Draft an AI Max change as a templated experiment in the Google Ads Experiments tab without launching it, and plan at least four weeks before reading results once you decide to run it.",
+   "evidence": [
+    {
+     "url": "https://blog.google/products/ads-commerce/ads-decoded-ab-testing/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "read vendor guidance page",
+    "checked_at": "2026-11-20T05:43-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "An 80% confidence interval works well for directional tweaks. Reserve 95% certainty for major structural overhauls.",
+   "excerpt_url": "https://blog.google/products/ads-commerce/ads-decoded-ab-testing/",
+   "item_url": "https://blog.google/products/ads-commerce/ads-decoded-ab-testing/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-04",
+   "source_id": "google-ads-commerce",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -7949,6 +8301,13 @@
    "date": "2026-11-19",
    "item_id": "2026-11-19-93422ffe",
    "source_id": "deepmind",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-20",
+   "item_id": "2026-11-20-8210e817",
+   "source_id": "openai",
    "tier": "T1-seed",
    "verdict": "pass"
   }
@@ -8438,6 +8797,11 @@
    "id": "2026-11-19-48d3f74a",
    "date": "2026-11-19",
    "reason": "review: stale, the program merger was announced Oct 6"
+  },
+  {
+   "id": "2026-11-20-37d43c38",
+   "date": "2026-11-20",
+   "reason": "review: repeats 2026-11-19-93422ffe (/stats heatmap already shipped in Gemini CLI v0.69.0)"
   }
  ]
 }
