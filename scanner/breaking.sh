@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Breaking AI News refresh (every BREAKING_REFRESH_HOURS, default 3): runs only scanner.breaking, which re-renders only the
+# Breaking AI News refresh (about every BREAKING_REFRESH_HOURS, default 6): runs only scanner.breaking, which re-renders only the
 # Breaking block of latest.md/latest.json. The checked-claims drop stays daily (scanner/run.sh). Scheduling and pushing
 # these refreshes is a separate, maintainer-approved step. A failed refresh keeps the last good section (non-zero exit).
 set -euo pipefail

@@ -5,7 +5,7 @@
 <!-- breaking:start -->
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 20, 12:25 PM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 20, 12:25 PM PT; refreshed about every 6 hours.
 
 1. **[Anthropic mathematician claims to prove Riemann hypothesis, most famous problem in all of math](https://www.reddit.com/r/singularity/comments/1y15d87/anthropic_mathematician_claims_to_prove_riemann/)**
    - Reddit (r/singularity): 703 upvotes*, 225 comments · source: r/singularity

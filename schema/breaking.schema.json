@@ -3,7 +3,7 @@
   "$id": "https://raw.githubusercontent.com/agnostify/context-pill/main/schema/breaking.schema.json",
   "title": "Context Pill Breaking AI News (engagement-ranked, not verified)",
   "type": "object",
-  "required": ["date", "updated_at", "updated_pt", "label", "warning", "min_score", "max_stories", "platforms_missing", "stories"],
+  "required": ["date", "updated_at", "updated_pt", "label", "warning", "status", "min_score", "max_stories", "platforms_missing", "stories"],
   "properties": {
     "schema": {"type": "string"},
     "date": {"type": "string", "format": "date"},
@@ -12,6 +12,8 @@
     "refresh_hours": {"type": "integer", "minimum": 1},
     "label": {"type": "string"},
     "warning": {"type": "string"},
+    "status": {"enum": ["unverified"], "description": "Every Breaking story is engagement-ranked, never verified."},
+    "status_note": {"type": "string"},
     "min_score": {"type": "number"},
     "max_stories": {"type": "integer", "minimum": 0},
     "ranking_basis": {"type": "object"},
@@ -23,11 +25,13 @@
   "$defs": {
     "story": {
       "type": "object",
-      "required": ["id", "rank", "title", "primary_url", "primary_kind", "primary_name", "links", "counts", "platforms", "score"],
+      "required": ["id", "rank", "title", "status", "primary_url", "primary_kind", "primary_name", "links", "counts", "platforms", "score"],
       "properties": {
         "id": {"type": "string", "pattern": "^b-[0-9a-f]{10}$"},
         "rank": {"type": "integer", "minimum": 1},
         "title": {"type": "string", "maxLength": 300},
+        "status": {"enum": ["unverified"], "description": "Engagement-ranked, not verified. Not a checked claim."},
+        "note": {"type": "string"},
         "why_it_matters": {"type": ["string", "null"]},
         "primary_url": {"type": "string", "format": "uri"},
         "primary_kind": {"enum": ["company", "reddit", "x"]},

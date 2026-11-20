@@ -53,7 +53,7 @@ No MCP? Point your agent at one file: `https://contextpill.com/latest.md` (same 
 
 ## Breaking AI News (top section, not verified)
 
-Above the checked claims, `latest.md` and `latest.json` (key `breaking`) carry a short **Breaking AI News** list: the day's biggest AI stories ranked by engagement, refreshed every 3 hours. It is labeled "Ranked by engagement, not verified." Nothing in it is a checked claim, and it never changes trust scores. Every story links its primary source: the company's own page when there is one, otherwise the Reddit thread. There is no fixed count: a story shows only if its score clears a bar (0.6 by default, at most 10 stories), and the section is hidden on a quiet day.
+Above the checked claims, `latest.md` and `latest.json` (key `breaking`) carry a short **Breaking AI News** list: the day's biggest AI stories ranked by engagement, refreshed about every 6 hours. It is labeled "Ranked by engagement, not verified." In the JSON, the `breaking` object and every story in it carry `"status": "unverified"` plus a short note, so an agent reading the raw file can't mistake a story for a checked claim. `get_latest` never returns Breaking stories. Nothing in it is a checked claim, and it never changes trust scores. Every story links its primary source: the company's own page when there is one, otherwise the Reddit thread. There is no fixed count: a story shows only if its score clears a bar (0.6 by default, at most 10 stories), and the section is hidden on a quiet day.
 
 - **Reddit:** r/LocalLLaMA, r/MachineLearning, r/OpenAI, r/ClaudeAI, r/singularity and r/ChatGPTCoding, through the Arctic Shift archive API (reddit.com's robots.txt disallows crawlers). Arctic Shift often records upvotes soon after posting, so they're understated (shown with *), and comments weigh more.
 - **Company releases:** the lab feeds already in `sources.yaml`. They count when Reddit (or X) picks them up.
@@ -125,7 +125,7 @@ Then ask your agent something like "What's new for coding agents today? Use Cont
 | Path | What |
 |---|---|
 | `latest.md`, `latest.json` | Today's drop |
-| `breaking.json`, `breaking.md` | Breaking AI News (engagement-ranked, not verified; refreshed every 3 hours) |
+| `breaking.json`, `breaking.md` | Breaking AI News (engagement-ranked, not verified; refreshed about every 6 hours) |
 | `daily/YYYY/MM/` | Archive |
 | `sources.yaml` | Every source: feeds, research criteria, access register, current trust |
 | `ledger/claims.json` | Every published claim and its resolution |
