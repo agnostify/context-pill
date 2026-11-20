@@ -4,17 +4,17 @@
 
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 20, 6:09 AM PT; refreshed every 3 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 20, 12:25 PM PT; refreshed every 3 hours.
 
-1. **[The default ChatGPT model breaks and goes into a self-aware spiral if they try to read or repeat "重庆时时彩彩"](https://www.reddit.com/r/singularity/comments/1y0rzn2/the_default_chatgpt_model_breaks_and_goes_into_a/)**
-   - Reddit (r/singularity): 122 upvotes*, 86 comments · source: r/singularity
+1. **[Anthropic mathematician claims to prove Riemann hypothesis, most famous problem in all of math](https://www.reddit.com/r/singularity/comments/1y15d87/anthropic_mathematician_claims_to_prove_riemann/)**
+   - Reddit (r/singularity): 703 upvotes*, 225 comments · source: r/singularity
+   - `b-942568af83`
+2. **[Unsloth is preparing to release 4 new models](https://www.reddit.com/r/LocalLLaMA/comments/1y18qbs/unsloth_is_preparing_to_release_4_new_models/)**
+   - Reddit (r/LocalLLaMA): 130 upvotes*, 63 comments · source: r/LocalLLaMA
+   - `b-d40193ce00`
+3. **[The default ChatGPT model breaks and goes into a self-aware spiral if they try to read or repeat "重庆时时彩彩"](https://www.reddit.com/r/singularity/comments/1y0rzn2/the_default_chatgpt_model_breaks_and_goes_into_a/)**
+   - Reddit (r/singularity): 195 upvotes*, 115 comments · source: r/singularity
    - `b-c01d48f972`
-2. **[Anyone else confused? Made with Hydrogen](https://www.reddit.com/r/singularity/comments/1y0fu5q/anyone_else_confused_made_with_hydrogen/)**
-   - Reddit (r/singularity): 504 upvotes*, 104 comments · source: r/singularity
-   - `b-072c196f93`
-3. **[Google teases yet ANOTHER Gemini model drop!](https://www.reddit.com/r/singularity/comments/1y0awmz/google_teases_yet_another_gemini_model_drop/)**
-   - Reddit (r/singularity): 672 upvotes*, 133 comments · source: r/singularity
-   - `b-755237d228`
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
