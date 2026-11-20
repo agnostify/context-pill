@@ -31,6 +31,13 @@ r = run("scanner.correct", items[0]["id"], "--reason", "test"); assert r.returnc
 c = json.loads((tmp / "ledger" / "claims.json").read_text())["claims"][0]
 assert c["state"] == "corrected" and "reversed_on" not in c, c
 assert run("scanner.correct", items[0]["id"], "--reason", "again").returncode == 1
+# correct: a claim resolved "bad" becomes corrected with no trust change (no reversed_on: it already took its beta +1)
+led = json.loads((tmp / "ledger" / "claims.json").read_text())
+led["claims"][1].update(state="resolved", outcome="bad", resolved_on="2026-01-15"); (tmp / "ledger" / "claims.json").write_text(json.dumps(led))
+r = run("scanner.correct", items[1]["id"], "--reason", "source now says y", "--date", "2026-01-20"); assert r.returncode == 0, r.stdout + r.stderr
+c = json.loads((tmp / "ledger" / "claims.json").read_text())["claims"][1]
+assert c["state"] == "corrected" and "reversed_on" not in c and c["correction"]["state_before"] == "resolved", c
+assert "already scored bad" in (tmp / "CHANGELOG-sources.md").read_text()
 # remove --all (held day, includes the audited item): exit 0, audits kept and marked removed, archive empty
 r = run("scanner.remove", D, "--all", "--reason", "held: test"); assert r.returncode == 0, r.stdout + r.stderr
 led = json.loads((tmp / "ledger" / "claims.json").read_text())

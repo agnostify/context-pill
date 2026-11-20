@@ -2270,13 +2270,18 @@
    "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "resolved",
+   "state": "corrected",
    "recheck_on": "2026-11-08",
    "source_id": "interconnects",
    "status_at_publication": "verified",
    "outcome": "bad",
    "resolved_on": "2026-11-08",
-   "resolution_note": "Outcome: bad. Source: https://artificialanalysis.ai/models/kimi-k3-1-pro"
+   "resolution_note": "Outcome: bad. Source: https://artificialanalysis.ai/models/kimi-k3-1-pro",
+   "correction": {
+    "on": "2026-11-19",
+    "reason": "Re-checked 2026-11-19: the Artificial Analysis page now shows a score of 46 on its Intelligence Index (v5.0.1), not 55, and ranks it #1 of 32 in its comparison class (open-weights models of its size). It no longer shows a rank of 4th of 215.",
+    "state_before": "resolved"
+   }
   },
   {
    "id": "2026-10-25-3bedbe12",

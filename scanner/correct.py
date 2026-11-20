@@ -3,6 +3,8 @@ Usage: python -m scanner.correct <claim-id> --reason "..." [--date YYYY-MM-DD]
 - The claim's state always becomes "corrected".
 - Pending claim: closed, never scored. Resolved within the last 90 days: its credit is reversed and the source gets beta +1
   dated today. Resolved earlier: no trust change.
+- Resolved with outcome "bad" (the re-check already found it wrong): no trust change, since the source already took its beta +1
+  at resolution. Record it to give the claim state "corrected" and say what the source shows now (if it could be read).
 The claim is also labeled corrected in the ledger; remove it from published files with scanner.remove if needed."""
 import json, sys, datetime as dt
 from pathlib import Path
@@ -24,7 +26,9 @@ def main(argv):
     prev = c.get("state")
     c["correction"] = {"on": today.isoformat(), "reason": reason, "state_before": prev}
     c["state"] = "corrected"                       # never "pending" again, so it can't earn credit at resolution
-    if prev == "pending":
+    if prev == "resolved" and c.get("outcome") == "bad":
+        effect = "no trust change (already scored bad at its re-check)"
+    elif prev == "pending":
         effect = "pending claim closed as corrected: it will never be scored"
     elif prev == "resolved" and c.get("resolved_on") and (today - dt.date.fromisoformat(c["resolved_on"])).days <= 90:
         c["reversed_on"] = today.isoformat(); effect = "trust credit reversed, beta +1"
