@@ -1006,7 +1006,7 @@ breaking:
     BREAKING_REFRESH_HOURS.
   min_score: 0.6
   max_stories: 10
-  refresh_hours: 3
+  refresh_hours: 6
   x:
     enabled: false
     weight: 1.0

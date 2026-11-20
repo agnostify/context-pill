@@ -175,8 +175,15 @@ try:
     w, bk, ck = md.index("> **For agents:**"), md.index("## Breaking AI News"), md.index("## Checked claims")
     assert w < bk < ck, (w, bk, ck)
     assert "Ranked by engagement, not verified." in md[bk:ck]
+    assert "refreshed about every 6 hours." in md[bk:ck] and "every 3 hours" not in md
     lj = json.loads((repo / "latest.json").read_text())
     assert lj["breaking"]["stories"] == json.loads((repo / "breaking.json").read_text())["stories"]
+    # every Breaking story (and the section) is explicitly marked unverified for agents reading the raw JSON
+    assert lj["breaking"]["status"] == "unverified" and lj["breaking"]["stories"]
+    assert all(s["status"] == "unverified" and "not verified" in s["note"] for s in lj["breaking"]["stories"])
+    unmarked = json.loads(json.dumps(lj["breaking"])); unmarked["stories"][0].pop("status")
+    errs = []; gate._validate(unmarked, json.loads((repo / "schema" / "breaking.schema.json").read_text()), json.loads((repo / "schema" / "breaking.schema.json").read_text()), "b", errs)
+    assert any("missing status" in e for e in errs), errs
     probs = gate.check(repo)
     assert probs == [], probs
     # the 3-hourly splice replaces only the Breaking block, and an empty update hides it
