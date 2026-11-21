@@ -149,6 +149,22 @@ def rebuild():
 r = run("scanner.correct", nid, "--reason", "test", "--date", D2); assert r.returncode == 0, r.stdout + r.stderr
 led = rebuild(); c = led["claims"][0]
 assert c["id"] == nid and c["state"] == "corrected" and c["correction"]["reason"] == "test", c
+# supersede: a same-day rebuild keeps the source change (state, outcome and record)
+r = run("scanner.supersede", nid, "--changed-on", D2, "--note", "index v2", "--date", D2); assert r.returncode == 0, r.stdout + r.stderr
+led = rebuild(); c = led["claims"][0]
+assert c["state"] == "superseded" and c["outcome"] == "source-changed" and c["source_change"]["note"] == "index v2", c
+assert c["source_change"]["correction_before"]["reason"] == "test" and "correction" not in c, c
+# resolution: a bad re-check the resolver flags as a source change keeps its outcome (and beta +1) and is flagged for review
+led["claims"].append(dict(c, id="2026-10-18-feedf00d", date="2026-10-18", state="pending", recheck_on=D2, claim="flag me"))
+for k in ("outcome", "resolved_on", "resolution_note", "source_change"): led["claims"][-1].pop(k)
+(tmp / "ledger" / "claims.json").write_text(json.dumps(led))
+with mock.patch.object(extract, "resolve", return_value={"2026-10-18-feedf00d": {"outcome": "bad", "source_urls": ["https://example.com/a"],
+                                                                                 "source_changed": True}}):
+    led = rebuild()
+f = next(x for x in led["claims"] if x["id"] == "2026-10-18-feedf00d")
+assert f["state"] == "resolved" and f["outcome"] == "bad" and f["source_change_flag"] == D2, f
+assert "flagged a possible source change" in (tmp / "CHANGELOG-sources.md").read_text()
+led["claims"] = [x for x in led["claims"] if x["id"] != f["id"]]; (tmp / "ledger" / "claims.json").write_text(json.dumps(led))
 # remove: a same-day rebuild doesn't republish a removed item
 r = run("scanner.remove", D2, nid, "--reason", "test"); assert r.returncode == 0, r.stdout + r.stderr
 led = rebuild()
@@ -242,6 +258,41 @@ r = qrun(D2, *[c["id"] for c in cs[10:]], "--reason", "review"); assert r.return
 s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
 assert s["audit_demoted"] is True and s["trust"]["tier"] == "T2-provisional", s
 assert (tmp / "CHANGELOG-sources.md").read_text().endswith(reverted([c["id"] for c in cs[10:]])), (tmp / "CHANGELOG-sources.md").read_text()
+# supersede: accurate when published, then the source changed its own numbers. A "bad" re-check (already corrected) becomes
+# source-changed/superseded, its beta +1 is undone (trust recomputed as if it was never scored), and it can't be corrected again
+srun = lambda *a: subprocess.run([sys.executable, "-m", "scanner.supersede", *a], cwd=tmp, env=qenv, capture_output=True, text=True)
+cs, t = qstate([("2026-10-20", "good")] * 4 + [(D2, "bad")]); bid = cs[-1]["id"]
+l = json.loads((tmp / "ledger" / "claims.json").read_text())
+l["claims"][-1].update(state="corrected", resolution_note="Outcome: bad. Source: https://example.com/a",
+                       correction={"on": "2026-11-05", "reason": "page now shows 46", "state_before": "resolved"})
+(tmp / "ledger" / "claims.json").write_text(json.dumps(l))
+arch_snap = {p: p.read_text() for p in (tmp / "daily").rglob("*.*")}; assert arch_snap and (tmp / "latest.json").exists()
+assert srun(bid, "--note", "x").returncode == 2                                              # --changed-on is required
+assert srun(bid, "--changed-on", "2026-10-01", "--note", "x", "--date", "2026-11-21").returncode == 1   # before the claim's date
+r = srun(bid, "--changed-on", "2026-10-27", "--note", "Oct 23 launch · Oct 27 index update (v5)", "--date", "2026-11-21")
+assert r.returncode == 0, r.stdout + r.stderr
+c = next(x for x in json.loads((tmp / "ledger" / "claims.json").read_text())["claims"] if x["id"] == bid)
+assert c["state"] == "superseded" and c["outcome"] == "source-changed" and "correction" not in c, c
+assert {p: p.read_text() for p in (tmp / "daily").rglob("*.*")} == arch_snap                # archives stay as published
+assert c["resolution_note"] == "Outcome: source-changed. Source: https://example.com/a", c
+sc = c["source_change"]
+assert sc["changed_on"] == "2026-10-27" and sc["note"].startswith("Oct 23 launch") and sc["now_shows"] == "page now shows 46", sc
+assert sc["outcome_before"] == "bad" and sc["state_before"] == "corrected" and sc["correction_before"]["on"] == "2026-11-05", sc
+s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
+want = trust.score(s, ev(cs[:4]), dt.date(2026, 11, 21))
+assert s["trust"]["resolved_tips"] == 4 and s["trust"]["beta"] == want["beta"] and s["trust"]["alpha"] == want["alpha"], (s["trust"], want)
+assert s["trust"]["beta"] < t["beta"] + 1e-9 and s["trust"]["resolved_tips"] == t["resolved_tips"] - 1, (s["trust"], t)
+assert "source changed on " + bid in (tmp / "CHANGELOG-sources.md").read_text() and "-> superseded" in (tmp / "CHANGELOG-sources.md").read_text()
+assert srun(bid, "--changed-on", "2026-10-27", "--note", "again", "--date", "2026-11-21").returncode == 1   # already superseded
+assert run("scanner.correct", bid, "--reason", "x").returncode == 1                                  # not a wrong claim
+# a pending claim superseded before its re-check is closed and never scored
+cs, t = qstate([("2026-10-20", "good")] * 2); p = dict(cs[0], id="2026-10-18-0000beef", state="pending")
+for k in ("outcome", "resolved_on", "resolution_note"): p.pop(k)
+l = json.loads((tmp / "ledger" / "claims.json").read_text()); l["claims"].append(p); (tmp / "ledger" / "claims.json").write_text(json.dumps(l))
+r = srun(p["id"], "--changed-on", "2026-10-19", "--note", "v2", "--date", "2026-11-21"); assert r.returncode == 0, r.stdout + r.stderr
+c = next(x for x in json.loads((tmp / "ledger" / "claims.json").read_text())["claims"] if x["id"] == p["id"])
+assert c["state"] == "superseded" and c["source_change"]["state_before"] == "pending" and "outcome_before" not in c["source_change"], c
+assert yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]["trust"]["resolved_tips"] == 2
 # gemini: CP_GEMINI_FROM can't move the start before Oct 23
 vid = [{"kind": "youtube", "url": "https://www.youtube.com/watch?v=x"}]
 with mock.patch.dict(os.environ, {"GEMINI_API_KEY": "fixture", "CP_GEMINI_APPROVED": "1", "CP_GEMINI_FROM": "2026-10-16"}), \

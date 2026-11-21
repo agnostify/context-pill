@@ -2270,17 +2270,25 @@
    "item_url": "https://www.interconnects.ai/p/podcast-kimi-k31-pro-the-new-cyber",
    "scorable": true,
    "prediction_deadline": null,
-   "state": "corrected",
+   "state": "superseded",
    "recheck_on": "2026-11-08",
    "source_id": "interconnects",
    "status_at_publication": "verified",
-   "outcome": "bad",
+   "outcome": "source-changed",
    "resolved_on": "2026-11-08",
-   "resolution_note": "Outcome: bad. Source: https://artificialanalysis.ai/models/kimi-k3-1-pro",
-   "correction": {
-    "on": "2026-11-19",
-    "reason": "Re-checked 2026-11-19: the Artificial Analysis page now shows a score of 46 on its Intelligence Index (v5.0.1), not 55, and ranks it #1 of 32 in its comparison class (open-weights models of its size). It no longer shows a rank of 4th of 215.",
-    "state_before": "resolved"
+   "resolution_note": "Outcome: source-changed. Source: https://artificialanalysis.ai/models/kimi-k3-1-pro",
+   "source_change": {
+    "recorded_on": "2026-11-21",
+    "changed_on": "2026-10-27",
+    "note": "Oct 23 launch: Artificial Analysis published 55, 4th of 215 · Oct 27 index update (Intelligence Index v5) re-scored every model",
+    "now_shows": "Re-checked 2026-11-19: the Artificial Analysis page now shows a score of 46 on its Intelligence Index (v5.0.1), not 55, and ranks it #1 of 32 in its comparison class (open-weights models of its size). It no longer shows a rank of 4th of 215.",
+    "state_before": "corrected",
+    "outcome_before": "bad",
+    "correction_before": {
+     "on": "2026-11-19",
+     "reason": "Re-checked 2026-11-19: the Artificial Analysis page now shows a score of 46 on its Intelligence Index (v5.0.1), not 55, and ranks it #1 of 32 in its comparison class (open-weights models of its size). It no longer shows a rank of 4th of 215.",
+     "state_before": "resolved"
+    }
    }
   },
   {

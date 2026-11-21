@@ -5,7 +5,8 @@ Usage: python -m scanner.correct <claim-id> --reason "..." [--date YYYY-MM-DD]
   dated today. Resolved earlier: no trust change.
 - Resolved with outcome "bad" (the re-check already found it wrong): no trust change, since the source already took its beta +1
   at resolution. Record it to give the claim state "corrected" and say what the source shows now (if it could be read).
-The claim is also labeled corrected in the ledger; remove it from published files with scanner.remove if needed."""
+The claim is also labeled corrected in the ledger; remove it from published files with scanner.remove if needed.
+If the claim was accurate when published and the source later changed its own numbers or method, use scanner.supersede instead."""
 import json, sys, datetime as dt
 from pathlib import Path
 
@@ -21,6 +22,8 @@ def main(argv):
     c = next((c for c in ledger["claims"] if c["id"] == cid), None)
     if not c:
         print(f"no claim {cid}"); return 1
+    if c.get("state") == "superseded":
+        print(f"{cid} is superseded (the source changed it on {c['source_change'].get('changed_on')}); nothing done"); return 1
     if c.get("state") == "corrected":
         print(f"{cid} is already corrected ({c.get('correction', {}).get('on')}); nothing done"); return 1
     prev = c.get("state")

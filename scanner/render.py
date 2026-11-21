@@ -137,7 +137,7 @@ def splice_breaking(repo, b):
         lj.write_text(json.dumps(meta, indent=1, ensure_ascii=False))
 
 
-def write(repo, date, day_no, drop, srcs, items_read, n_sources, write_latest=True):
+def write(repo, date, day_no, drop, srcs, items_read, n_sources, write_latest=True, write_archive=True):
     drop = sorted(drop, key=lambda d: (ORDER.get(d["verification"]["status"], 9), d["category"]))
     good = [d for d in drop if d["verification"]["status"] in ("verified", "docs-verified", "vendor-claim", "face-value-T1")]
     weak = [d for d in drop if d not in good]
@@ -176,8 +176,10 @@ def write(repo, date, day_no, drop, srcs, items_read, n_sources, write_latest=Tr
     if breaking:
         meta["breaking"] = breaking
     y, m = date[:4], date[5:7]
-    arch = repo / "daily" / y / m; arch.mkdir(parents=True, exist_ok=True)
-    mds, jss = [arch / f"{date}.md"], [arch / f"{date}.json"]
+    arch = repo / "daily" / y / m
+    mds, jss = [], []
+    if write_archive:                    # False: refresh latest.* only (scanner.supersede), keeping the day's archive as published
+        arch.mkdir(parents=True, exist_ok=True); mds, jss = [arch / f"{date}.md"], [arch / f"{date}.json"]
     if write_latest:
         mds.append(repo / "latest.md"); jss.append(repo / "latest.json")
     for p in mds:

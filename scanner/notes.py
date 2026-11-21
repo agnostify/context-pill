@@ -11,6 +11,7 @@ VERDICTS = ("pass", "fail", "inconclusive")
 AUDIT_CAUSES = ("our summary", "source", "unclear")   # the auditor's failure_cause on a "fail"; only "our summary" spares the source
 MAX_URLS = 3
 FLAG = "all_facts_on_cited_pages"             # the resolver's own statement that every part of the claim is on a cited page
+CHANGE_FLAG = "source_changed"                # the resolver's flag that the source itself changed its numbers/version/method later
 
 
 def usable_url(url):
