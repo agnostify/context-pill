@@ -152,6 +152,7 @@ test("descriptions: search_claims fits 'was it checked / did it hold up', get_la
   const l = await call({ jsonrpc: "2.0", id: 1, method: "tools/list" }, { "MCP-Protocol-Version": "2025-11-25" });
   const by = Object.fromEntries(l.body.result.tools.map((x) => [x.name, x]));
   assert.match(by.search_claims.description, /whether a claim was checked, was verified, held up or turned out to be wrong/);
+  assert.ok(by.search_claims.description.includes("current state (pending, resolved, corrected, superseded (source changed its numbers after we checked) or closed-inconclusive)"));
   assert.match(by.get_latest.description, /not whether an older claim was checked or held up/);
   for (const x of Object.values(by)) assert.doesNotMatch(x.description, /\b(you must|always call|never call|IMPORTANT)\b/i);
   assert.equal(by.search_claims.annotations.title, "Search every published claim");
