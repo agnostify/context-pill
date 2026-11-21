@@ -161,3 +161,5 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-20: audit of 2026-11-20-8210e817 (OpenAI (and Sam Altman's blog)): pass (Verdict: pass. Source: https://github.com/openai/codex/releases/tag/rust-v0.171.0)
 - 2026-11-20: removed 1 item(s) from 2026-11-20 (review: repeats 2026-11-19-93422ffe (/stats heatmap already shipped in Gemini CLI v0.69.0))
 - 2026-11-21: source changed on 2026-10-25-b6651c86 (interconnects): accurate when published on 2026-10-25; the source changed it on 2026-10-27 (Oct 23 launch: Artificial Analysis published 55, 4th of 215 · Oct 27 index update (Intelligence Index v5) re-scored every model). Outcome bad -> source-changed, state corrected -> superseded (not scored; trust recomputed: mean 0.56 -> 0.635, LB10 0.339 -> 0.408, tier T3 -> T3)
+- 2026-11-21: audit of 2026-11-21-d88672ed (OpenAI (and Sam Altman's blog)): pass (Verdict: pass. Source: https://openai.com/index/combatting-adversarial-distillation)
+- 2026-11-21: removed 2 item(s) from 2026-11-21 (review: Codex r2 (a0970398 overgeneralized the post-RL result; 175ed6b4 unverified single-source claim))

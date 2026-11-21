@@ -8030,6 +8030,294 @@
    "recheck_on": "2026-12-04",
    "source_id": "google-ads-commerce",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-21-9c31a7fd",
+   "date": "2026-11-21",
+   "category": "release",
+   "claim": "Claude Code v2.1.330 adds easel, a built-in mod that draws charts on request and under MCP metrics results, on Pro and Max (Team and Enterprise where available) on macOS and Linux; automatic charts can be turned off in /config.",
+   "why_it_matters": "Charts can now show up in terminal sessions without being asked. Teams that want plain output need to know where to turn them off.",
+   "try_this": "After updating Claude Code, open /config and decide whether to keep automatic charts on.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.330",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "official release notes on GitHub; no sandbox test",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.330",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-21-73a6d598",
+   "date": "2026-11-21",
+   "category": "release",
+   "claim": "Claude Code v2.1.330 fixes ExitWorktree deleting a worktree another running session was using, lost user settings when several processes saved at once, and multi-minute freezes after compacting very long conversations.",
+   "why_it_matters": "These fixes matter most to people who run several Claude Code sessions or worktrees in parallel.",
+   "try_this": "Update Claude Code to v2.1.330 or later if you run parallel sessions in worktrees.",
+   "evidence": [
+    {
+     "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.330",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "official release notes on GitHub; no sandbox test",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Fixed ExitWorktree and the worktree exit dialog deleting a worktree that another running Claude Code session was working in",
+   "excerpt_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.330",
+   "item_url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.330",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-21-1bfed3be",
+   "date": "2026-11-21",
+   "category": "release",
+   "claim": "For GPT-6.2 Astra and GPT-6.2 Sol, OpenAI ties protected reasoning to the conversation that produced it. If an earlier message is rewritten, the API drops the reasoning that came after it. Older model families with weaker safeguards cannot read it.",
+   "why_it_matters": "Apps that rewrite an earlier message will lose the reasoning the model generated after it, which can change results and cost.",
+   "try_this": "If your app rewrites earlier messages, test GPT-6.2 Astra or Sol multi-turn flows for behavior changes.",
+   "evidence": [
+    {
+     "url": "https://openai.com/index/combatting-adversarial-distillation",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "stated on OpenAI's own post; not tested via API",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "If an earlier message is rewritten, our API drops the reasoning that followed it",
+   "excerpt_url": "https://openai.com/index/combatting-adversarial-distillation",
+   "item_url": "https://openai.com/index/combatting-adversarial-distillation",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "openai",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-21-d88672ed",
+   "date": "2026-11-21",
+   "category": "research",
+   "claim": "In OpenAI's internal adaptive red-teaming of attempts to recover protected reasoning from an earlier request, average attack success fell from 54.0% against GPT-6 Astra (original safeguards) to 0.2% against GPT-6.2 Astra (updated safeguards).",
+   "why_it_matters": "This is a vendor-reported measure of how well reasoning-extraction defenses work, which matters to anyone relying on hidden chain-of-thought.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://openai.com/index/combatting-adversarial-distillation",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "internal evaluation reported by OpenAI; not independently checked",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://openai.com/index/combatting-adversarial-distillation"
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://openai.com/index/combatting-adversarial-distillation",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "openai",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-21-8e8b3741",
+   "date": "2026-11-21",
+   "category": "release",
+   "claim": "GitHub custom repository roles now have four generally available security advisory permissions: view, create/edit/manage, accept private vulnerability reports, and publish/request CVEs. These tasks no longer need admin or security manager roles, though merging a temporary private fork still does.",
+   "why_it_matters": "You can give a team access to security advisories on only the repos it maintains, without org-wide admin rights.",
+   "try_this": "Org owners on plans with custom repository roles: create a role with only the View security advisories permission for triage helpers.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-20-security-advisory-permissions-are-now-generally-available",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "official GitHub changelog",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "You no longer have to make them repository administrators or give them the organization-wide security manager role.",
+   "excerpt_url": "https://github.blog/changelog/2026-11-20-security-advisory-permissions-are-now-generally-available",
+   "item_url": "https://github.blog/changelog/2026-11-20-security-advisory-permissions-are-now-generally-available",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-21-f27c9926",
+   "date": "2026-11-21",
+   "category": "release",
+   "claim": "The GitHub Enterprise Server 3.23 release candidate adds public-preview AI secret detection for enterprises using GitHub Secret Protection. A fine-tuned model runs on the appliance CPU with no GPU, hosted LLM or outbound connection, so it works in air-gapped setups.",
+   "why_it_matters": "It is an example of a small local model doing useful security work fully offline inside enterprise infrastructure.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-20-github-enterprise-server-3-23-release-candidate",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "official GitHub changelog",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "A self-contained, fine-tuned model runs on the appliance’s CPU without a GPU, hosted LLM, or outbound connection.",
+   "excerpt_url": "https://github.blog/changelog/2026-11-20-github-enterprise-server-3-23-release-candidate",
+   "item_url": "https://github.blog/changelog/2026-11-20-github-enterprise-server-3-23-release-candidate",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-21-21971982",
+   "date": "2026-11-21",
+   "category": "release",
+   "claim": "In GHES 3.23, Dependabot by default waits until a package version has been on its registry for at least three days before opening a version update pull request.",
+   "why_it_matters": "The cooldown reduces the chance of auto-merging a freshly compromised or buggy package release.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-20-github-enterprise-server-3-23-release-candidate",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "official GitHub changelog",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": null,
+   "excerpt_url": null,
+   "item_url": "https://github.blog/changelog/2026-11-20-github-enterprise-server-3-23-release-candidate",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-21-a73fbbe4",
+   "date": "2026-11-21",
+   "category": "tool",
+   "claim": "GitHub Desktop 3.7.0 supports multiple signed-in accounts on the same host, with each repository tied to a chosen account for clone, publish and Git operations.",
+   "why_it_matters": "People who juggle personal and client GitHub accounts can stop signing in and out or mixing up credentials.",
+   "try_this": "Update to GitHub Desktop 3.7.0 and add a second account under Settings > Accounts.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-19-github-desktop-now-supports-multiple-accounts-per-host",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "official GitHub changelog; no sandbox test",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Add more than one account for a single host, with no fixed limit.",
+   "excerpt_url": "https://github.blog/changelog/2026-11-19-github-desktop-now-supports-multiple-accounts-per-host",
+   "item_url": "https://github.blog/changelog/2026-11-19-github-desktop-now-supports-multiple-accounts-per-host",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-21-d2550ca7",
+   "date": "2026-11-21",
+   "category": "release",
+   "claim": "Google is rolling out new Connected Apps in Search and the Gemini app in the US, including grocery ordering from Albertsons, Safeway, Shaw's and Target via the Universal Commerce Protocol, plus Experian and H&R Block in Search.",
+   "why_it_matters": "Agentic checkout inside Google Search is expanding to everyday retailers, which matters for anyone building commerce integrations.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://blog.google/products-and-platforms/products/search/connected-apps-holiday-errands/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "official Google blog post",
+    "checked_at": "2026-11-21T07:51-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "In the U.S., we’re rolling out new Connected Apps through Search and the Gemini app",
+   "excerpt_url": "https://blog.google/products-and-platforms/products/search/connected-apps-holiday-errands/",
+   "item_url": "https://blog.google/products-and-platforms/products/search/connected-apps-holiday-errands/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-05",
+   "source_id": "google-search",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -8315,6 +8603,13 @@
   {
    "date": "2026-11-20",
    "item_id": "2026-11-20-8210e817",
+   "source_id": "openai",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-21",
+   "item_id": "2026-11-21-d88672ed",
    "source_id": "openai",
    "tier": "T1-seed",
    "verdict": "pass"
@@ -8810,6 +9105,16 @@
    "id": "2026-11-20-37d43c38",
    "date": "2026-11-20",
    "reason": "review: repeats 2026-11-19-93422ffe (/stats heatmap already shipped in Gemini CLI v0.69.0)"
+  },
+  {
+   "id": "2026-11-21-175ed6b4",
+   "date": "2026-11-21",
+   "reason": "review: Codex r2 (a0970398 overgeneralized the post-RL result; 175ed6b4 unverified single-source claim)"
+  },
+  {
+   "id": "2026-11-21-a0970398",
+   "date": "2026-11-21",
+   "reason": "review: Codex r2 (a0970398 overgeneralized the post-RL result; 175ed6b4 unverified single-source claim)"
   }
  ]
 }
