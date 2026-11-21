@@ -129,7 +129,7 @@ def main():
         t["updated"] = date
         t["items_seen_by_date"] = old.get("items_seen_by_date", {})
         t["items_seen"] = sum(t["items_seen_by_date"].values())
-        t["scorable_claims"] = sum(1 for c in ledger["claims"] if c["source_id"] == s["id"] and c.get("scorable"))
+        t["scorable_claims"] = trust.count_scorable(ledger["claims"], s["id"])
         s["trust"] = t
         if prev and prev != t["tier"]:
             changelog(f"{s['name']} tier {prev} -> {t['tier']} (mean {t['trust_mean']}, LB10 {t['lb10']}, {t['resolved_tips']} resolved)")
@@ -332,9 +332,7 @@ def main():
         if d["id"] in corrected:
             ledger["claims"][-1].update({k: corrected[d["id"]][k] for k in ("correction", "reversed_on", "source_change", "outcome", "resolved_on",
                                                                             "resolution_note") if k in corrected[d["id"]]})
-    for s in srcs.values():
-        if s.get("trust"):
-            s["trust"]["scorable_claims"] = sum(1 for c in ledger["claims"] if c["source_id"] == s["id"] and c.get("scorable"))
+    trust.set_scorable_claims(srcs.values(), ledger["claims"])
 
     # 7. write public outputs
     lp.write_text(json.dumps(ledger, indent=1, ensure_ascii=False))

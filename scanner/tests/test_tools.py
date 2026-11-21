@@ -317,6 +317,41 @@ with mock.patch.dict(os.environ, env), mock.patch.object(extract.requests, "post
 assert post.call_count == 1, post.call_count
 assert any("HTTP 404" in m and extract.GEMINI_DEFAULT_MODEL in m and "GEMINI_MODEL" in m for m in logs), logs
 assert all("404" in v["video_status"] for v in vids), vids
+# remove: trust.scorable_claims is recounted from the ledger after one id and after --all.
+# A non-scorable claim (removed or not) does not count; an older claim that stays does.
+D3 = "2026-01-03"
+def tblock(n):
+    return {"tier": "T3", "trust_mean": 0.5, "lb10": 0.2, "resolved_tips": 0, "research_criterion": "x", "scorable_claims": n}
+reg_sc = {"sources": [
+    {"id": "oa", "name": "OpenAI", "home_url": "https://openai.com", "enabled": True, "seed": False, "trust": tblock(3)},
+    {"id": "sw", "name": "Simon Willison", "home_url": "https://simonwillison.net", "enabled": True, "seed": False, "trust": tblock(2)},
+    {"id": "bare", "name": "No trust yet", "home_url": "https://example.com", "enabled": False}]}
+(tmp / "sources.yaml").write_text(yaml.safe_dump(reg_sc))
+def day_item(n, sid, scorable=True):
+    d = item(n); d.update(id=f"{D3}-{n:08d}", date=D3, scorable=scorable, claim=f"{'claim' if scorable else 'opinion'} {sid} {n}")
+    d["source"] = {"id": sid, "name": sid, "home_url": "https://example.com", "tier": "T3", "trust_mean": 0.5, "lb10": 0.2, "seed": False}
+    return d
+day = [day_item(1, "oa"), day_item(2, "oa"), day_item(3, "oa", False), day_item(4, "sw")]
+old = [{"id": "2026-01-01-00000005", "date": "2026-01-01", "source_id": "oa", "scorable": True, "claim": "older oa"},
+       {"id": "2026-01-01-00000006", "date": "2026-01-01", "source_id": "oa", "scorable": False, "claim": "older opinion"},
+       {"id": "2026-01-01-00000007", "date": "2026-01-01", "source_id": "sw", "scorable": True, "claim": "older sw"}]
+render.write(tmp, D3, 80, day, {s["id"]: s for s in reg_sc["sources"]}, 4, 2, write_latest=False)
+(tmp / "ledger" / "claims.json").write_text(json.dumps({"claims": [dict(d, source_id=d["source"]["id"]) for d in day] + old, "audits": []}))
+def fresh(sid):
+    cs = json.loads((tmp / "ledger" / "claims.json").read_text())["claims"]
+    return sum(1 for c in cs if c["source_id"] == sid and c.get("scorable"))
+def stored():
+    return {s["id"]: (s.get("trust") or {}).get("scorable_claims") for s in yaml.safe_load((tmp / "sources.yaml").read_text())["sources"]}
+assert stored()["oa"] == fresh("oa") == 3 and stored()["sw"] == fresh("sw") == 2 and stored()["bare"] is None
+r = run("scanner.remove", D3, day[0]["id"], "--reason", "test"); assert r.returncode == 0, r.stdout + r.stderr
+got = stored()
+assert got["oa"] == 2 and got["oa"] == fresh("oa") and got["oa"] == 3 - 1, got   # one scorable claim left the ledger
+assert got["sw"] == 2 and got["sw"] == fresh("sw") and got["bare"] is None, got   # untouched source, and the opinion still does not count
+r = run("scanner.remove", D3, "--all", "--reason", "held: test"); assert r.returncode == 0, r.stdout + r.stderr
+got = stored()
+assert got["oa"] == fresh("oa") == 1 and got["sw"] == fresh("sw") == 1, got      # only the older scorable claims remain
+assert json.loads((tmp / "daily" / "2026" / "01" / f"{D3}.json").read_text())["items"] == []
+assert run("scanner.remove", D3, "--all").returncode == 0 and stored() == got     # empty day: counts stay at the recount
 shutil.rmtree(tmp.parent)
 # health flags: thin day, one source dominating, a source gone quiet (review only, never blocks)
 srcs_h = {"a": {"name": "A", "enabled": True, "feeds": [{}], "trust": {"items_seen_by_date": {"2026-10-24": 3}}},

@@ -87,6 +87,28 @@ def posterior(events, today, decay=True, since=None):
     return a, b
 
 
+def count_scorable(claims, source_id):
+    """Ledger claims from this source that still count toward trust.scorable_claims.
+    scanner.run writes this when it rescores and again after the day's claims land."""
+    return sum(1 for c in claims if c["source_id"] == source_id and c.get("scorable"))
+
+
+def set_scorable_claims(sources, claims):
+    """Set trust.scorable_claims from `claims` on every source that has a trust block.
+    scanner.remove does this after claims leave the ledger, and scanner.run after the day's claims land.
+    Returns True if any stored count changed."""
+    changed = False
+    for s in sources:
+        t = s.get("trust")
+        if not t or not s.get("id"):
+            continue
+        n = count_scorable(claims, s["id"])
+        if t.get("scorable_claims") != n:
+            changed = True
+        t["scorable_claims"] = n
+    return changed
+
+
 def score(source, events, today):
     """Returns the trust record written into sources.yaml for one source."""
     today = _d(today)
