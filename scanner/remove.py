@@ -1,12 +1,13 @@
 """Remove published items everywhere (review BLOCK fixes and takedowns): latest.*, the dated archive (.md and .json),
 weekly files, and the ledger. Usage: python -m scanner.remove YYYY-MM-DD <item-id> [<item-id> ...] [--reason "..."]
        python -m scanner.remove YYYY-MM-DD --all [--reason "..."]   (a held day: removes every item, works on an empty day)
-Re-renders the affected day (and latest.* if it is the latest day), reports weekly files that still mention an id,
+Re-renders the affected day (and latest.* if it is the latest day), recomputes trust.scorable_claims in sources.yaml
+from the ledger that remains (one id or --all; same count as scanner.run), reports weekly files that still mention an id,
 and exits non-zero if anything remains or the gate fails."""
 import json, sys, datetime as dt
 from pathlib import Path
 import yaml
-from . import render, gate
+from . import render, gate, trust
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -23,7 +24,8 @@ def main(argv):
     meta = json.loads(arch.read_text())
     ids = {d["id"] for d in meta["items"]} if "--all" in argv else set(args[1:])
     keep = [d for d in meta["items"] if d["id"] not in ids]
-    srcs = {s["id"]: s for s in yaml.safe_load((REPO / "sources.yaml").read_text())["sources"] if "id" in s}
+    reg = yaml.safe_load((REPO / "sources.yaml").read_text())
+    srcs = {s["id"]: s for s in reg["sources"] if "id" in s}
     lp = REPO / "ledger" / "claims.json"
     ledger = json.loads(lp.read_text())
     ledger["claims"] = [c for c in ledger["claims"] if c["id"] not in ids]
@@ -33,6 +35,11 @@ def main(argv):
         if x["item_id"] in ids:
             x["removed"] = True
     lp.write_text(json.dumps(ledger, indent=1, ensure_ascii=False))
+    # a removed claim leaves the ledger, so it must leave trust.scorable_claims too (same recount scanner.run writes)
+    if trust.set_scorable_claims(reg["sources"], ledger["claims"]):
+        (REPO / "sources.yaml").write_text(
+            "# Context Pill source registry. Hand-edit names, feeds and criteria; the scanner rewrites the trust blocks.\n"
+            "# No X handles in this public file. Caps: ~40 sources total.\n" + yaml.safe_dump(reg, sort_keys=False, width=140, allow_unicode=True))
     latest_is_this = json.loads((REPO / "latest.json").read_text()).get("date") == date
     render.write(REPO, date, meta["scanner_day"], keep, srcs, meta.get("items_read", 0), meta.get("sources_with_items", 0),
                  write_latest=latest_is_this)
