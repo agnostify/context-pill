@@ -1,6 +1,6 @@
 {
   "name": "context-pill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pull today's checked AI claims into Claude Code on demand, or check whether a specific release claim has been verified. Runs only when you invoke it.",
   "author": {
     "name": "Agnostify",
