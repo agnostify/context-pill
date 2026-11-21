@@ -79,7 +79,7 @@ def main():
     # 1. resolution of claims due today (14 days after publication, or prediction deadline + 14)
     due = [c for c in ledger["claims"] if c["state"] == "pending" and c.get("scorable") and c["recheck_on"] <= date]
     res = extract.resolve([{"id": c["id"], "claim": c["claim"], "evidence": c["evidence"], "category": c["category"]} for c in due], WORK, date, log)
-    res, why = notes.split(res, "outcome", notes.OUTCOMES)       # an invalid outcome is not judged; model text stays in WORK
+    res, why = notes.split(res, "outcome", notes.OUTCOMES, keep=(notes.CHANGE_FLAG,))   # an invalid outcome is not judged; model text stays in WORK
     for c in due:
         r = res.get(c["id"])
         if not r: continue
@@ -98,6 +98,12 @@ def main():
             log(f"resolve: {c['id']} {r['outcome']} -> {out}: {dwhy}")
         c["state"] = "resolved"; c["outcome"] = out; c["resolved_on"] = date
         c["resolution_note"] = notes.resolution_note(out, urls)
+        if out in ("bad", "partial") and r.get(notes.CHANGE_FLAG) is True:
+            # the resolver thinks the source itself changed its numbers, version or method after publication. The outcome
+            # stands (the model never spares a source); the maintainer confirms with scanner.supersede, which undoes it
+            c["source_change_flag"] = date
+            changelog(f"re-check of {c['id']} ({c['source_id']}) scored {out} and flagged a possible source change after publication "
+                      f"(new version, index or method); review and, if confirmed, record with python -m scanner.supersede")
     notes.save_reasoning(raw / "resolve.reasoning.json", why)
 
     # 2. trust update; apply drop, audit demotion/recovery, and per-tier tightening (>1 audit error in the last 20)
@@ -314,17 +320,18 @@ def main():
     if ares or held:
         ares_p.write_text(json.dumps(held | ares, indent=1))
     # 6. ledger (stable ids; reruns replace today's entries)
-    corrected = {c["id"]: c for c in ledger["claims"] if c["date"] == date and c.get("state") == "corrected"}   # scanner.correct survives rebuilds
+    corrected = {c["id"]: c for c in ledger["claims"] if c["date"] == date and c.get("state") in ("corrected", "superseded")}   # scanner.correct/supersede survive rebuilds
     for d in drop:
         if d["id"] in corrected:
-            d["state"] = "corrected"
+            d["state"] = corrected[d["id"]]["state"]
     ledger["claims"] = [c for c in ledger["claims"] if c["date"] != date or (c["id"] in corrected and c["id"] not in {d["id"] for d in drop})]
     for d in drop:
         ledger["claims"].append({k: d[k] for k in ("id", "date", "category", "claim", "why_it_matters", "try_this", "evidence", "verification",
                                                    "excerpt", "excerpt_url", "item_url", "scorable", "prediction_deadline", "state", "recheck_on")}
                                 | {"source_id": d["source"]["id"], "status_at_publication": d["verification"]["status"]})
         if d["id"] in corrected:
-            ledger["claims"][-1].update({k: corrected[d["id"]][k] for k in ("correction", "reversed_on") if k in corrected[d["id"]]})
+            ledger["claims"][-1].update({k: corrected[d["id"]][k] for k in ("correction", "reversed_on", "source_change", "outcome", "resolved_on",
+                                                                            "resolution_note") if k in corrected[d["id"]]})
     for s in srcs.values():
         if s.get("trust"):
             s["trust"]["scorable_claims"] = sum(1 for c in ledger["claims"] if c["source_id"] == s["id"] and c.get("scorable"))

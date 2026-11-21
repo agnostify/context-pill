@@ -31,7 +31,7 @@ Codex, Cursor and VS Code: see [setup snippets](#setup-snippets-copy-and-paste).
 | "What shipped in AI today?" | `get_latest` |
 | "What's new for coding agents today?" | `get_latest` with `topic: "coding agents"` |
 | "Has Context Pill checked `<tool or model>`?" | `search_claims` with `query: "<tool or model>"` |
-| "Did that claim hold up?" or "Was it wrong?" | `search_claims` with `query: "<tool or model>"`: current state and re-check outcome; corrected means a re-check found it wrong |
+| "Did that claim hold up?" or "Was it wrong?" | `search_claims` with `query: "<tool or model>"`: current state and re-check outcome; corrected means a re-check found it wrong; superseded means it was accurate when published and the source later changed its own numbers |
 | "How far should I trust `<source>`?" | `list_sources` with `name: "<source>"` |
 
 Every claim comes back with a status (`verified`, `docs-verified`, `vendor-claim`, `unverified`...), how it was checked and its evidence links (`get_latest` adds the source's trust score), so your agent can tell a checked release from a press release.

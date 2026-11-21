@@ -26,4 +26,8 @@ old = [{"date": today - dt.timedelta(days=50), "outcome": "good"}] * 20
 assert T.score(demo, old, today)["tier"] == "T2", T.score(demo, old, today)
 new = [{"date": today - dt.timedelta(days=5), "outcome": "good"}] * 20
 assert T.score(demo, old + new, today)["tier"] == "T1", T.score(demo, old + new, today)
+# source-changed (scanner.supersede) and inconclusive are never scored: same as having no event
+ev = [{"date": today, "outcome": "good"}] * 3
+assert T.score({}, ev + [{"date": today, "outcome": "source-changed"}, {"date": today, "outcome": "inconclusive"}], today) == T.score({}, ev, today)
+assert "source-changed" not in T.WEIGHTS
 print("trust tests: OK")

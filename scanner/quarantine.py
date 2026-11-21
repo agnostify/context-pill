@@ -35,7 +35,7 @@ def main(argv):
         if c.get("state") != "resolved" or c.get("resolved_on") != date:
             skipped.append(f"{c['id']} ({c.get('state')}, resolved_on {c.get('resolved_on')})"); continue
         c["state"] = "pending"
-        for k in ("outcome", "resolved_on", "resolution_note"):
+        for k in ("outcome", "resolved_on", "resolution_note", "source_change_flag"):
             c.pop(k, None)
         c["recheck_on"] = (today + dt.timedelta(days=REQUEUE_DAYS)).isoformat()
         reset.append(c)

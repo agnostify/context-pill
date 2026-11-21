@@ -797,16 +797,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 4.279
-    beta: 3.368
-    trust_mean: 0.56
-    lb10: 0.339
+    alpha: 4.262
+    beta: 2.452
+    trust_mean: 0.635
+    lb10: 0.408
     lb10_basis: undecayed-12mo (low volume)
-    resolved_tips: 4
+    resolved_tips: 3
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-20'
+    updated: '2026-11-21'
     items_seen_by_date:
       '2026-10-18': 1
       '2026-10-25': 1

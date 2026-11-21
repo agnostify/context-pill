@@ -52,7 +52,7 @@
         "excerpt_url": {"type": ["string", "null"]},
         "scorable": {"type": "boolean"},
         "prediction_deadline": {"type": ["string", "null"]},
-        "state": {"enum": ["pending", "resolved", "corrected", "closed-inconclusive"]},
+        "state": {"enum": ["pending", "resolved", "corrected", "superseded", "closed-inconclusive"]},
         "recheck_on": {"type": "string", "format": "date"}
       }
     }

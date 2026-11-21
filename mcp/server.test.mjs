@@ -127,15 +127,25 @@ test("search_claims: a bad re-check reads as corrected, with the recorded correc
       state: "resolved", outcome: "bad", resolved_on: "2026-11-09", evidence: [] },
     { id: "x3", date: "2026-10-27", claim: "Zeta price drops", category: "release", source_id: "s", status_at_publication: "verified",
       state: "resolved", outcome: "partial", resolved_on: "2026-11-10", evidence: [] },
+    { id: "x4", date: "2026-10-25", claim: "Zeta ranks 4th on an index", category: "research", source_id: "s", status_at_publication: "verified",
+      state: "superseded", outcome: "source-changed", resolved_on: "2026-11-08", evidence: [],
+      source_change: { recorded_on: "2026-11-21", changed_on: "2026-10-27", note: "Oct 23 launch · Oct 27 index update (v5)", now_shows: "page now shows 46", outcome_before: "bad" } },
+    { id: "x5", date: "2026-10-28", claim: "Zeta leads a leaderboard", category: "research", source_id: "s", status_at_publication: "verified",
+      state: "resolved", outcome: "bad", resolved_on: "2026-11-11", source_change_flag: "2026-11-11", evidence: [] },
   ] };
   const ft = async (p) => (p === "ledger/claims.json" ? JSON.stringify(ledger) : readFileSync(new URL(p, root), "utf8"));
   const req = new Request("https://contextpill.com/mcp", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", "MCP-Protocol-Version": "2025-11-25" },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "search_claims", arguments: { query: "zeta" } } }) });
   const t = JSON.parse(await (await handleMcp(req, { fetchText: ft })).text()).result.content[0].text;
-  const [b1, b2, b3] = ["x1", "x2", "x3"].map((id) => t.split("\n\n").find((s) => s.includes(`id: ${id}`)));
+  const [b1, b2, b3, b4, b5] = ["x1", "x2", "x3", "x4", "x5"].map((id) => t.split("\n\n").find((s) => s.includes(`id: ${id}`)));
   assert.match(b1, /current state: corrected/); assert.match(b1, /CORRECTED on 2026-11-19: page now shows 46/);
   assert.match(b2, /current state: corrected/); assert.match(b2, /CORRECTED on 2026-11-09: the re-check found the claim no longer matches its source/);
   assert.match(b3, /current state: resolved/); assert.match(b3, /re-check outcome: partial \(only part of the claim held up\)/);
+  // the source changed its own numbers later: not corrected, says it was accurate when published, with both dates
+  assert.match(b4, /current state: superseded/); assert.doesNotMatch(b4, /CORRECTED/);
+  assert.match(b4, /re-check outcome: source-changed \(the source changed its numbers after we checked; it was accurate when published\)/);
+  assert.match(b4, /SOURCE CHANGED on 2026-10-27: Oct 23 launch · Oct 27 index update \(v5\); accurate when published on 2026-10-25, not a wrong claim\. Now: page now shows 46/);
+  assert.match(b5, /current state: corrected/); assert.match(b5, /may have changed its own numbers or method since, under review/);
 });
 
 test("descriptions: search_claims fits 'was it checked / did it hold up', get_latest says it is for today", async () => {

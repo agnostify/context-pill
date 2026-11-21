@@ -29,12 +29,14 @@ const INSTRUCTIONS =
   "Example: user asks \"Is Claude Code fast mode available on Vertex?\" → call search_claims with {\"query\":\"fast mode\"} (1–3 key words; every word must match).";
 
 // Re-check outcomes in plain words. A claim whose re-check outcome is "bad" is shown as corrected even before a correction
-// with the source's current value is recorded (scanner/correct.py), so it never reads as merely "resolved".
+// with the source's current value is recorded (scanner/correct.py), so it never reads as merely "resolved". A "source-changed"
+// claim (state "superseded", scanner/supersede.py) was accurate when published; the source later changed its own numbers.
 const OUTCOME_GLOSS = {
   good: "held up",
   "docs-verified": "held up per the docs, not tested hands-on",
   partial: "only part of the claim held up",
   bad: "the claim no longer held at the re-check",
+  "source-changed": "the source changed its numbers after we checked; it was accurate when published",
 };
 const shownState = (c) => (c.state === "resolved" && c.outcome === "bad" ? "corrected" : c.state);
 
@@ -225,10 +227,15 @@ async function callTool(name, rawArgs, fetchText) {
         const gloss = OUTCOME_GLOSS[c.outcome] ? ` (${OUTCOME_GLOSS[c.outcome]})` : "";
         lines.push(`   re-check outcome: ${oneLine(c.outcome, 30) || "?"}${gloss}${c.resolved_on ? ` on ${oneLine(c.resolved_on, 20)}` : ""}${c.resolution_note ? ` (${oneLine(c.resolution_note, 200)})` : ""}`);
       }
-      if (c.correction) {
+      if (c.source_change) {
+        const sc = c.source_change;
+        lines.push(`   SOURCE CHANGED on ${oneLine(sc.changed_on, 20) || "?"}: ${oneLine(sc.note, 200) || "no detail recorded"}; accurate when published on ${oneLine(c.date, 20)}, not a wrong claim` +
+          (sc.now_shows ? `. Now: ${oneLine(sc.now_shows, 300)}` : ""));
+      } else if (c.correction) {
         lines.push(`   CORRECTED on ${oneLine(c.correction.on, 20) || "?"}: ${oneLine(c.correction.reason, 300) || "no reason recorded"}`);
       } else if (shownState(c) === "corrected" && c.outcome === "bad") {
-        lines.push(`   CORRECTED on ${oneLine(c.resolved_on, 20) || "?"}: the re-check found the claim no longer matches its source; no corrected value recorded yet`);
+        lines.push(`   CORRECTED on ${oneLine(c.resolved_on, 20) || "?"}: the re-check found the claim no longer matches its source; no corrected value recorded yet` +
+          (c.source_change_flag ? "; the re-check flagged that the source may have changed its own numbers or method since, under review" : ""));
       }
       lines.push(`   evidence: ${(c.evidence || []).map((e) => httpsOnly(e.url)).join("; ") || "none"}`, `   id: ${oneLine(c.id, 60)}`);
       return lines.join("\n");
