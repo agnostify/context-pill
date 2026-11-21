@@ -68,8 +68,13 @@ def main(argv):
         t["updated"] = today.isoformat()
         t.update({k: old[k] for k in ("items_seen_by_date", "items_seen", "scorable_claims") if k in old})
         s["trust"] = t
+        # the drop rule as in scanner.run (which only rescores enabled sources, so a drop this claim caused is lifted here)
+        if t["tier"] == "drop" and s.get("enabled"):
+            s["enabled"] = False; s["disabled_reason"] = f"dropped by trust rule on {today}"
+        elif t["tier"] != "drop" and not s.get("enabled") and str(s.get("disabled_reason", "")).startswith("dropped by trust rule"):
+            s["enabled"] = True; s.pop("disabled_reason")
         effect = (f"not scored; trust recomputed: mean {old.get('trust_mean')} -> {t['trust_mean']}, LB10 {old.get('lb10')} -> {t['lb10']}, "
-                  f"tier {old.get('tier')} -> {t['tier']}")
+                  f"tier {old.get('tier')} -> {t['tier']}" + ("" if s.get("enabled") else ", source disabled by the drop rule"))
         (REPO / "sources.yaml").write_text(
             "# Context Pill source registry. Hand-edit names, feeds and criteria; the scanner rewrites the trust blocks.\n"
             "# No X handles in this public file. Caps: ~40 sources total.\n" + yaml.safe_dump(reg, sort_keys=False, width=140, allow_unicode=True))

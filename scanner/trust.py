@@ -16,7 +16,8 @@ T1_LB, T2_LB, DROP_MEAN, MIN_RESOLVED = 0.80, 0.65, 0.50, 15
 PROVISIONAL_DAYS = 14                            # no face-value publishing before day 15
 
 # outcome -> (alpha increment, beta increment). "inconclusive" and "source-changed" (scanner.supersede: accurate when published,
-# then the source changed its own numbers or method) have no entry, so they are never scored.
+# then the source changed its own numbers or method) have no entry, so they are never scored. Every trust rebuild must use the
+# same filter: state in ("resolved", "corrected") and outcome in WEIGHTS (scanner.run events_for, quarantine, supersede).
 WEIGHTS = {"good": (1.0, 0.0), "docs-verified": (0.5, 0.0), "partial": (0.5, 0.5), "bad": (0.0, 1.0)}
 
 

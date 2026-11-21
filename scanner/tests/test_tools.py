@@ -293,6 +293,12 @@ r = srun(p["id"], "--changed-on", "2026-10-19", "--note", "v2", "--date", "2026-
 c = next(x for x in json.loads((tmp / "ledger" / "claims.json").read_text())["claims"] if x["id"] == p["id"])
 assert c["state"] == "superseded" and c["source_change"]["state_before"] == "pending" and "outcome_before" not in c["source_change"], c
 assert yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]["trust"]["resolved_tips"] == 2
+# a drop the superseded bad claim caused is lifted (the daily run never rescores a disabled source)
+cs, t = qstate([("2026-10-20", "good")] * 1 + [("2026-10-20", "bad")] * 13 + [(D2, "bad")], {"enabled": False, "disabled_reason": "dropped by trust rule on 2026-11-01"})
+assert t["tier"] == "drop", t
+r = srun(cs[1]["id"], "--changed-on", "2026-10-19", "--note", "v2", "--date", "2026-11-21"); assert r.returncode == 0, r.stdout + r.stderr
+s = yaml.safe_load((tmp / "sources.yaml").read_text())["sources"][0]
+assert s["trust"]["resolved_tips"] == 14 and s["trust"]["tier"] == "T3" and s["enabled"] is True and "disabled_reason" not in s, s
 # gemini: CP_GEMINI_FROM can't move the start before Oct 23
 vid = [{"kind": "youtube", "url": "https://www.youtube.com/watch?v=x"}]
 with mock.patch.dict(os.environ, {"GEMINI_API_KEY": "fixture", "CP_GEMINI_APPROVED": "1", "CP_GEMINI_FROM": "2026-10-16"}), \
