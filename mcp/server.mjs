@@ -5,7 +5,7 @@
 // Usage: import { handleMcp } from "./server.mjs"; return handleMcp(request, { fetchText }) for POST /mcp.
 // fetchText(path) must return the text of a repo file (e.g. "latest.json") or throw.
 
-export const SERVER_INFO = { name: "context-pill", title: "Context Pill", version: "0.2.0" };
+export const SERVER_INFO = { name: "context-pill", title: "Context Pill", version: "0.2.1" };
 // 2026-07-28 is stateless (no initialize; version in the MCP-Protocol-Version header and params._meta). The 2025 versions
 // use the initialize handshake. Both are served by the same stateless handler.
 const MODERN = "2026-07-28";
@@ -38,6 +38,7 @@ const OUTCOME_GLOSS = {
   bad: "the claim no longer held at the re-check",
   "source-changed": "the source changed its numbers after we checked; it was accurate when published",
 };
+const outcomeGloss = (o) => (typeof o === "string" && Object.hasOwn(OUTCOME_GLOSS, o) ? OUTCOME_GLOSS[o] : "");
 const shownState = (c) => (c.state === "resolved" && c.outcome === "bad" ? "corrected" : c.state);
 
 const CHECKED = new Set(["verified", "docs-verified", "vendor-claim", "face-value-T1"]);
@@ -100,23 +101,65 @@ const TOOLS = [
 // ---------- helpers
 // Search words: Unicode letters and numbers (NFKC, lower case), keeping . + # - inside words so "gpt-5.5", "c++" and "c#" work.
 // Trailing "." and "-" and leading "-" are dropped, and a token with no letter or number (".", "-", "?!") is not a word.
-const fold = (s) => String(s || "").normalize("NFKC").toLowerCase();
+// Feed and request values as text: strings and finite numbers pass (so 0 prints as "0"); anything else (null, true, false,
+// objects, lists) is empty. Never throws, whatever the JSON holds.
+const str = (v) => (typeof v === "string" ? v : typeof v === "number" && Number.isFinite(v) ? String(v) : "");
+const fold = (s) => str(s).normalize("NFKC").toLowerCase();
 const words = (s) => fold(s).split(/[^\p{L}\p{M}\p{N}.+#-]+/u)
   .map((w) => w.replace(/^-+|[.-]+$/g, "")).filter((w) => /[\p{L}\p{N}]/u.test(w));
-function matches(hay, ws) {
-  const h = fold(hay);
-  return ws.length > 0 && ws.every((w) => h.includes(w));
+// The text a filter searches. A word that matched before still matches: the as-written test comes first. On top of that:
+// - a hyphenated word also finds the same name written apart or joined up ("claude-code" finds "Claude Code" and
+//   "ClaudeCode"; "sub-agent" finds "subagents"), counted only from the start of a term, so "e-mail" does not find "the mail";
+// - a plain word also finds a hyphenated term joined up ("gpt5.5" finds "GPT-5.5", "subagent" finds "sub-agents"). It must
+//   start the term and stop at the end of one of its parts, at a "." or at least three characters into a part, so "t5"
+//   does not find "GPT-5.5", "opens" does not find "open-source" and "101" does not find "10-15".
+// A joined word does not find a name written with a space ("claudecode" does not find "Claude Code").
+// Fields are joined with " . " so a name never matches across two fields ("alpha-beta" does not find a claim that ends in
+// "Alpha" with the category "Beta"). A lone "." is never a search word, so nothing that matched before is affected.
+function haystack(...parts) {
+  // Feed text sometimes uses a typographic hyphen (U+2010, U+2011, as in "GPT‑5.5"); read it as the plain one.
+  return { h: fold(parts.map(str).join(" . ")).replace(/[\u2010\u2011]/g, "-") }; // other forms are worked out when a word needs them
 }
+const NOT_TERM = /[^\p{L}\p{M}\p{N}.+#]+/gu;
+const NOT_TERM_OR_HYPHEN = /[^\p{L}\p{M}\p{N}.+#-]+/u;
+function joinedMatches(term, w) {
+  const parts = term.split("-");
+  const joined = parts.join("");
+  if (!joined.startsWith(w)) return false;
+  if (w.length === joined.length || joined[w.length] === ".") return true;
+  let edge = 0; // the last part boundary at or before the end of w
+  for (const p of parts) { if (edge + p.length > w.length) break; edge += p.length; }
+  return w.length === edge || [...w.slice(edge)].length >= 3; // three characters, not three UTF-16 units
+}
+function wordMatches(hay, w) {
+  if (hay.h.includes(w)) return true;
+  if (!w.includes("-")) {
+    // Cheap test first: with every hyphen dropped the word must be there at all. Nearly every miss ends here.
+    if (!(hay.dropped ??= hay.h.replaceAll("-", "")).includes(w)) return false;
+    // One pass over the text: split it into terms, keep the ones with a hyphen inside.
+    return (hay.hyphenated ??= hay.h.split(NOT_TERM_OR_HYPHEN).filter((t) => t.includes("-"))).some((t) => joinedMatches(t, w));
+  }
+  const terms = (hay.terms ??= " " + hay.h.replace(NOT_TERM, " "));
+  return terms.includes(" " + w.replace(/-+/g, " ")) || terms.includes(" " + w.replaceAll("-", ""));
+}
+const matches = (hay, ws) => ws.length > 0 && ws.every((w) => wordMatches(hay, w));
 // An optional filter (topic, name): blank means no filter. Returns the search words, or null for no filter.
 // A query with no searchable words at all is -32602, so "." doesn't match everything and "?!" doesn't silently match nothing.
 function filterWords(k, v) {
   if (v === undefined || !v.trim()) return null;
   const ws = words(v);
   if (!ws.length) throw new RpcError(-32602, `${k} has no searchable words; use letters or numbers, such as a product or model name`);
-  return ws;
+  return [...new Set(ws)]; // a repeated word is tested once
 }
 const statusLabel = (st) => (typeof st === "string" && Object.hasOwn(STATUS_LABEL, st) ? STATUS_LABEL[st] : "");
-const httpsOnly = (u) => (/^https:\/\/[^\s"'<>]+$/.test(String(u || "")) ? String(u) : "(non-https link omitted)");
+// A link is shown only when it is plain https, printable ASCII (no control, invisible or look-alike characters), at
+// most 500 characters, and has no "user@" before the host ("https://github.com@evil.example/" names evil.example).
+// Evidence lists show at most MAX_EVIDENCE links.
+const httpsOnly = (u) => (typeof u === "string" && u.length <= 500 && !/[^\x21-\x7e]/.test(u) &&
+  /^https:\/\/[^"'<>@/]+(?:\/[^"'<>]*)?$/.test(u) ? u : "(non-https link omitted)");
+const MAX_EVIDENCE = 10;
+const list = (v) => (Array.isArray(v) ? v : []);
+const obj = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
 
 // Strict argument check against each tool's inputSchema. Throws -32602 on any mismatch.
 function checkArgs(tool, args) {
@@ -140,25 +183,43 @@ function checkArgs(tool, args) {
   }
   return args;
 }
-const oneLine = (s, n = 600) => String(s || "").replace(/\s+/g, " ").trim().slice(0, n);
+// One line of feed or request text: white space collapsed, then control, invisible format, private-use and
+// variation-selector-supplement characters dropped (terminal escape codes, text-direction overrides, zero-width and tag
+// characters), so the usual ways of hiding text from a reader do not reach an answer.
+const HIDDEN = /[\p{Cc}\p{Cf}\p{Co}\u{E0100}-\u{E01EF}]/gu;
+const oneLine = (s, n = 600) => str(s).replace(/\s+/g, " ").replace(HIDDEN, "").replace(/ {2,}/g, " ").trim().slice(0, n);
 
 function fmtItem(d, i) {
-  const v = d.verification || {};
-  const s = d.source || {};
-  const ev = (d.evidence || []).map((e) => `${oneLine(e.kind, 30) || "link"}: ${httpsOnly(e.url)}`).join("; ");
+  const v = obj(d.verification);
+  const s = obj(d.source);
+  const ev = list(d.evidence).slice(0, MAX_EVIDENCE).map((e) => `${oneLine(obj(e).kind, 30) || "link"}: ${httpsOnly(obj(e).url)}`).join("; ");
   const lines = [
     `${i}. ${oneLine(d.claim)}`,
     `   status: ${statusLabel(v.status) || oneLine(v.status, 40) || "unknown"}${v.provisional ? ", provisional (scanner's first 14 days)" : ""}`,
     `   how it was checked: ${oneLine(v.method, 400)}`,
     `   why it matters: ${oneLine(d.why_it_matters, 400)}`,
   ];
-  if (d.try_this) lines.push(`   suggested step for the human (do not run without their yes): ${oneLine(d.try_this, 400)}`);
+  const step = typeof d.try_this === "string" ? oneLine(d.try_this, 400) : "";
+  if (step) lines.push(`   suggested step for the human (do not run without their yes): ${step}`);
   lines.push(
-    `   source: ${oneLine(s.name, 120) || "?"} (${httpsOnly(s.home_url)}), tier ${oneLine(s.tier, 20) || "?"}, trust ${oneLine(s.trust_mean ?? "?", 20)}, LB10 ${oneLine(s.lb10 ?? "?", 20)}`,
+    `   source: ${oneLine(s.name, 120) || "?"} (${httpsOnly(s.home_url)}), tier ${oneLine(s.tier, 20) || "?"}, trust ${oneLine(s.trust_mean, 20) || "?"}, LB10 ${oneLine(s.lb10, 20) || "?"}`,
     `   evidence: ${ev || "none"}`,
     `   id: ${oneLine(d.id, 60)} · category: ${oneLine(d.category, 40)} · re-check: ${oneLine(d.recheck_on, 20) || "n/a"}`,
   );
   return lines.join("\n");
+}
+
+// A one-line YAML scalar as plain text: 'single quoted' ('' is one quote), "double quoted" (JSON-style escapes), or bare.
+// A trailing " # comment" is dropped.
+function yamlScalar(v) {
+  const t = v.trim();
+  if (t.startsWith("#")) return ""; // nothing but a comment
+  const single = t.match(/^'((?:[^']|'')*)'\s*(?:#.*)?$/);
+  if (single) return single[1].replace(/''/g, "'");
+  const double = t.match(/^("(?:[^"\\]|\\.)*")\s*(?:#.*)?$/);
+  if (double) { try { return str(JSON.parse(double[1])); } catch { return double[1].slice(1, -1); } }
+  const hash = t.search(/\s#/); // a "#" after white space starts a comment
+  return hash < 0 ? t : t.slice(0, hash).trimEnd();
 }
 
 function parseSources(yamlText) {
@@ -167,8 +228,8 @@ function parseSources(yamlText) {
   for (const block of String(yamlText).split(/\n- id: /).slice(1)) {
     const g = (re) => (block.match(re) || [])[1];
     out.push({
-      id: block.split("\n")[0].trim(),
-      name: (g(/\n  name: (.+)/) || "").replace(/^['"]|['"]$/g, ""),
+      id: yamlScalar(block.split("\n")[0]).trim(),
+      name: yamlScalar(g(/\n  name: (.+)/) || "").trim(),
       home_url: g(/\n  home_url: (\S+)/) || "",
       enabled: g(/\n  enabled: (\w+)/) === "true",
       tier: g(/\n    tier: (\S+)/) || "",
@@ -180,30 +241,48 @@ function parseSources(yamlText) {
   return out;
 }
 
+// Feed files must have the shape we read: a drop is an object with an items list of objects, the ledger an object with a
+// claims list of objects. Anything else (an empty file, an error page saved as JSON, a half-written file) is a feed outage,
+// never "nothing was published" or "no claim matches".
+const isRows = (v) => Array.isArray(v) && v.every((it) => it && typeof it === "object" && !Array.isArray(it));
+const isDrop = (x) => !!x && typeof x === "object" && !Array.isArray(x) && isRows(x.items);
+const isLedger = (x) => !!x && typeof x === "object" && !Array.isArray(x) && isRows(x.claims);
+
 // One drop's checked items, then the topic filter (ws null means no filter).
 function pickItems(drop, ws) {
-  const all = drop.items || [];
-  const checked = all.filter((d) => CHECKED.has((d.verification || {}).status));
+  const all = drop.items;
+  const checked = all.filter((d) => CHECKED.has(obj(d.verification).status));
   let items = checked;
   if (ws) {
-    items = items.filter((d) =>
-      matches([d.claim, d.why_it_matters, d.category, d.source && d.source.name].join(" "), ws));
+    items = items.filter((d) => matches(haystack(d.claim, d.why_it_matters, d.category, obj(d.source).name), ws));
   }
   return { checked: checked.length, notVerified: all.length - checked.length, items };
 }
 
 // Today's drop as text, shared by the get_latest tool and the contextpill://latest resource.
-function formatLatest(drop, topic, limit) {
+function formatLatest(drop, topic, limit, now) {
   const ws = filterWords("topic", topic);
+  if (!isDrop(drop)) throw new Error("feed unavailable");
   const { checked, notVerified, items } = pickItems(drop, ws);
+  const today = windowDates(now, 1)[0];
+  const stale = isDate(drop.date) && drop.date < today;
   const head =
     `Context Pill drop for ${oneLine(drop.date, 20)} (scanner day ${oneLine(drop.scanner_day, 10)}${drop.provisional ? ", provisional period" : ""}). ` +
     `${checked} checked claims from ${oneLine(drop.items_read, 10)} items read` +
     (notVerified ? ` (${notVerified} more listed as not verified are left out here; don't act on those)` : "") +
-    (ws ? `; ${items.length} match "${oneLine(topic, 80)}"` : "") + ".";
+    (ws ? `; ${items.length} match "${oneLine(topic, 80)}"` : "") + "." +
+    (stale ? ` This is the latest drop available; it is dated before today, ${today} (Los Angeles date).` : "") +
+    (items.length > limit ? ` Showing the first ${limit}.` : "");
   const shown = items.slice(0, limit);
   const body = shown.map((d, i) => fmtItem(d, i + 1)).join("\n\n") || "No items match.";
   return { text: `${WARNING}\n\n${head}\n\n${body}\n\nFull drop: https://contextpill.com/latest.md · JSON: https://contextpill.com/latest.json`, results: shown.length };
+}
+
+// A real calendar date written YYYY-MM-DD ("2026-02-30" is not one).
+function isDate(s) {
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const t = Date.parse(`${s}T00:00:00Z`);
+  return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === s;
 }
 
 // The Los Angeles calendar dates from today back over `days` days, newest first ("2026-11-21", "2026-11-20", ...).
@@ -227,8 +306,7 @@ async function formatWindow(fetchText, now, days, topic, limit) {
   const got = await Promise.all(dates.map((d) =>
     fetchJson(fetchText, `daily/${d.slice(0, 4)}/${d.slice(5, 7)}/${d}.json`)
       // A drop must be an object with an items list; anything else is unreadable, so one bad file never hides the healthy days.
-      .then((x) => (x && typeof x === "object" && !Array.isArray(x) && Array.isArray(x.items) &&
-        x.items.every((it) => it && typeof it === "object" && !Array.isArray(it)) ? x : UNREADABLE))
+      .then((x) => (isDrop(x) ? x : UNREADABLE))
       .catch((e) => (isMissing(e) ? null : UNREADABLE))));
   const unread = dates.filter((_, i) => got[i] === UNREADABLE);
   const drops = got.map((d) => (d === UNREADABLE ? null : d));
@@ -255,8 +333,17 @@ async function formatWindow(fetchText, now, days, topic, limit) {
     (unread.length ? ` Could not be read right now: ${unread.join(", ")}.` : "") +
     ` ${checked} checked claims` +
     (notVerified ? ` (${notVerified} more listed as not verified are left out here; don't act on those)` : "") +
-    (ws ? `; ${matched} match "${oneLine(topic, 80)}"` : "") + ".";
+    (ws ? `; ${matched} match "${oneLine(topic, 80)}"` : "") + "." +
+    (matched > limit ? ` Showing the first ${limit}, newest day first.` : "");
   return { text: `${WARNING}\n\n${head}\n\n${groups.join("\n\n") || "No items match."}\n\n${foot}`, results: n };
+}
+
+// The searched text of one ledger claim, prepared once per parsed ledger (a batch of searches shares it).
+const claimTexts = new WeakMap();
+function claimText(c) {
+  let t = claimTexts.get(c);
+  if (!t) claimTexts.set(c, (t = haystack(c.claim, c.why_it_matters, c.category, c.source_id)));
+  return t;
 }
 
 // Common English words search_claims drops from a query when another word remains. No negations, digits or symbols.
@@ -266,60 +353,84 @@ const COMMON_WORDS = new Set(("a an the is are was were be been do does did has 
 // ---------- tools
 // Returns { text, results }: results is the number of rows returned to the caller.
 async function callTool(name, rawArgs, fetchText, now) {
+  if (typeof name !== "string") throw new RpcError(-32602, "name must be a string");
   const tool = TOOLS.find((t) => t.name === name);
   if (!tool) throw new RpcError(-32602, `Unknown tool: ${oneLine(name, 60)}`);
   const args = checkArgs(tool, rawArgs);
   if (name === "get_latest") {
     filterWords("topic", args.topic); // argument errors come before any feed fetch
     if ((args.days ?? 1) > 1) return formatWindow(fetchText, now, args.days, args.topic, args.limit ?? 15);
-    return formatLatest(await fetchJson(fetchText, "latest.json"), args.topic, args.limit ?? 15);
+    return formatLatest(await fetchJson(fetchText, "latest.json"), args.topic, args.limit ?? 15, now);
   }
   if (name === "search_claims") {
     if (!args.query.trim()) throw new RpcError(-32602, "query must not be empty");
     let ws = filterWords("query", args.query);
     const kept = ws.filter((w) => !COMMON_WORDS.has(w));
-    const ignored = kept.length && kept.length < ws.length ? [...new Set(ws.filter((w) => COMMON_WORDS.has(w)))] : [];
+    let ignored = kept.length && kept.length < ws.length ? [...new Set(ws.filter((w) => COMMON_WORDS.has(w)))] : [];
     if (ignored.length) ws = kept;
     const ledger = await fetchJson(fetchText, "ledger/claims.json");
+    if (!isLedger(ledger)) throw new Error("feed unavailable");
     const limit = args.limit ?? 10;
-    const hits = (ledger.claims || [])
-      .filter((c) => matches([c.claim, c.why_it_matters, c.category, c.source_id].join(" "), ws))
-      .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    // A query that is exactly one claim's id (the value after "id:" in any result, with or without that label) returns
+    // that claim and nothing else, and an exact removed id returns only its removal: neither runs the word search, so a
+    // claim whose text happens to mention that id is not listed. Ids are not part of the searched text, so the dates and
+    // hex inside them never match a word search.
+    // Only text shaped like our ids (a date, then a short code) takes this path, so a feed row with an id such as
+    // "claude" can never capture an ordinary search.
+    const typed = fold(args.query).trim().replace(/^id:\s*/, "");
+    const asId = /^\d{4}-\d{2}-\d{2}-[0-9a-z]{4,40}$/.test(typed) ? typed : "";
+    const byId = asId ? ledger.claims.filter((c) => typeof c.id === "string" && fold(c.id) === asId) : [];
+    const gone = byId.length || !asId ? undefined : list(ledger.removed).find((r) => typeof obj(r).id === "string" && fold(r.id) === asId);
+    if (byId.length || gone) ignored = [];
+    const found = byId.length ? byId : gone ? [] : ledger.claims
+      .filter((c) => matches(claimText(c), ws))
+      .sort((a, b) => str(b.date).localeCompare(str(a.date)));
+    // Claims that hold every word as written come first, then the ones found through another spelling, newest first in
+    // each. So the other spellings never push out a claim the query finds as written.
+    const asWritten = (c) => ws.every((w) => claimText(c).h.includes(w));
+    const written = new Set(byId.length ? [] : found.filter(asWritten));
+    const tiered = written.size > 0 && written.size < found.length;
+    const hits = tiered ? [...written, ...found.filter((c) => !written.has(c))] : found;
     const body = hits.slice(0, limit).map((c, i) => {
       const lines = [
         `${i + 1}. [${oneLine(c.date, 20)}] ${oneLine(c.claim)}`,
         `   status at publication: ${statusLabel(c.status_at_publication) || oneLine(c.status_at_publication, 40) || "unknown"}`,
-        `   how it was checked: ${oneLine((c.verification || {}).method, 400) || "not recorded"}`,
+        `   how it was checked: ${oneLine(obj(c.verification).method, 400) || "not recorded"}`,
         `   current state: ${oneLine(shownState(c), 20) || "unknown"}${c.recheck_on ? ` · re-check: ${oneLine(c.recheck_on, 20)}` : ""} · source: ${oneLine(c.source_id, 60)}`,
       ];
       if (c.outcome || c.resolved_on) {
-        const gloss = OUTCOME_GLOSS[c.outcome] ? ` (${OUTCOME_GLOSS[c.outcome]})` : "";
+        const gloss = outcomeGloss(c.outcome) ? ` (${outcomeGloss(c.outcome)})` : "";
         lines.push(`   re-check outcome: ${oneLine(c.outcome, 30) || "?"}${gloss}${c.resolved_on ? ` on ${oneLine(c.resolved_on, 20)}` : ""}${c.resolution_note ? ` (${oneLine(c.resolution_note, 200)})` : ""}`);
       }
       if (c.source_change) {
-        const sc = c.source_change;
+        const sc = obj(c.source_change);
         lines.push(`   SOURCE CHANGED on ${oneLine(sc.changed_on, 20) || "?"}: ${oneLine(sc.note, 200) || "no detail recorded"}; accurate when published on ${oneLine(c.date, 20)}, not a wrong claim` +
           (sc.now_shows ? `. Now: ${oneLine(sc.now_shows, 300)}` : ""));
       } else if (c.correction) {
-        lines.push(`   CORRECTED on ${oneLine(c.correction.on, 20) || "?"}: ${oneLine(c.correction.reason, 300) || "no reason recorded"}`);
+        lines.push(`   CORRECTED on ${oneLine(obj(c.correction).on, 20) || "?"}: ${oneLine(obj(c.correction).reason, 300) || "no reason recorded"}`);
       } else if (shownState(c) === "corrected" && c.outcome === "bad") {
         lines.push(`   CORRECTED on ${oneLine(c.resolved_on, 20) || "?"}: the re-check found the claim no longer matches its source; no corrected value recorded yet` +
           (c.source_change_flag ? "; the re-check flagged that the source may have changed its own numbers or method since, under review" : ""));
       }
-      lines.push(`   evidence: ${(c.evidence || []).map((e) => httpsOnly(e.url)).join("; ") || "none"}`, `   id: ${oneLine(c.id, 60)}`);
+      lines.push(`   evidence: ${list(c.evidence).slice(0, MAX_EVIDENCE).map((e) => httpsOnly(obj(e).url)).join("; ") || "none"}`, `   id: ${oneLine(c.id, 60)}`);
       return lines.join("\n");
     }).join("\n\n");
-    const text = `${WARNING}\n\n${hits.length} claim(s) match "${oneLine(args.query, 80)}" in the ledger (${(ledger.claims || []).length} claims total).` +
+    const text = `${WARNING}\n\n${hits.length} claim(s) match "${oneLine(args.query, 80)}" in the ledger (${ledger.claims.length} claims total).` +
+      (hits.length <= limit ? "" : tiered ? ` Showing ${limit}: claims containing the searched words exactly as typed come first, then claims found through another spelling, newest first within each group.` : ` Showing the ${limit} newest.`) +
       (ignored.length ? `\nIgnored common words: ${ignored.join(", ")}.` : "") +
-      (hits.length ? `\n\n${body}` : "\nNo claim in the ledger matches. Context Pill may not have covered it, or the item was removed (removed items keep only an id, date and reason). Either way, that says nothing about whether the claim is true.");
+      (hits.length ? `\n\n${body}` : gone ? `\nThat id belongs to an item removed from the ledger (${oneLine(gone.date, 20) ? `dated ${oneLine(gone.date, 20)}` : "no date recorded"}). Reason on record: ${oneLine(gone.reason, 300) || "none"}. Removed items keep only an id, date and reason. A removal does not show whether the claim was true or false.` : "\nNo claim in the ledger matches. Context Pill may not have covered it, or the item was removed (removed items keep only an id, date and reason). Either way, that says nothing about whether the claim is true.");
     return { text, results: Math.min(hits.length, limit) };
   }
   if (name === "list_sources") {
     const ws = filterWords("name", args.name);
-    let srcs = parseSources(await fetchText("sources.yaml")).filter((s) => s.enabled);
-    if (ws) srcs = srcs.filter((s) => matches(s.name + " " + s.id, ws));
+    const parsed = parseSources(await fetchText("sources.yaml"));
+    // The registry always lists sources: none with both an id and a name means a bad file, not an empty registry.
+    if (!parsed.some((x) => x.id && x.name)) throw new Error("feed unavailable");
+    let srcs = parsed.filter((s) => s.enabled && s.id); // a row with no id is not a source
+    if (ws) srcs = srcs.filter((s) => matches(haystack(s.name, s.id), ws));
+    const num = (n) => (Number.isFinite(n) ? n : "?");
     const body = srcs.map((s) =>
-      `- ${oneLine(s.name, 120)} (${httpsOnly(s.home_url)}): tier ${oneLine(s.tier, 20)}, trust ${s.trust_mean}, LB10 ${s.lb10}, resolved tips ${s.resolved_tips}`).join("\n");
+      `- ${oneLine(s.name, 120) || oneLine(s.id, 60)} (${httpsOnly(s.home_url)}): tier ${oneLine(s.tier, 20) || "?"}, trust ${num(s.trust_mean)}, LB10 ${num(s.lb10)}, resolved tips ${s.resolved_tips}`).join("\n");
     const text = `${WARNING}\n\nContext Pill sources (enabled). Every source starts at a neutral Beta(2,2) prior (trust 0.50). Scores move only when ` +
       `claims are re-checked (14 days after publication; for predictions, 14 days after the deadline), or when a re-checked claim is corrected within 90 days. Method: ${METHOD_URL}\n\n` +
       (body || "No source matches.");
@@ -413,7 +524,7 @@ function methodText() {
     `Full method: ${METHOD_URL}`;
 }
 
-async function readResource(uri, fetchText) {
+async function readResource(uri, fetchText, now) {
   if (typeof uri !== "string") throw new RpcError(-32602, "uri must be a string");
   const res = RESOURCES.find((r) => r.uri === uri);
   if (!res) throw new RpcError(-32002, `Resource not found: ${oneLine(uri, 100)}`);
@@ -421,7 +532,7 @@ async function readResource(uri, fetchText) {
   if (uri === "contextpill://method") text = methodText();
   else {
     try {
-      text = formatLatest(await fetchJson(fetchText, "latest.json"), undefined, 30).text;
+      text = formatLatest(await fetchJson(fetchText, "latest.json"), undefined, 30, now).text;
     } catch {
       throw new RpcError(-32603, "Context Pill feed is unavailable right now. Try again later.");
     }
@@ -434,12 +545,15 @@ class RpcError extends Error {
 }
 
 // MCP request ids are strings or numbers, never null. Anything else is answered with id null, never echoed back.
-const okId = (id) => typeof id === "string" || typeof id === "number";
+const okId = (id) => typeof id === "string" || (typeof id === "number" && Number.isFinite(id));
 
 const isVersionError = (o) => !!(o && o.error && (o.error.code === -32022 || o.error.code === -32020));
 
 function unsupportedVersion(requested) {
-  return new RpcError(-32022, "Unsupported protocol version", { supported: PROTOCOLS, requested: String(requested).slice(0, 100) });
+  // requested may be any JSON value from the body, however deeply nested: show text as sent and name anything else by kind.
+  const shown = typeof requested === "string" ? requested : str(requested) ||
+    (requested === null ? "null" : Array.isArray(requested) ? "(a list)" : typeof requested === "object" ? "(an object)" : String(requested)); // true, false
+  return new RpcError(-32022, "Unsupported protocol version", { supported: PROTOCOLS, requested: shown.slice(0, 100) });
 }
 
 // The protocol version for one message: params._meta wins, else the header. Throws -32022 / -32020 per 2026-07-28.
@@ -487,8 +601,9 @@ async function handleOne(msg, fetchText, headerPv, note = () => {}, now = Date.n
         modern = true; // a 2026-07-28 method: always answer in its shape
         return reply({ supportedVersions: PROTOCOLS, capabilities: CAPABILITIES, instructions: INSTRUCTIONS }, true);
       case "initialize": {
-        const asked = msg.params && msg.params.protocolVersion;
+        const asked = obj(msg.params).protocolVersion; // params that are not an object carry no version
         modern = false; // initialize is the 2025 handshake; it only negotiates 2025 versions
+        if (asked !== undefined && typeof asked !== "string") throw new RpcError(-32602, "protocolVersion must be a string");
         return reply({
           protocolVersion: LEGACY.includes(asked) ? asked : LEGACY[0],
           capabilities: CAPABILITIES,
@@ -524,7 +639,7 @@ async function handleOne(msg, fetchText, headerPv, note = () => {}, now = Date.n
       case "resources/read": {
         const p = msg.params || {};
         try {
-          return reply({ contents: [await readResource(p.uri, fetchText)] }, true);
+          return reply({ contents: [await readResource(p.uri, fetchText, now)] }, true);
         } catch (e) {
           if (modern && e.code === -32002) throw new RpcError(-32602, e.message); // 2026-07-28 renumbered resource-not-found
           throw e;
@@ -651,7 +766,9 @@ export async function handleMcp(request, opts = {}) {
     note({ error: -32700, reason: "parse" });
     return json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, 400, h);
   }
-  note(Array.isArray(msg) ? { method: "batch", tool: null } : { method: msg && msg.method, tool: msg && msg.params && msg.params.name });
+  // Only strings are reported: a body can put any JSON value in method or params.name, and the counter must never see one.
+  const noted = (v) => (typeof v === "string" ? v : null);
+  note(Array.isArray(msg) ? { method: "batch", tool: null } : { method: noted(msg && msg.method), tool: noted(msg && msg.params && msg.params.name) });
   if (Array.isArray(msg)) {
     if (msg.length === 0 || msg.length > 20) { note({ error: -32600, reason: "batch" }); return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid batch" } }, 400, h); }
     const out = (await Promise.all(msg.map((m) => handleOne(m, fetchText, pv, note, now)))).filter(Boolean);
