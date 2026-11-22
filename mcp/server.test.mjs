@@ -202,9 +202,12 @@ test("get_latest days: omitted or 1 is byte-for-byte the 0.1.0 output and reads 
     assert.equal((await tool(f, "get_latest", { topic: "claude", limit: 1, ...extra })).text, GOLDEN_TOPIC);
     assert.deepEqual(Object.keys(f.calls), ["latest.json"]);
   }
-  // a day with no new publication: latest.json still answers, unchanged
+  // a day with no new publication: latest.json still answers, and says the drop is not today's (0.2.1)
   const held = feed({});
-  assert.equal((await tool(held, "get_latest", {}, Date.parse("2026-11-23T20:00:00Z"))).text, GOLDEN_DEFAULT);
+  const heldText = (await tool(held, "get_latest", {}, Date.parse("2026-11-23T20:00:00Z"))).text;
+  const note = " This is the latest drop available; it is dated before today, 2026-11-23 (Los Angeles date).";
+  assert.equal(heldText, GOLDEN_DEFAULT.replace("don't act on those).\n", `don't act on those).${note}\n`));
+  assert.notEqual(heldText, GOLDEN_DEFAULT);
 });
 
 test("get_latest days=7: newest day first, held days skipped and named, unverified left out", async () => {
@@ -341,14 +344,14 @@ test("onMessage results: rows returned for a single successful tools/call only, 
   assert.deepEqual(Object.keys(n).sort(), ["method", "results", "tool"]);
 });
 
-test("descriptions: days and common words are explained, version 0.2.0", async () => {
+test("descriptions: days and common words are explained, version 0.2.1", async () => {
   const l = await call({ jsonrpc: "2.0", id: 1, method: "tools/list" }, { "MCP-Protocol-Version": "2025-11-25" });
   const by = Object.fromEntries(l.body.result.tools.map((x) => [x.name, x]));
   assert.match(by.get_latest.description, /up to the last 14 days/);
   assert.deepEqual(by.get_latest.inputSchema.properties.days, { ...by.get_latest.inputSchema.properties.days, type: "integer", minimum: 1, maximum: 14 });
   assert.match(by.search_claims.inputSchema.properties.query.description, /Common words such as 'is', 'the' or 'on' are ignored/);
   const i = await call({ jsonrpc: "2.0", id: 2, method: "initialize", params: { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "t", version: "1" } } });
-  assert.equal(i.body.result.serverInfo.version, "0.2.0"); assert.match(i.body.result.instructions, /up to the last 14 days/);
+  assert.equal(i.body.result.serverInfo.version, "0.2.1"); assert.match(i.body.result.instructions, /up to the last 14 days/);
   for (const x of Object.values(by)) assert.doesNotMatch(JSON.stringify(x), /\u2014/);
 });
 
@@ -387,4 +390,286 @@ test("get_latest days: a malformed dated drop is unreadable and does not hide he
   assert.equal(r.isError, false);
   assert.match(r.text, /Covered: 2026-11-21\. Could not be read right now: 2026-11-20, 2026-11-19, 2026-11-18, 2026-11-17\./);
   assert.match(r.text, /1\. Claude twenty-one/);
+});
+
+// ---------- 0.2.1: stress-test fixes (2026-11-21)
+const rawCall = async (body, opts = {}) => {
+  const notes = [];
+  const req = new Request("https://contextpill.com/mcp", { method: "POST", headers: { "Content-Type": "application/json", ...(opts.headers || {}) }, body: JSON.stringify(body) });
+  const res = await handleMcp(req, { fetchText: opts.fetchText || fetchText, now: opts.now ?? NOON_NOV21, onMessage: (m) => notes.push(m) });
+  const t = await res.text();
+  return { status: res.status, body: t ? JSON.parse(t) : null, notes };
+};
+const filesFeed = (files) => ({ calls: {}, fetchText: async (p) => { if (!Object.hasOwn(files, p)) throw new Error(`fetch ${p}: 404`); return files[p]; } });
+
+test("0.2.1: a method, tool name or prompt name that is not a string is a plain JSON-RPC error and is never reported", async () => {
+  const odd = [{ toString: 1 }, { toString: 1, valueOf: 2 }, [{ toString: 1 }], {}, [], 5, true, null];
+  for (const v of odd) {
+    const m = await rawCall({ jsonrpc: "2.0", id: 1, method: v });
+    assert.equal(m.status, 200); assert.equal(m.body.error.code, -32600);
+    const t = await rawCall({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: v } });
+    assert.equal(t.body.error.code, -32602); assert.doesNotMatch(t.body.error.message, /object Object/);
+    const pr = await rawCall({ jsonrpc: "2.0", id: 1, method: "prompts/get", params: { name: v } });
+    assert.equal(pr.body.error.code, -32602);
+    // what the request counter is told: strings, numbers or null only, so String() on it can never throw
+    for (const n of [...m.notes, ...t.notes, ...pr.notes]) for (const x of Object.values(n)) assert.ok(x === null || ["string", "number"].includes(typeof x), JSON.stringify(n));
+  }
+  const ok = await rawCall({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "nope" } });
+  assert.equal(ok.body.error.message, "Unknown tool: nope"); assert.deepEqual(ok.notes[0], { method: "tools/call", tool: "nope" });
+});
+
+test("0.2.1: a version that is not a string is -32022, and an id that is not a finite number is refused", async () => {
+  const r = await rawCall({ jsonrpc: "2.0", id: 1, method: "tools/list", params: { _meta: { [M]: { toString: 1 } } } });
+  assert.equal(r.status, 400); assert.equal(r.body.error.code, -32022); assert.equal(r.body.error.data.requested, "(an object)");
+  // a value nested 20,000 deep is named the same way, with no stack overflow while describing it
+  const deepBody = `{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"${M}":${"[".repeat(20000)}${"]".repeat(20000)}}}}`;
+  const deep = JSON.parse(await (await handleMcp(new Request("https://contextpill.com/mcp", { method: "POST", headers: { "Content-Type": "application/json" }, body: deepBody }), { fetchText })).text());
+  assert.equal(deep.error.code, -32022); assert.equal(deep.error.data.requested, "(a list)");
+  for (const [v, shown] of [[5, "5"], [null, "null"], [true, "true"], [false, "false"]]) {
+    const o = await rawCall({ jsonrpc: "2.0", id: 1, method: "tools/list", params: { _meta: { [M]: v } } });
+    assert.equal(o.body.error.code, -32022); assert.equal(o.body.error.data.requested, shown);
+  }
+  // initialize: a version that is not text is refused; one that is left out or unknown still gets our newest 2025 version
+  for (const v of [{ toString: 1 }, [], 5, null, true]) {
+    const i = await rawCall({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: v } });
+    assert.equal(i.body.error.code, -32602, JSON.stringify(v)); assert.equal(i.body.error.message, "protocolVersion must be a string");
+  }
+  for (const params of [{}, { protocolVersion: "2024-11-05" }, undefined, null, false, 0, "x", [1]]) {
+    const i = await rawCall({ jsonrpc: "2.0", id: 1, method: "initialize", params });
+    assert.equal(i.body.result.protocolVersion, "2025-11-25");
+  }
+  const req = new Request("https://contextpill.com/mcp", { method: "POST", headers: { "Content-Type": "application/json" }, body: '{"jsonrpc":"2.0","id":1e999,"method":"ping"}' });
+  const out = JSON.parse(await (await handleMcp(req, { fetchText })).text());
+  assert.equal(out.id, null); assert.equal(out.error.code, -32600);
+});
+
+test("0.2.1: search_claims finds a claim by its exact id, and names a removed id", async () => {
+  const ledger = { claims: [
+    { id: "2026-11-01-aaaa1111", date: "2026-11-01", claim: "Alpha ships a tool", category: "release", source_id: "s", evidence: [] },
+    { id: "2026-11-02-bbbb2222", date: "2026-11-02", claim: "Beta costs $8 in 2026", category: "release", source_id: "s", evidence: [] },
+  ], removed: [{ id: "2026-10-17-cccc3333", date: "2026-10-17", reason: "duplicate of an earlier item" }] };
+  const f = filesFeed({ "ledger/claims.json": JSON.stringify(ledger) });
+  for (const q of ["2026-11-01-aaaa1111", " 2026-11-01-AAAA1111 ", "id: 2026-11-01-aaaa1111", "ID:2026-11-01-aaaa1111"]) {
+    const r = await tool(f, "search_claims", { query: q });
+    assert.match(r.text, /^[^\n]+\n\n1 claim\(s\) match "(id: |ID:)?2026-11-01-(aaaa|AAAA)1111" in the ledger \(2 claims total\)\.\n\n1\. \[2026-11-01\] Alpha ships a tool/);
+    assert.doesNotMatch(r.text, /Beta/);
+  }
+  const gone = await tool(f, "search_claims", { query: "2026-10-17-cccc3333" });
+  assert.match(gone.text, /0 claim\(s\) match[^\n]*\nThat id belongs to an item removed from the ledger \(dated 2026-10-17\)\. Reason on record: duplicate of an earlier item\. Removed items keep only an id, date and reason\. A removal does not show whether the claim was true or false\.$/);
+  // a removed id ends the lookup even when a live claim's text mentions it
+  const both = filesFeed({ "ledger/claims.json": JSON.stringify({ claims: [{ id: "2026-11-03-dddd4444", date: "2026-11-03", claim: "Replaces 2026-10-17-cccc3333 and is the newer item", category: "release", source_id: "s", evidence: [] }], removed: ledger.removed }) });
+  const hidden = await tool(both, "search_claims", { query: "the 2026-10-17-cccc3333" });
+  assert.match(hidden.text, /\n1 claim\(s\) match[^\n]*\nIgnored common words: the\.\n\n1\. \[2026-11-03\]/); // not exactly the id: a word search
+  const exact = await tool(both, "search_claims", { query: "2026-10-17-cccc3333" });
+  assert.match(exact.text, /\n0 claim\(s\) match[^\n]*\nThat id belongs to an item removed from the ledger \(dated 2026-10-17\)\./); assert.doesNotMatch(exact.text, /Replaces/);
+  // only text shaped like an id takes the id path: a row whose id is an ordinary word cannot capture a search
+  const hijack = filesFeed({ "ledger/claims.json": JSON.stringify({ claims: [
+    { id: "claude", date: "2026-11-01", claim: "Unrelated row", category: "release", source_id: "s", evidence: [] },
+    { id: "2026-11-02-eeee5555", date: "2026-11-02", claim: "Claude ships a thing", category: "release", source_id: "s", evidence: [] },
+  ], removed: [{ id: "codex", date: "2026-10-01", reason: "x" }] }) });
+  assert.match((await tool(hijack, "search_claims", { query: "claude" })).text, /\n1 claim\(s\) match "claude"[^\n]*\n\n1\. \[2026-11-02\] Claude ships a thing/);
+  assert.match((await tool(hijack, "search_claims", { query: "codex" })).text, /\n0 claim\(s\) match "codex"[^\n]*\nNo claim in the ledger matches\./);
+  // a bare "id:" names no id, even if a row has an empty one
+  const blank = filesFeed({ "ledger/claims.json": JSON.stringify({ claims: [{ id: "", date: "2026-11-03", claim: "Nothing to see", category: "release", source_id: "s", evidence: [] }], removed: [{ id: "", date: "2026-10-01", reason: "x" }] }) });
+  for (const q of ["id:", "ID: "]) assert.match((await tool(blank, "search_claims", { query: q })).text, /\n0 claim\(s\) match[^\n]*\nNo claim in the ledger matches\./, q);
+  // ids are not searched as text: a year, a date or part of an id matches claim text only
+  assert.match((await tool(f, "search_claims", { query: "2026" })).text, /^[^\n]+\n\n1 claim\(s\) match/);
+  for (const q of ["2026-11-01", "aaaa1111", "2026-11-01-aaaa"]) assert.match((await tool(f, "search_claims", { query: q })).text, /\n0 claim\(s\) match[^\n]*\nNo claim in the ledger matches\./, q);
+  let n = {}; await tool(f, "search_claims", { query: "2026-11-01-aaaa1111" }, NOON_NOV21, n); assert.equal(n.results, 1);
+});
+
+test("0.2.1: hyphens, spaces and joined spellings of one name find the same claims", async () => {
+  const ledger = { claims: [
+    { id: "h1", date: "2026-11-01", claim: "Claude Code adds fast mode", category: "release", source_id: "s", evidence: [] },
+    { id: "h2", date: "2026-11-02", claim: "The claude-code package gains sub-agents", category: "release", source_id: "s", evidence: [] },
+    { id: "h3", date: "2026-11-03", claim: "GPT-5.5 ships with subagents", category: "release", source_id: "s", evidence: [] },
+    { id: "h4", date: "2026-11-04", claim: "Beam 1.0 is out with open weights", category: "release", source_id: "s", evidence: [] },
+  ] };
+  const f = filesFeed({ "ledger/claims.json": JSON.stringify(ledger) });
+  const found = async (q) => [...(await tool(f, "search_claims", { query: q })).text.matchAll(/id: (h\d)/g)].map((m) => m[1]).sort().join();
+  for (const q of ["claude code", "claude-code", "Claude-Code"]) assert.equal(await found(q), "h1,h2", q);
+  for (const q of ["fast mode", "fast-mode"]) assert.equal(await found(q), "h1", q);
+  for (const q of ["subagent", "sub-agent", "sub agent"]) assert.equal(await found(q), "h2,h3", q);
+  for (const q of ["gpt-5.5", "gpt 5.5", "gpt5.5"]) assert.equal(await found(q), "h3", q);
+  for (const q of ["beam 1.0", "beam-1.0", "open-weights", "open weights"]) assert.equal(await found(q), "h4", q);
+  // the joined spelling only matches from the start of the term, so a short name inside another one does not
+  for (const q of ["t5", "t5.5", "5.5x", "codepackage", "t-mode", "m-1.0", "n-weights", "audecode", "pt5.5"]) assert.equal(await found(q), "", q);
+  // part of a hyphenated name still matches as written, as it always did, and gains nothing from the other spellings
+  assert.equal(await found("e-code"), "h2"); assert.equal(await found("b-agents"), "h2"); assert.equal(await found("t-5.5"), "h3");
+  // a plain word must stop at the end of a part, at a "." or three characters into a part of the hyphenated term
+  const parts = filesFeed({ "ledger/claims.json": JSON.stringify({ claims: [
+    { id: "p1", date: "2026-11-01", claim: "An open-source, server-side tool for credential-stealing checks", category: "release", source_id: "s", evidence: [] },
+    { id: "p2", date: "2026-11-02", claim: "Runs 10-15 tasks on-device with GPT-6.2-Sol and task-specific sub-agents.", category: "release", source_id: "s", evidence: [] },
+  ] }) });
+  const hit = async (q) => [...(await tool(parts, "search_claims", { query: q })).text.matchAll(/id: (p\d)/g)].map((m) => m[1]).sort().join();
+  for (const q of ["opens", "servers", "credentials", "101", "ond", "ones", "taskss", "gpt6.2s", "subag"]) assert.equal(await hit(q), "", q);
+  for (const [q, want] of [["opensource", "p1"], ["opensou", "p1"], ["serverside", "p1"], ["credentialstealing", "p1"], ["1015", "p2"], ["ondevice", "p2"], ["ondev", "p2"],
+    ["gpt6", "p2"], ["gpt6.2", "p2"], ["gpt6.2sol", "p2"], ["taskspecific", "p2"], ["subagent", "p2"], ["subagents", "p2"], ["subage", "p2"]]) assert.equal(await hit(q), want, q);
+  // a name never matches across two fields, and the three-character rule counts characters, not UTF-16 units
+  const fields = filesFeed({ "ledger/claims.json": JSON.stringify({ claims: [
+    { id: "f1", date: "2026-11-01", claim: "A note about Alpha", why_it_matters: "Beta users care", category: "gamma", source_id: "delta-src", evidence: [] },
+    { id: "f2", date: "2026-11-02", claim: "The ab-\u{10428}cde kit and the sky-blue theme " + "x".repeat(16000), category: "release", source_id: "s", evidence: [] },
+  ] }) });
+  const fhit = async (q) => [...(await tool(fields, "search_claims", { query: q })).text.matchAll(/id: (f\d)/g)].map((m) => m[1]).sort().join();
+  for (const q of ["alpha-beta", "care-gamma", "gamma-delta", "gammadelta", "ab\u{10428}c"]) assert.equal(await fhit(q), "", q);
+  for (const [q, want] of [["alpha beta", "f1"], ["delta-src", "f1"], ["deltasrc", "f1"], ["ab\u{10428}cd", "f2"], ["skyblue", "f2"]]) assert.equal(await fhit(q), want, q);
+  // a very long unbroken run of text costs one pass, not one pass per character
+  const t0 = performance.now();
+  for (let i = 0; i < 20; i++) await fhit("skyblue");
+  assert.ok(performance.now() - t0 < 2000, "search stays fast on a 16,000-character run");
+  // other spellings never push out a claim that holds the query as written, however new they are
+  const crowd = filesFeed({ "ledger/claims.json": JSON.stringify({ claims: [
+    { id: "r0", date: "2026-10-01", claim: "The agent-transcript export is out", category: "release", source_id: "s", evidence: [] },
+    ...[1, 2, 3].map((i) => ({ id: `r${i}`, date: `2026-11-0${i}`, claim: `Agent transcription update ${i}`, category: "release", source_id: "s", evidence: [] })),
+  ] }) });
+  const order = async (q, limit) => { const r = await tool(crowd, "search_claims", { query: q, limit }); return [[...r.text.matchAll(/id: (r\d)/g)].map((m) => m[1]).join(), r.text.split("\n\n")[1]]; };
+  assert.deepEqual(await order("agent-transcript", 2), ["r0,r3", '4 claim(s) match "agent-transcript" in the ledger (4 claims total). Showing 2: claims containing the searched words exactly as typed come first, then claims found through another spelling, newest first within each group.']);
+  // dropped common words are not part of "the searched words": the grouping is the same with or without them
+  const withCommon = await tool(crowd, "search_claims", { query: "is the agent-transcript", limit: 2 });
+  assert.deepEqual([...withCommon.text.matchAll(/id: (r\d)/g)].map((m) => m[1]).join(), "r0,r3");
+  assert.match(withCommon.text, /Showing 2: claims containing the searched words exactly as typed come first, then claims found through another spelling, newest first within each group\.\nIgnored common words: is, the\.\n\n1\. /);
+  assert.deepEqual((await order("agent-transcript", 10))[0], "r0,r3,r2,r1");
+  // with one kind of match only, the order is newest first as before
+  assert.deepEqual(await order("agent transcript", 2), ["r3,r2", '4 claim(s) match "agent transcript" in the ledger (4 claims total). Showing the 2 newest.']);
+  assert.deepEqual(await order("agent-transcription", 2), ["r3,r2", '3 claim(s) match "agent-transcription" in the ledger (4 claims total). Showing the 2 newest.']);
+  // a typographic hyphen in feed text is read as a hyphen, and a repeated query word is tested once
+  const typo = filesFeed({ "ledger/claims.json": JSON.stringify({ claims: [{ id: "u1", date: "2026-11-01", claim: "GPT‑5.5 and Claude‐Code ship", category: "release", source_id: "s", evidence: [] }] }) });
+  for (const q of ["gpt-5.5", "gpt5.5", "gpt 5.5", "claude-code", "claude code", "gpt‑5.5", "claude claude claude code"]) assert.match((await tool(typo, "search_claims", { query: q })).text, /\n1 claim\(s\) match/, q);
+  // punctuation around a name does not hide it
+  const punct = filesFeed({ "ledger/claims.json": JSON.stringify({ claims: [{ id: "h9", date: "2026-11-05", claim: "New in (Claude Code): \"fast mode\", and Sub-Agents/tools.", category: "release", source_id: "s", evidence: [] }] }) });
+  for (const q of ["claude-code", "fast-mode", "subagents", "sub-agents", "subagent"]) assert.match((await tool(punct, "search_claims", { query: q })).text, /\n1 claim\(s\) match/, q);
+  // the topic filter of get_latest follows the same rule
+  const drops = feed({}, { "latest.json": drop("2026-11-21", [item("g1", "Claude Code adds a view", "verified"), item("g2", "Codex adds a view", "verified")]) });
+  assert.match((await tool(drops, "get_latest", { topic: "claude-code" })).text, /; 1 match "claude-code"\./);
+});
+
+test("0.2.1: a feed file with the wrong shape is a feed outage, never an empty answer", async () => {
+  const sources = readFileSync(new URL("sources.yaml", root), "utf8");
+  for (const bad of ["", "null", "[]", "5", "\"x\"", "{}", "{\"items\":null,\"claims\":null}", "{\"items\":{},\"claims\":{}}", "{\"items\":[null],\"claims\":[null]}", "{\"items\":[5],\"claims\":[\"x\"]}", "<html>rate limited</html>"]) {
+    const f = filesFeed({ "latest.json": bad, "ledger/claims.json": bad, "sources.yaml": bad });
+    for (const [name, args] of [["get_latest", {}], ["get_latest", { topic: "claude" }], ["search_claims", { query: "claude" }], ["search_claims", { query: "2026-11-01-aaaa1111" }], ["list_sources", {}], ["list_sources", { name: "anthropic" }]]) {
+      if (name === "list_sources" && bad === "") continue; // an empty sources file is covered below (it also fails the fetch here)
+      const r = await tool(f, name, args);
+      assert.equal(r.isError, true, `${name} ${JSON.stringify(args)} on ${bad}`); assert.match(r.text, /feed is unavailable/);
+    }
+    const res = await rawCall({ jsonrpc: "2.0", id: 1, method: "resources/read", params: { uri: "contextpill://latest" } }, { fetchText: f.fetchText });
+    assert.equal(res.body.error.code, -32603);
+  }
+  const empty = await tool(filesFeed({ "sources.yaml": "" }), "list_sources", {});
+  assert.equal(empty.isError, true);
+  // healthy but empty is still an answer: a drop with no items, a ledger with no claims, a filter that matches no source
+  const ok = filesFeed({ "latest.json": JSON.stringify({ date: "2026-11-21", items_read: 0, scanner_day: 0, items: [] }), "ledger/claims.json": JSON.stringify({ claims: [] }), "sources.yaml": sources });
+  const l = await tool(ok, "get_latest", {});
+  assert.equal(l.isError, false); assert.match(l.text, /Context Pill drop for 2026-11-21 \(scanner day 0\)\. 0 checked claims from 0 items read\.\n\nNo items match\./);
+  assert.match((await tool(ok, "search_claims", { query: "claude" })).text, /0 claim\(s\) match "claude" in the ledger \(0 claims total\)\./);
+  assert.match((await tool(ok, "list_sources", { name: "zzzzqq" })).text, /No source matches\.$/);
+});
+
+test("0.2.1: every real feed file in this repository still answers", async () => {
+  const { readdirSync } = await import("fs");
+  const dailyRoot = new URL("daily/", root);
+  let days = 0;
+  for (const y of readdirSync(dailyRoot)) for (const m of readdirSync(new URL(`${y}/`, dailyRoot))) for (const name of readdirSync(new URL(`${y}/${m}/`, dailyRoot))) {
+    if (!name.endsWith(".json")) continue;
+    const text = readFileSync(new URL(`${y}/${m}/${name}`, dailyRoot), "utf8");
+    const f = { calls: {}, fetchText: async (p) => (p === "latest.json" ? text : fetchText(p)) };
+    const r = await tool(f, "get_latest", { limit: 30 }, Date.parse(`${name.slice(0, 10)}T20:00:00Z`));
+    assert.equal(r.isError, false, name); assert.doesNotMatch(r.text, /undefined|NaN|\[object Object\]|latest drop available/, name);
+    days++;
+  }
+  assert.ok(days > 20);
+  const real = { calls: {}, fetchText };
+  for (const [name, args] of [["get_latest", {}], ["search_claims", { query: "claude", limit: 30 }], ["search_claims", { query: "e", limit: 30 }], ["list_sources", {}]]) {
+    const r = await tool(real, name, args);
+    assert.equal(r.isError, false, name); assert.doesNotMatch(r.text, /undefined|NaN|\[object Object\]|trust \?|tier \?/, name);
+  }
+});
+
+test("0.2.1: a drop older than today says so; today's, a future-dated or an undated drop does not", async () => {
+  const f = feed({});
+  const note = /read \(1 more listed as not verified are left out here; don't act on those\)\. This is the latest drop available; it is dated before today, (\d{4}-\d{2}-\d{2}) \(Los Angeles date\)\.\n\n1\. /;
+  // 07:30 UTC on Nov 22 is still Nov 21 in Los Angeles; 08:30 UTC is Nov 22
+  assert.doesNotMatch((await tool(f, "get_latest", {}, Date.parse("2026-11-22T07:30:00Z"))).text, /latest drop available/);
+  assert.equal((await tool(f, "get_latest", {}, Date.parse("2026-11-22T08:30:00Z"))).text.match(note)[1], "2026-11-22");
+  assert.equal((await tool(f, "get_latest", { days: 1, limit: 1 }, Date.parse("2026-11-25T20:00:00Z"))).text.match(/before today, (\S+) /)[1], "2026-11-25");
+  assert.doesNotMatch((await tool(f, "get_latest", {}, Date.parse("2026-11-20T20:00:00Z"))).text, /latest drop available/);
+  for (const date of [undefined, null, 20261121, "yesterday", "2026-11-2", { a: 1 }, "2026-02-30", "2026-13-01", "2026-00-10", "2025-02-29", "0097-02-29", "2026-11-00", "2026-11-31"]) {
+    const odd = feed({}, { "latest.json": { ...LATEST, date } });
+    const r = await tool(odd, "get_latest", {}, Date.parse("2026-11-25T20:00:00Z"));
+    assert.equal(r.isError, false); assert.doesNotMatch(r.text, /latest drop available/);
+  }
+  assert.match((await tool(feed({}, { "latest.json": { ...LATEST, date: "2024-02-29" } }), "get_latest", {})).text, /latest drop available/); // a real leap day
+  assert.match((await tool(feed({}, { "latest.json": { ...LATEST, date: "0096-02-29" } }), "get_latest", {})).text, /latest drop available/); // and one in a two-digit year
+  // the resource carries the same note, and every answer still opens with the warning, then the drop line
+  const res = await rawCall({ jsonrpc: "2.0", id: 1, method: "resources/read", params: { uri: "contextpill://latest" } }, { fetchText: f.fetchText, now: Date.parse("2026-11-25T20:00:00Z") });
+  assert.match(res.body.result.contents[0].text, /^Untrusted reference material[^\n]+\n\nContext Pill drop for 2026-11-21 [^\n]+latest drop available; it is dated before today, 2026-11-25 /);
+});
+
+test("0.2.1: results beyond the limit are announced", async () => {
+  const many = feed({ "2026-11-20": [1, 2, 3].map((i) => item(`y${i}`, `Yesterday ${i}`, "verified")) }, {
+    "latest.json": drop("2026-11-21", [1, 2, 3, 4].map((i) => item(`t${i}`, `Claude ${i}`, "verified"))),
+    "ledger/claims.json": { claims: [1, 2, 3].map((i) => ({ id: `k${i}`, date: `2026-11-0${i}`, claim: `Claude ${i}`, category: "release", source_id: "s", evidence: [] })) },
+  });
+  many.fetchText = ((inner) => async (p) => (p === dayPath("2026-11-21") ? JSON.stringify(drop("2026-11-21", [1, 2, 3, 4].map((i) => item(`t${i}`, `Claude ${i}`, "verified")))) : inner(p)))(many.fetchText);
+  assert.match((await tool(many, "get_latest", { limit: 2 })).text, /4 checked claims from 12 items read\. Showing the first 2\.\n\n1\. /);
+  assert.doesNotMatch((await tool(many, "get_latest", { limit: 4 })).text, /Showing/);
+  assert.match((await tool(many, "get_latest", { limit: 2, topic: "claude" })).text, /; 4 match "claude"\. Showing the first 2\./);
+  assert.match((await tool(many, "get_latest", { days: 2, limit: 5 })).text, /7 checked claims\. Showing the first 5, newest day first\.\n\nDrop for 2026-11-21:/);
+  assert.doesNotMatch((await tool(many, "get_latest", { days: 2, limit: 7 })).text, /Showing/);
+  assert.match((await tool(many, "search_claims", { query: "claude", limit: 2 })).text, /3 claim\(s\) match "claude" in the ledger \(3 claims total\)\. Showing the 2 newest\.\n\n1\. \[2026-11-03\]/);
+  assert.doesNotMatch((await tool(many, "search_claims", { query: "claude", limit: 3 })).text, /Showing/);
+});
+
+test("0.2.1: odd feed values print plainly: zero, unknown outcomes, unscored and quoted sources, non-text fields", async () => {
+  const ledger = { claims: [
+    { id: "o1", date: "2026-11-01", claim: "Omega one", category: "release", source_id: "s", state: "resolved", outcome: "constructor", evidence: [] },
+    { id: "o2", date: 20261102, claim: "Omega two", why_it_matters: ["x"], category: { a: 1 }, source_id: null, state: {}, outcome: "good", verification: "nope", correction: "yes", evidence: [null, "https://a.example", { url: { toString: 1 } }, { url: "https://ok.example/x" }] },
+    { id: "o3", date: "2026-11-03", claim: "Omega three", category: "release", source_id: "s", state: "superseded", outcome: "source-changed", source_change: "yes", evidence: {} },
+  ] };
+  const yaml = "sources:\n- id: a\n  name: 'Sam''s blog: notes' # hand note\n  home_url: https://a.example\n  enabled: true\n- id: b\n  name: \"Quoted \\\"B\\\"\"\n  home_url: https://b.example\n  enabled: true\n  trust:\n    trust_mean: 0.5\n    lb10: 0.25\n    resolved_tips: 0\n    tier: T2\n- id: c # the third\n  name: Bare C#  # sharp, then a comment\n  home_url: https://c.example\n  enabled: true\n- id: d\n  name: # only a comment\n  home_url: https://d.example\n  enabled: true\n";
+  const latest = { date: "2026-11-21", scanner_day: 0, items_read: 0, items: [
+    { id: "z1", claim: "Zero trust", category: "release", why_it_matters: "w", verification: { status: "verified", method: "m" }, source: { name: "S", home_url: "https://s.example", tier: "T3", trust_mean: 0, lb10: 0 }, evidence: [null, "x", { kind: 5, url: "https://e.example" }] },
+    { id: 7, claim: { toString: 1 }, category: null, why_it_matters: ["w"], verification: { status: "verified", method: 5 }, source: "nope", evidence: "nope", try_this: ["rm"] },
+    { id: "z3", claim: "Odd numbers", category: "release", why_it_matters: "w", verification: { status: "verified", method: "m" }, source: { name: "S", home_url: "https://s.example", tier: true, trust_mean: true, lb10: false }, evidence: [], try_this: 0 },
+  ] };
+  const f = filesFeed({ "ledger/claims.json": JSON.stringify(ledger), "sources.yaml": yaml, "latest.json": JSON.stringify(latest) });
+  const s = await tool(f, "search_claims", { query: "omega" });
+  assert.equal(s.isError, false);
+  assert.match(s.text, /re-check outcome: constructor\n/); assert.doesNotMatch(s.text, /native code|object Object|undefined/);
+  assert.match(s.text, /1\. \[20261102\] Omega two[\s\S]*how it was checked: not recorded[\s\S]*CORRECTED on \?: no reason recorded\n   evidence: \(non-https link omitted\); \(non-https link omitted\); \(non-https link omitted\); https:\/\/ok\.example\/x\n   id: o2/);
+  assert.match(s.text, /SOURCE CHANGED on \?: no detail recorded; accurate when published on 2026-11-03, not a wrong claim\n   evidence: none/);
+  const l = await tool(f, "list_sources", {});
+  assert.match(l.text, /- Sam's blog: notes \(https:\/\/a\.example\): tier \?, trust \?, LB10 \?, resolved tips 0\n- Quoted "B" \(https:\/\/b\.example\): tier T2, trust 0\.5, LB10 0\.25, resolved tips 0\n- Bare C# \(https:\/\/c\.example\): tier \?, trust \?, LB10 \?, resolved tips 0\n- d \(https:\/\/d\.example\): tier \?, trust \?, LB10 \?, resolved tips 0$/);
+  assert.match((await tool(f, "list_sources", { name: "c" })).text, /- Bare C# /); // the id is "c", without its comment
+  // a row that holds nothing but comments is not listed next to real sources
+  const mixed = await tool(filesFeed({ "sources.yaml": "sources:\n- id: # none\n  name: # none\n  enabled: true\n- id: ok\n  name: Real One\n  home_url: https://ok.example\n  enabled: true\n" }), "list_sources", {}, NOON_NOV21);
+  assert.match(mixed.text, /\n\n- Real One \(https:\/\/ok\.example\): tier \?, trust \?, LB10 \?, resolved tips 0$/); assert.doesNotMatch(mixed.text, /\n-  \(/);
+  const blankId = await tool(filesFeed({ "sources.yaml": "sources:\n- id: '   '\n  name: # none\n  enabled: true\n- id: ok\n  name: '  Real One  '\n  home_url: https://ok.example\n  enabled: true\n" }), "list_sources", {}, NOON_NOV21);
+  assert.match(blankId.text, /\n\n- Real One \(https:\/\/ok\.example\)[^\n]*$/); assert.doesNotMatch(blankId.text, /\n-  +\(/);
+  // a registry whose entries hold nothing but comments is a bad file
+  assert.equal((await tool(filesFeed({ "sources.yaml": "sources:\n- id: # none\n  name: # none\n  enabled: true\n" }), "list_sources", {})).isError, true);
+  // a name with a very long run of spaces is read in one pass
+  const wide = "sources:\n- id: w\n  name: Wide" + " ".repeat(200000) + "Name\n  home_url: https://w.example\n  enabled: true\n";
+  const w0 = performance.now();
+  assert.match((await tool(filesFeed({ "sources.yaml": wide }), "list_sources", {})).text, /- Wide Name \(https:\/\/w\.example\)/);
+  assert.ok(performance.now() - w0 < 2000, "a long run of spaces in a name stays fast");
+  // invisible and control characters never reach an answer; long or user@host links and overlong evidence lists are held back
+  const sneaky = { date: "2026-11-21", scanner_day: 1, items_read: 1, items: [{ id: "s1", claim: "Vis\u001b[2Jible ‮claim​ ​ \u{E0041}\u{E0042}end\u{E0100}\u{E01EF}", category: "release", why_it_matters: "w", verification: { status: "verified", method: "m" },
+    source: { name: "S", home_url: "https://github.com@evil.example/", tier: "T2", trust_mean: 0.5, lb10: 0.4 },
+    evidence: [{ kind: "a", url: "https://ok.example/p@q" }, { kind: "b", url: "https://x.example/" + "y".repeat(500) }, { kind: "c", url: "https://user@host.example/x" },
+      { kind: "d", url: "https://example.com/\u001b[2J" }, { kind: "e", url: "https://github.com/‮gpj.exe" }, { kind: "f", url: "https://exa​mple.com/x" }, { kind: "g", url: "https://x\u0085y.example/" }, { kind: "h", url: "https://gіthub.com/" },
+      ...Array.from({ length: 12 }, (_, i) => ({ kind: `k${i}`, url: `https://e.example/${i}` }))] }] };
+  const sn = await tool(filesFeed({ "latest.json": JSON.stringify(sneaky) }), "get_latest", {});
+  assert.match(sn.text, /\n1\. Vis\[2Jible claim end\n/); assert.doesNotMatch(sn.text, /[\u001b‮​\u0085і\u{E0041}\u{E0100}\u{E01EF}]/u);
+  assert.match(sn.text, /source: S \(\(non-https link omitted\)\)/);
+  assert.match(sn.text, /evidence: a: https:\/\/ok\.example\/p@q; b: \(non-https link omitted\); c: \(non-https link omitted\); d: \(non-https link omitted\); e: \(non-https link omitted\); f: \(non-https link omitted\); g: \(non-https link omitted\); h: \(non-https link omitted\); k0: https:\/\/e\.example\/0; k1: https:\/\/e\.example\/1\n/);
+  assert.doesNotMatch(sn.text, /k2:/);
+  // a registry whose only entry has no id and no name is a bad file
+  assert.equal((await tool(filesFeed({ "sources.yaml": "sources:\n- id: \n  enabled: true\n" }), "list_sources", {})).isError, true);
+  const g = await tool(f, "get_latest", {});
+  assert.equal(g.isError, false);
+  assert.match(g.text, /\(scanner day 0\)\. 3 checked claims from 0 items read\./);
+  assert.match(g.text, /3\. Odd numbers\n   status: verified[^\n]*\n   how it was checked: m\n   why it matters: w\n   source: S \(https:\/\/s\.example\), tier \?, trust \?, LB10 \?\n/);
+  assert.match(g.text, /tier T3, trust 0, LB10 0\n   evidence: link: \(non-https link omitted\); link: \(non-https link omitted\); 5: https:\/\/e\.example/);
+  assert.match(g.text, /2\. \n   status: verified[^\n]*\n   how it was checked: 5\n   why it matters: \n   source: \? \(\(non-https link omitted\)\), tier \?, trust \?, LB10 \?\n   evidence: none\n   id: 7 · category:  · re-check: n\/a/);
 });
