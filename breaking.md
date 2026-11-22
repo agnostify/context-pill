@@ -4,11 +4,11 @@
 
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 21, 6:09 PM PT; refreshed about every 6 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 22, 6:17 AM PT; refreshed about every 6 hours.
 
-1. **[Former NSA hacker reveals he’s actively responding to a live breach where an AI "agent swarm" bypassed 2FA, stole data, and encrypted a company's entire system: "This all took 14 minutes. 14 minutes. Never seen anything that fast before."](https://www.reddit.com/r/OpenAI/comments/1y1v8o1/former_nsa_hacker_reveals_hes_actively_responding/)**
-   - Reddit (r/OpenAI, r/singularity): 834 upvotes*, 138 comments across 2 posts · source: r/OpenAI
-   - `b-0bbaf04a68`
+1. **[Ran a 9.5 hour autonomous test on Inkling 2 Mini (Q4\_K\_M) on a 3060 12GB with Claude Code. It aced almost everything , its the best model at this hardware constraints.](https://www.reddit.com/r/LocalLLaMA/comments/1y2hypn/ran_a_95_hour_autonomous_test_on_inkling_2_mini/)**
+   - Reddit (r/LocalLLaMA): 61 upvotes*, 27 comments · source: r/LocalLLaMA
+   - `b-6fbb6065df`
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
