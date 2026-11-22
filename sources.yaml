@@ -27,16 +27,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 6.552
+    alpha: 6.517
     beta: 2.0
-    trust_mean: 0.766
-    lb10: 0.574
+    trust_mean: 0.765
+    lb10: 0.573
     lb10_basis: decayed
     resolved_tips: 6
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-23': 1
@@ -90,7 +90,7 @@ sources:
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -123,15 +123,15 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 16.642
+    alpha: 16.53
     beta: 2.0
-    trust_mean: 0.893
-    lb10: 0.797
+    trust_mean: 0.892
+    lb10: 0.796
     lb10_basis: decayed
     resolved_tips: 20
     tier: T2
     research_criterion: main claim checked against one primary or independent source
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-16': 10
       '2026-10-19': 2
@@ -188,16 +188,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 8.27
-    beta: 3.357
+    alpha: 8.221
+    beta: 3.347
     trust_mean: 0.711
-    lb10: 0.537
+    lb10: 0.536
     lb10_basis: decayed
     resolved_tips: 9
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-16': 7
       '2026-10-17': 2
@@ -258,16 +258,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 6.892
+    alpha: 6.855
     beta: 2.0
-    trust_mean: 0.775
-    lb10: 0.589
+    trust_mean: 0.774
+    lb10: 0.588
     lb10_basis: decayed
     resolved_tips: 8
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -295,7 +295,8 @@ sources:
       '2026-11-19': 7
       '2026-11-20': 6
       '2026-11-21': 1
-    items_seen: 59
+      '2026-11-22': 1
+    items_seen: 60
     scorable_claims: 31
 - id: karpathy
   name: Andrej Karpathy
@@ -333,7 +334,7 @@ sources:
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-11-01': 1
     items_seen: 1
@@ -360,16 +361,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 4.205
-    beta: 2.888
-    trust_mean: 0.593
+    alpha: 4.188
+    beta: 2.881
+    trust_mean: 0.592
     lb10: 0.37
     lb10_basis: undecayed-12mo (low volume)
     resolved_tips: 4
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -400,8 +401,9 @@ sources:
       '2026-11-19': 4
       '2026-11-20': 2
       '2026-11-21': 2
-    items_seen: 65
-    scorable_claims: 20
+      '2026-11-22': 1
+    items_seen: 66
+    scorable_claims: 21
 - id: ray
   name: Ray Fu (RayCFU)
   home_url: https://www.raycfu.com
@@ -436,8 +438,8 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.915
-    beta: 2.915
+    alpha: 2.908
+    beta: 2.908
     trust_mean: 0.5
     lb10: 0.247
     lb10_basis: undecayed-12mo (low volume)
@@ -445,7 +447,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 2
@@ -486,15 +488,15 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 11.976
-    beta: 2.892
-    trust_mean: 0.806
-    lb10: 0.669
+    alpha: 11.9
+    beta: 2.885
+    trust_mean: 0.805
+    lb10: 0.668
     lb10_basis: decayed
     resolved_tips: 15
     tier: T2
     research_criterion: main claim checked against one primary or independent source
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -552,7 +554,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-11-10': 1
     items_seen: 1
@@ -578,16 +580,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 7.471
+    alpha: 7.429
     beta: 2.0
-    trust_mean: 0.789
-    lb10: 0.612
+    trust_mean: 0.788
+    lb10: 0.611
     lb10_basis: decayed
     resolved_tips: 7
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-22': 5
@@ -627,7 +629,7 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.429
+    alpha: 2.425
     beta: 2.0
     trust_mean: 0.548
     lb10: 0.262
@@ -636,7 +638,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-16': 1
     items_seen: 1
@@ -662,16 +664,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 6.062
-    beta: 2.435
+    alpha: 6.031
+    beta: 2.432
     trust_mean: 0.713
-    lb10: 0.509
+    lb10: 0.508
     lb10_basis: decayed
     resolved_tips: 6
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-20': 3
@@ -720,7 +722,7 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.905
+    alpha: 2.898
     beta: 2.0
     trust_mean: 0.592
     lb10: 0.32
@@ -729,7 +731,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 1
@@ -777,7 +779,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-11-03': 1
       '2026-11-11': 1
@@ -805,16 +807,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 4.262
-    beta: 2.452
-    trust_mean: 0.635
+    alpha: 4.244
+    beta: 2.449
+    trust_mean: 0.634
     lb10: 0.408
     lb10_basis: undecayed-12mo (low volume)
     resolved_tips: 3
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-18': 1
       '2026-10-25': 1
@@ -842,7 +844,7 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.919
+    alpha: 2.912
     beta: 2.0
     trust_mean: 0.593
     lb10: 0.32
@@ -851,7 +853,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-27': 1
@@ -894,7 +896,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-11-10': 1
       '2026-11-12': 1
@@ -936,7 +938,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date:
       '2026-11-17': 2
       '2026-11-21': 1
@@ -978,7 +980,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-21'
+    updated: '2026-11-22'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0

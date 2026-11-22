@@ -163,3 +163,5 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-21: source changed on 2026-10-25-b6651c86 (interconnects): accurate when published on 2026-10-25; the source changed it on 2026-10-27 (Oct 23 launch: Artificial Analysis published 55, 4th of 215 · Oct 27 index update (Intelligence Index v5) re-scored every model). Outcome bad -> source-changed, state corrected -> superseded (not scored; trust recomputed: mean 0.56 -> 0.635, LB10 0.339 -> 0.408, tier T3 -> T3)
 - 2026-11-21: audit of 2026-11-21-d88672ed (OpenAI (and Sam Altman's blog)): pass (Verdict: pass. Source: https://openai.com/index/combatting-adversarial-distillation)
 - 2026-11-21: removed 2 item(s) from 2026-11-21 (review: Codex r2 (a0970398 overgeneralized the post-RL result; 175ed6b4 unverified single-source claim))
+- 2026-11-22: audit of 2026-11-22-4cbc1f0d (Google DeepMind / Google AI): pass (Verdict: pass. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.71.0-nightly.20261122.geecccfcd5)
+- 2026-11-22: removed 1 item(s) from 2026-11-22 (review: empty nightly (same commit eecccfcd5 as the 21 Nov nightly, no change notes), not news)
