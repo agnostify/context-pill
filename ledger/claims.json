@@ -8350,6 +8350,70 @@
    "recheck_on": "2026-12-06",
    "source_id": "simonw",
    "status_at_publication": "unverified"
+  },
+  {
+   "id": "2026-11-23-3f9c0207",
+   "date": "2026-11-23",
+   "category": "technique",
+   "claim": "Simon Willison's preferred cross-browser select box style uses appearance: none plus an inline SVG data URI chevron as a no-repeat background, with extra right padding to leave room for the arrow.",
+   "why_it_matters": "It's a small CSS recipe with no dependencies. His post shows the styled select box in Chrome, Safari and Firefox.",
+   "try_this": "Apply appearance: none with an inline SVG chevron background to one select element and compare it in the browsers you support.",
+   "evidence": [
+    {
+     "url": "https://simonwillison.net/2026/Nov/22/select-styling/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "CSS confirmed in author's own post; not rendered or tested by us",
+    "checked_at": "2026-11-23T05:42-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "I got frustrated at how HTML <select> boxes default to looking different in different browsers",
+   "excerpt_url": "https://simonwillison.net/2026/Nov/22/select-styling/",
+   "item_url": "https://simonwillison.net/2026/Nov/22/select-styling/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-07",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-23-b1b298c5",
+   "date": "2026-11-23",
+   "category": "technique",
+   "claim": "Simon Willison used Claude Fable 5.2 with a one-sentence prompt to build a 'Select Styling Specimens' HTML page that shows many ways to style a select box. His post then shows his preferred style in Chrome, Safari and Firefox.",
+   "why_it_matters": "It's a cheap pattern: have a model build a page of every variant, then pick one by eye. That beats guessing at CSS.",
+   "try_this": "Ask your model for one HTML page that shows every styling variant of a UI element, then screenshot it in each browser you support.",
+   "evidence": [
+    {
+     "url": "https://simonwillison.net/2026/Nov/22/select-styling/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "prompt and model name stated in author's own post",
+    "checked_at": "2026-11-23T05:42-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "So I had Claude Fable 5.2 build me this page showing all of the ways they can be styled",
+   "excerpt_url": "https://simonwillison.net/2026/Nov/22/select-styling/",
+   "item_url": "https://simonwillison.net/2026/Nov/22/select-styling/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-07",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -8649,6 +8713,14 @@
   {
    "date": "2026-11-22",
    "item_id": "2026-11-22-4cbc1f0d",
+   "source_id": "deepmind",
+   "tier": "T1-seed",
+   "verdict": "pass",
+   "removed": true
+  },
+  {
+   "date": "2026-11-23",
+   "item_id": "2026-11-23-d55a3fc0",
    "source_id": "deepmind",
    "tier": "T1-seed",
    "verdict": "pass",
@@ -9160,6 +9232,26 @@
    "id": "2026-11-22-4cbc1f0d",
    "date": "2026-11-22",
    "reason": "review: empty nightly (same commit eecccfcd5 as the 21 Nov nightly, no change notes), not news"
+  },
+  {
+   "id": "2026-11-23-d55a3fc0",
+   "date": "2026-11-23",
+   "reason": "review: empty Gemini CLI nightly with no changes listed, not news"
+  },
+  {
+   "id": "2026-11-23-ab75e4b9",
+   "date": "2026-11-23",
+   "reason": "review: unproven income claim, marketing not evidence"
+  },
+  {
+   "id": "2026-11-23-81cc3d3b",
+   "date": "2026-11-23",
+   "reason": "review: third-party product claim not checked against vendor docs"
+  },
+  {
+   "id": "2026-11-23-82648a72",
+   "date": "2026-11-23",
+   "reason": "review: guide page and sitemap carry no publish date, freshness not established"
   }
  ]
 }

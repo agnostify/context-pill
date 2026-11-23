@@ -165,3 +165,8 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-21: removed 2 item(s) from 2026-11-21 (review: Codex r2 (a0970398 overgeneralized the post-RL result; 175ed6b4 unverified single-source claim))
 - 2026-11-22: audit of 2026-11-22-4cbc1f0d (Google DeepMind / Google AI): pass (Verdict: pass. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.71.0-nightly.20261122.geecccfcd5)
 - 2026-11-22: removed 1 item(s) from 2026-11-22 (review: empty nightly (same commit eecccfcd5 as the 21 Nov nightly, no change notes), not news)
+- 2026-11-23: audit of 2026-11-23-d55a3fc0 (Google DeepMind / Google AI): pass (Verdict: pass. Source: https://github.com/google-gemini/gemini-cli/releases/tag/v0.71.0-nightly.20261123.geecccfcd5)
+- 2026-11-23: removed 1 item(s) from 2026-11-23 (review: empty Gemini CLI nightly with no changes listed, not news)
+- 2026-11-23: removed 1 item(s) from 2026-11-23 (review: unproven income claim, marketing not evidence)
+- 2026-11-23: removed 1 item(s) from 2026-11-23 (review: third-party product claim not checked against vendor docs)
+- 2026-11-23: removed 1 item(s) from 2026-11-23 (review: guide page and sitemap carry no publish date, freshness not established)
