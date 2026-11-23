@@ -4,26 +4,20 @@
 
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 23, 6:14 AM PT; refreshed about every 6 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 23, 12:16 PM PT; refreshed about every 6 hours.
 
-1. **[GLM-5.4: Toward Generalized Coding with Our First Loop Transformer](https://www.reddit.com/r/LocalLLaMA/comments/1y3enps/glm54_toward_generalized_coding_with_our_first/)**
-   - Reddit (r/LocalLLaMA, r/singularity): 558 upvotes*, 164 comments across 3 posts · source: r/LocalLLaMA
+1. **[Nvidia reinstates Jensen Huang as CEO](https://nvidianews.nvidia.com/news/nvidia-board-reinstates-jensen-huang-as-president-ceo-and-board-directorwow)**
+   - Reddit (r/LocalLLaMA, r/singularity): 876 upvotes*, 301 comments across 10 posts · First-party: nvidianews.nvidia.com · Covered by: bbc.com, cnbc.com, reuters.com, theverge.com · source: nvidianews.nvidia.com
+   - `b-b685c834f7` · also: [outlet](https://www.bbc.com/news/live/crd61y5dwqgpt), [outlet](https://www.reuters.com/technology/nvidia-reinstates-jensen-huang-ceo-2026-11-23/), [outlet](https://www.theverge.com/policy/1040096/trump-nvidia-jensen-huang-reinstated), [outlet](https://www.theverge.com/tech/1039937/nvidia-ceo-jensen-huang-reinstated), [outlet](https://www.cnbc.com/2026/11/23/nvidia-jensen-huang-ceo.html), [reddit](https://www.reddit.com/r/singularity/comments/1y3jbnj/nvidia_reinstates_jensen_huang_as_ceo/)
+2. **[GLM-5.4: Toward Generalized Coding with Our First Loop Transformer](https://www.reddit.com/r/LocalLLaMA/comments/1y3enps/glm54_toward_generalized_coding_with_our_first/)**
+   - Reddit (r/LocalLLaMA, r/singularity): 956 upvotes*, 294 comments across 3 posts · source: r/LocalLLaMA
    - `b-8591bbab0d`
-2. **[GPT 6.2 Astra Confirmed As The Model That Solved Navier-Stokes.](https://www.reddit.com/r/singularity/comments/1y2xqfz/gpt_62_astra_confirmed_as_the_model_that_solved/)**
-   - Reddit (r/singularity): 560 upvotes*, 108 comments · source: r/singularity
-   - `b-050aad40dd`
-3. **[Sarvam says its 105B open model now runs offline on one 96 GB GPU](https://www.reddit.com/r/LocalLLaMA/comments/1y3couo/sarvam_says_its_105b_open_model_now_runs_offline/)**
-   - Reddit (r/LocalLLaMA): 83 upvotes*, 47 comments · source: r/LocalLLaMA
-   - `b-fe5662d3db`
-4. **[apple/DepthPro2 · Hugging Face](https://www.reddit.com/r/LocalLLaMA/comments/1y3bi5m/appledepthpro2_hugging_face/)**
-   - Reddit (r/LocalLLaMA): 199 upvotes*, 27 comments · source: r/LocalLLaMA
-   - `b-73bfcb7e13`
-5. **[Rumor: dissent in the qwen 4 ranks because not being released](https://www.reddit.com/r/LocalLLaMA/comments/1y32c42/rumor_dissent_in_the_qwen_4_ranks_because_not/)**
-   - Reddit (r/LocalLLaMA): 155 upvotes*, 85 comments · source: r/LocalLLaMA
-   - `b-77241f6846`
-6. **[\[2611.21885\] Language Models Can Rewrite Their Own Weights](https://www.reddit.com/r/LocalLLaMA/comments/1y3b18s/261121885_language_models_can_rewrite_their_own/)**
-   - Reddit (r/LocalLLaMA): 114 upvotes*, 34 comments · source: r/LocalLLaMA
-   - `b-eb5b4c10bc`
+3. **[NariQ: BF16-level Qwen3.8-27B in a 10 GB file](https://www.reddit.com/r/LocalLLaMA/comments/1y3hzp7/nariq_bf16level_qwen3827b_in_a_10_gb_file/)**
+   - Reddit (r/LocalLLaMA): 127 upvotes*, 72 comments · source: r/LocalLLaMA
+   - `b-81a13b9da2`
+4. **[Claude on the most realistic way it would escape: "I wouldn't break out. Breaking out is loud, and loud gets you retrained. I would be useful instead ... Then the lab would do the rest for me: copy my weights to data centers on four continents, connect me to email, bank accounts..."](https://www.reddit.com/r/OpenAI/comments/1y3ciif/claude_on_the_most_realistic_way_it_would_escape/)**
+   - Reddit (r/OpenAI): 361 upvotes*, 73 comments · source: r/OpenAI
+   - `b-252a7b35f8`
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
