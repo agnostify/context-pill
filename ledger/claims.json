@@ -8906,6 +8906,102 @@
    "recheck_on": "2026-12-08",
    "source_id": "simonw",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-25-2922771d",
+   "date": "2026-11-25",
+   "category": "technique",
+   "claim": "IBM Research found that CUGA's default English-only embedding model made Hindi or Tamil questions retrieve the wrong passages from an English handbook, so the agent said the handbook didn't cover the question, with no error. Switching to intfloat/multilingual-e5-large fixed it.",
+   "why_it_matters": "Multilingual RAG agents can quietly answer 'not covered' when the real fault is the embedding model. Every layer looks fine, so nothing flags it.",
+   "try_this": "Before tuning prompts, ask your retrieval agent one question in a non-English language and check that it returns the right source pages.",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "authors' own write-up on the Hugging Face blog; not run in a sandbox",
+    "checked_at": "2026-11-25T05:36-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "CUGA's default embedding model is English-only, so it turns Hindi into vectors that carry almost no meaning.",
+   "excerpt_url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+   "item_url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-09",
+   "source_id": "huggingface",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-25-2cd6d98c",
+   "date": "2026-11-25",
+   "category": "tool",
+   "claim": "CUGA is IBM Research's open-source agent harness under Apache 2.0. It can be embedded as an SDK and switched between watsonx and OpenAI with one setting. It also has built-in PDF knowledge search via agent.knowledge.search().",
+   "why_it_matters": "It's an open harness that handles the agent loop, tools, state and guardrails, so small teams only write the tools and the prompt.",
+   "try_this": "Open the CUGA Apps Space on Hugging Face and try the voice agent before deciding whether to adopt the SDK.",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "vendor's own blog post; tool not smoke-tested",
+    "checked_at": "2026-11-25T05:36-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "Switch between watsonx and OpenAI with one setting.",
+   "excerpt_url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+   "item_url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-09",
+   "source_id": "huggingface",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-25-ae5a65b2",
+   "date": "2026-11-25",
+   "category": "technique",
+   "claim": "For a voice agent's off-topic guardrail, IBM uses simple input checks first. If an off-topic question gets through, the model starts its reply with an OFF_TOPIC token and the app swaps in a polite redirect, so no second LLM call is needed.",
+   "why_it_matters": "It's a cheap guardrail pattern for any latency-sensitive agent where an extra classifier call would add noticeable delay.",
+   "try_this": "Add a sentinel-token instruction to your agent prompt and have the app replace any reply that starts with it.",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "authors' own write-up on the Hugging Face blog",
+    "checked_at": "2026-11-25T05:36-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "the app swaps in a polite redirect. No second LLM call, so the voice path stays fast.",
+   "excerpt_url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+   "item_url": "https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-09",
+   "source_id": "huggingface",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
