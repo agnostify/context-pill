@@ -170,3 +170,4 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-23: removed 1 item(s) from 2026-11-23 (review: unproven income claim, marketing not evidence)
 - 2026-11-23: removed 1 item(s) from 2026-11-23 (review: third-party product claim not checked against vendor docs)
 - 2026-11-23: removed 1 item(s) from 2026-11-23 (review: guide page and sitemap carry no publish date, freshness not established)
+- 2026-11-24: audit of 2026-11-24-3653c8c3 (OpenAI (and Sam Altman's blog)): pass (Verdict: pass. Source: https://openai.com/business/customer-stories/ifood)
