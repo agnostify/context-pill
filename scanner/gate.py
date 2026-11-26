@@ -3,8 +3,10 @@ Checks every file in the repo (no exemptions): no secrets, nothing from X (no X/
 no maintainer-private text. Private patterns live OUTSIDE the repo ($CP_PRIVATE_PATTERNS, default
 $CP_WORK/private-patterns.txt), so the public code never contains them. Also validates latest.json and every
 daily/weekly archive JSON against schema/drop.schema.json, quote length/attribution, and the tool-status ceiling."""
+import datetime as dt
 import json, os, re
 from pathlib import Path
+from . import quotes
 
 ALLOWED_TOP = {"README.md", "llms.txt", "latest.md", "latest.json", "breaking.json", "breaking.md", "daily", "weekly", "scanner", "sources.yaml", "schema", "METHOD.md",
                "CHANGELOG-sources.md", "TAKEDOWN.md", "skill", "LICENSE", "LICENSE-CONTENT", "ledger", "feedback", ".gitignore", ".git",
@@ -12,9 +14,10 @@ ALLOWED_TOP = {"README.md", "llms.txt", "latest.md", "latest.json", "breaking.js
 SECRET = [r"sk-[A-Za-z0-9_-]{20,}", r"sk-ant-[A-Za-z0-9_-]{10,}", r"gh[pousr]_[A-Za-z0-9]{30,}", r"github_pat_[A-Za-z0-9_]{30,}", r"AIza[0-9A-Za-z_-]{35}",
           r"\bre_[A-Za-z0-9]{8}_[A-Za-z0-9]{16,}", r"AKIA[0-9A-Z]{16}", r"xox[abpr]-[A-Za-z0-9-]{10,}", r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
           r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*['\"][^'\"\s]{12,}['\"]"]
-XPAT = [r"https?://([a-z0-9-]+\.)*(x|twitter)\.com/[^\s)\"']+", r"https?://t\.co/\w+", r"/status(es)?/\d{10,}"]
+XPAT = [r"(?i)https?://([a-z0-9-]+\.)*(x|twitter)\.com/[^\s)\"']+", r"(?i)https?://t\.co/\w+", r"(?i)/status(es)?/\d{10,}"]
 TOOL_CATS = ("tool", "automation")
 CHECKED = ("verified", "docs-verified", "vendor-claim", "face-value-T1")
+TAKE_METHOD = "quote matched on the linked page"
 
 
 def private_patterns():
@@ -41,7 +44,7 @@ def scan_text(rel, t, private):
     return out
 
 
-# --- minimal JSON Schema subset validator (type, required, enum, properties, items, $ref, pattern, maxLength, minimum)
+# --- minimal JSON Schema subset validator (type, required, enum, properties, items, $ref, pattern, maxLength, minimum, if/then/else)
 _T = {"string": str, "integer": int, "number": (int, float), "boolean": bool, "object": dict, "array": list, "null": type(None)}
 
 
@@ -74,11 +77,48 @@ def _validate(x, sch, root, path, out):
             out.append(f"{path}: too long")
     if isinstance(x, (int, float)) and not isinstance(x, bool) and "minimum" in sch and x < sch["minimum"]:
         out.append(f"{path}: below minimum")
+    if "if" in sch:
+        condition = []
+        _validate(x, sch["if"], root, path, condition)
+        _validate(x, sch.get("else" if condition else "then", {}), root, path, out)
+
+
+def valid_attribution(d, drop_date=None):
+    """A named speaker (2 to 6 words, <=80 chars) and an original publication date no later than the drop's date."""
+    speaker, said_on = d.get("speaker"), d.get("said_on")
+    if not quotes.valid_speaker(speaker) or not isinstance(said_on, str):
+        return False
+    try:
+        ok = dt.date.fromisoformat(said_on).isoformat() == said_on
+    except ValueError:
+        return False
+    latest = drop_date or d.get("date")
+    return ok and (not isinstance(latest, str) or said_on <= latest)
+
+
+def check_take(d, pid):
+    v = d.get("verification") or {}
+    if d.get("category") != "take":
+        return [f"{pid}: attributed status is only for takes"] if "attributed" in (v.get("status"), d.get("status_at_publication")) else []
+    out = []
+    if v.get("status") != "attributed" or v.get("method") != TAKE_METHOD:
+        out.append(f"{pid}: take must have attributed status and the quote-check method")
+    if not valid_attribution(d):
+        out.append(f"{pid}: take needs a named speaker and original publication date (YYYY-MM-DD)")
+    if "status_at_publication" in d and d["status_at_publication"] != "attributed":
+        out.append(f"{pid}: a take's status at publication must be attributed")
+    if not quotes.valid_excerpt(d.get("excerpt")) or not quotes.https_link(d.get("excerpt_url")) or d["excerpt_url"] != d.get("item_url"):
+        out.append(f"{pid}: take needs a quote of 25 words and 300 characters or fewer linked to the item")
+    if d.get("try_this"):
+        out.append(f"{pid}: a take never carries a try-this step")
+    if d.get("scorable") is not False or d.get("recheck_on") is not None or v.get("t1_audit_sample") or v.get("audit_verdict") is not None:
+        out.append(f"{pid}: takes cannot be scored, re-checked or audited")
+    return out
 
 
 def check_item(d, where):
-    out = []
     pid = f"{where}:{d.get('id')}"
+    out = check_take(d, pid)
     src = d.get("source") or {}
     if not src.get("home_url") or not src.get("name"):
         out.append(f"{pid}: missing attribution")
@@ -92,7 +132,7 @@ def check_item(d, where):
     if v.get("status") == "face-value-T1" and (d.get("category") in TOOL_CATS or v.get("provisional") or not str(src.get("tier", "")).startswith("T1")):
         out.append(f"{pid}: face-value-T1 on a tool/automation, a provisional item or a non-T1 source")
     if d.get("excerpt"):
-        if len(d["excerpt"].split()) > 25:
+        if isinstance(d["excerpt"], str) and len(d["excerpt"].split()) > 25:
             out.append(f"{pid}: quote over 25 words")
         if not d.get("excerpt_url"):
             out.append(f"{pid}: quote without a source URL")
@@ -148,8 +188,12 @@ def check(repo, require_private=False):
     lp =repo / "ledger" / "claims.json"
     if lp.exists():
         for c in json.loads(lp.read_text()).get("claims", []):
-            if c.get("excerpt") and (len(c["excerpt"].split()) > 25 or not c.get("excerpt_url")):
-                problems.append(f"ledger:{c['id']}: quote over 25 words or without URL")
+            pid = f"ledger:{c['id']}"
+            problems += check_take(c, pid)
+            if c.get("category") == "take" and "status_at_publication" not in c:
+                problems.append(f"{pid}: a ledger take needs its status at publication (attributed)")
+            if c.get("excerpt") and (not quotes.valid_excerpt(c["excerpt"]) or not c.get("excerpt_url")):
+                problems.append(f"{pid}: quote over 25 words or 300 characters, invalid or without URL")
     return problems
 
 

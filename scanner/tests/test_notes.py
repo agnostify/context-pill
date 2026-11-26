@@ -166,7 +166,7 @@ def test_gate_blocked_source_url_falls_back():
     from scanner import gate
     X, TW = "x" + ".com", "twit" + "ter.com"                  # built at runtime: the gate bans X links in repo files
     bad = ["https://" + X + "/u", "https://mobile." + TW + "/u/" + "status/" + "1" * 19, "https://t" + ".co/abc",
-           "https://X.COM/u", "https://example.com/" + "status/" + "1" * 12, "https://example.com/?u=https://" + X + "/u",
+           "https://X" + ".COM/u", "https://example.com/" + "status/" + "1" * 12, "https://example.com/?u=https://" + X + "/u",
            "https://example.com/?k=sk-" + "a" * 24]
     for u in bad:
         assert not N.usable_url(u), u

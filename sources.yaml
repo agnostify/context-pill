@@ -100,6 +100,8 @@ sources:
   name: Anthropic
   home_url: https://www.anthropic.com
   kind: lab
+  take_paths:
+  - /engineering/
   seed: true
   enabled: true
   feeds:
@@ -1000,6 +1002,248 @@ sources:
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
+- id: bcherny
+  name: Boris Cherny
+  home_url: https://borischerny.com
+  kind: expert
+  seed: false
+  enabled: true
+  take_byline: true
+  feeds:
+  - type: rss
+    url: https://borischerny.com/feed.xml
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: Created Claude Code.
+- id: mitsuhiko
+  name: Armin Ronacher
+  home_url: https://lucumr.pocoo.org
+  kind: expert
+  seed: false
+  enabled: true
+  take_byline: true
+  feeds:
+  - type: rss
+    url: https://lucumr.pocoo.org/feed.atom
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: hamel
+  name: Hamel Husain
+  home_url: https://hamel.dev
+  kind: expert
+  seed: false
+  enabled: true
+  take_byline: true
+  feeds:
+  - type: rss
+    url: https://hamel.dev/index.xml
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: mitchellh
+  name: Mitchell Hashimoto
+  home_url: https://mitchellh.com
+  kind: expert
+  seed: false
+  enabled: false
+  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  feeds:
+  - type: rss
+    url: https://mitchellh.com/feed.xml
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: addyosmani
+  name: Addy Osmani
+  home_url: https://addyo.substack.com
+  kind: expert
+  seed: false
+  enabled: false
+  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  feeds:
+  - type: rss
+    url: https://addyo.substack.com/feed
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. Substack article pages are read only within the same per-host limits.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: eugeneyan
+  name: Eugene Yan
+  home_url: https://eugeneyan.com
+  kind: expert
+  seed: false
+  enabled: false
+  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  feeds:
+  - type: rss
+    url: https://eugeneyan.com/rss/
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: jxnl
+  name: Jason Liu
+  home_url: https://jxnl.co
+  kind: expert
+  seed: false
+  enabled: false
+  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  feeds:
+  - type: rss
+    url: https://jxnl.co/feed_rss_created.xml
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: dbreunig
+  name: Drew Breunig
+  home_url: https://www.dbreunig.com
+  kind: expert
+  seed: false
+  enabled: false
+  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  feeds:
+  - type: rss
+    url: https://www.dbreunig.com/feed.xml
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: ghuntley
+  name: Geoffrey Huntley
+  home_url: https://ghuntley.com
+  kind: expert
+  seed: false
+  enabled: false
+  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  feeds:
+  - type: rss
+    url: https://ghuntley.com/rss/
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: yegge
+  name: Steve Yegge
+  home_url: https://steve-yegge.medium.com
+  kind: expert
+  seed: false
+  enabled: false
+  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  feeds:
+  - type: rss
+    url: https://steve-yegge.medium.com/feed
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. Medium article pages are read only within the same per-host limits.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: null
+- id: zvi
+  name: Zvi Mowshowitz
+  home_url: https://thezvi.substack.com
+  kind: expert
+  seed: false
+  enabled: false
+  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  feeds:
+  - type: rss
+    url: https://thezvi.substack.com/feed
+  research_criteria:
+  - 'Takes are logged as attributed opinion: we check the words are on the linked page, not that they are right'
+  - Tool and model claims checked against the vendor page
+  register:
+    route: rss/atom
+    basis: Public RSS/Atom feed the publisher offers for syndication; robots.txt checked at fetch time
+    terms: Not separately reviewed; feed published for syndication. Substack article pages are read only within the same per-host limits.
+    republish: Our own one-to-two sentence summary, a link, attribution, at most one quote of <=25 words and <=300 characters
+    limit: 1 feed fetch/day; <=20 page fetches/day/site; <=1 request per 2 s; <=30 requests/day/host
+    stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
+    opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
+  notes: Long, frequent posts.
 - id: x-discovery
   name: X (private discovery signal)
   enabled: false

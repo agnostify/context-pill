@@ -499,7 +499,8 @@ def earlier_stories(ledger, date, history_path=None, log=lambda m: None):
         if isinstance(d, str) and lo <= d < date:
             ev = c.get("evidence") or []
             urls = [e.get("url") for e in ev if isinstance(e, dict)]
-            out.append({"ref": c.get("id", "?"), "date": d, "text": c.get("claim") or "", "urls": [u for u in urls if isinstance(u, str)]})
+            out.append({"ref": c.get("id", "?"), "date": d, "text": c.get("claim") or "",
+                        "urls": [u for u in urls if isinstance(u, str)], "take": c.get("category") == "take"})
     n_ledger = len(out)
     hp = history_path or os.environ.get("CP_STORY_HISTORY")
     if hp:

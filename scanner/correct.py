@@ -29,7 +29,9 @@ def main(argv):
     prev = c.get("state")
     c["correction"] = {"on": today.isoformat(), "reason": reason, "state_before": prev}
     c["state"] = "corrected"                       # never "pending" again, so it can't earn credit at resolution
-    if prev == "resolved" and c.get("outcome") == "bad":
+    if c.get("scorable") is False or c.get("category") == "take":
+        effect = "attribution corrected without changing trust" if c.get("category") == "take" else "no trust change"
+    elif prev == "resolved" and c.get("outcome") == "bad":
         effect = "no trust change (already scored bad at its re-check)"
     elif prev == "pending":
         effect = "pending claim closed as corrected: it will never be scored"

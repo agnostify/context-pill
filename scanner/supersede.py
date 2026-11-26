@@ -35,6 +35,8 @@ def main(argv):
     c = next((c for c in ledger["claims"] if c["id"] == cid), None)
     if not c:
         print(f"no claim {cid}"); return 1
+    if c.get("scorable") is False or c.get("category") == "take":
+        print(f"{cid} is non-scorable and has no resolution to supersede"); return 1
     if c.get("state") == "superseded":
         print(f"{cid} is already superseded ({c['source_change'].get('changed_on')}); nothing done"); return 1
     if c.get("state") not in ("pending", "resolved", "corrected"):
@@ -61,8 +63,7 @@ def main(argv):
     s = srcs.get(c["source_id"]); effect = "source not in sources.yaml: no trust change"
     if s is not None:
         old = s.get("trust") or {}
-        ev = [{"date": x["resolved_on"], "outcome": x["outcome"], "reversed_on": x.get("reversed_on")} for x in ledger["claims"]
-              if x["source_id"] == s["id"] and x["state"] in ("resolved", "corrected") and x.get("outcome") in trust.WEIGHTS]
+        ev = trust.claim_events(ledger["claims"], s["id"])
         t = trust.score(s, ev, today); t.pop("audit_demoted", None)
         t["research_criterion"] = trust.research_criterion(t["tier"], (today - START_DATE).days + 1, set(reg.get("tightened") or {}))
         t["updated"] = today.isoformat()
