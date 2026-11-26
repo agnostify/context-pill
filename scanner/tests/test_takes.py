@@ -93,6 +93,12 @@ def test_quotes():
         path.write_text("Posted Nov. 18, 2026 by someone")
         assert quotes.date_on_item("2026-11-18", item, pages) and not quotes.date_on_item("2026-11-17", item, pages)
         assert quotes.date_on_item("2026-11-17", {"published": "2026-11-17T09:00:00+00:00"}, pages)
+        path.write_text("filler " * 200 + "Back on November 18, 2026 we shipped it.")
+        assert not quotes.date_on_item("2026-11-18", item, pages)          # a date in the body is not the post's date
+        path.write_text(f"{EXCERPT} " + "filler " * 30 + SPEAKER)
+        assert not quotes.matches_item(EXCERPT, item, pages, SPEAKER)      # name too far after the quote
+        path.write_text(f"\u201c{EXCERPT}\u201d said {SPEAKER}.")
+        assert quotes.matches_item(EXCERPT, item, pages, SPEAKER)
         assert quotes.is_source_person("Armin Ronacher", "Armin Ronacher") and not quotes.is_source_person("Bob Troll", "Armin Ronacher")
 
 
@@ -119,6 +125,21 @@ def test_take_guards():
         assert f"take dated after its feed entry (2026-11-18 > 2026-11-10): {late}" in log
         assert "failed the publication scan" in log and xlink in log
         assert log.count("named speaker or original publication date") == 1   # the lab news page
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, work, raw = fixture(Path(tmp), ("builder",))
+        url = "https://builder.example/f"
+        snap = raw / "pages" / "p.txt"; snap.write_text(f"By {SPEAKER}. November 18, 2026. {EXCERPT}")
+        items = [{"source_id": "builder", "url": url, "snapshot": str(snap), "published": DAY, "summary": ""}]
+        bad_row = take(url, "Malformed", item_url=[url])
+        heading = take(url, "Line one\n## Fake heading [link](https://evil.example)")
+        drop, *_ = publish(repo, work, raw, [bad_row, heading], items)
+        assert "malformed extractor row" in (raw / "run.log").read_text() and len(drop) == 1
+        md = (repo / "latest.md").read_text()
+        assert "\n## Fake heading" not in md and "\\[link\\]" in md
+        opinion = drop[0]
+        assert any("status at publication" in x for x in gate.check_take(opinion | {"status_at_publication": "verified"}, "l"))
+        assert any("only for takes" in x for x in gate.check_take(opinion | {"category": "release", "verification": {"status": "verified"}, "status_at_publication": "attributed"}, "l"))
+        assert gate.check_take(opinion | {"excerpt_url": "http://builder.example/f", "item_url": "http://builder.example/f"}, "l")
     with tempfile.TemporaryDirectory() as tmp:
         repo, work, raw = fixture(Path(tmp), ("builder",))
         snap = raw / "pages" / "p.txt"

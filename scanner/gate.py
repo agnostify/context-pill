@@ -14,7 +14,7 @@ ALLOWED_TOP = {"README.md", "llms.txt", "latest.md", "latest.json", "breaking.js
 SECRET = [r"sk-[A-Za-z0-9_-]{20,}", r"sk-ant-[A-Za-z0-9_-]{10,}", r"gh[pousr]_[A-Za-z0-9]{30,}", r"github_pat_[A-Za-z0-9_]{30,}", r"AIza[0-9A-Za-z_-]{35}",
           r"\bre_[A-Za-z0-9]{8}_[A-Za-z0-9]{16,}", r"AKIA[0-9A-Z]{16}", r"xox[abpr]-[A-Za-z0-9-]{10,}", r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
           r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*['\"][^'\"\s]{12,}['\"]"]
-XPAT = [r"https?://([a-z0-9-]+\.)*(x|twitter)\.com/[^\s)\"']+", r"https?://t\.co/\w+", r"/status(es)?/\d{10,}"]
+XPAT = [r"(?i)https?://([a-z0-9-]+\.)*(x|twitter)\.com/[^\s)\"']+", r"(?i)https?://t\.co/\w+", r"(?i)/status(es)?/\d{10,}"]
 TOOL_CATS = ("tool", "automation")
 CHECKED = ("verified", "docs-verified", "vendor-claim", "face-value-T1")
 TAKE_METHOD = "quote matched on the linked page"
@@ -99,13 +99,15 @@ def valid_attribution(d, drop_date=None):
 def check_take(d, pid):
     v = d.get("verification") or {}
     if d.get("category") != "take":
-        return [f"{pid}: attributed status is only for takes"] if v.get("status") == "attributed" else []
+        return [f"{pid}: attributed status is only for takes"] if "attributed" in (v.get("status"), d.get("status_at_publication")) else []
     out = []
     if v.get("status") != "attributed" or v.get("method") != TAKE_METHOD:
         out.append(f"{pid}: take must have attributed status and the quote-check method")
     if not valid_attribution(d):
         out.append(f"{pid}: take needs a named speaker and original publication date (YYYY-MM-DD)")
-    if not quotes.valid_excerpt(d.get("excerpt")) or not d.get("excerpt_url") or d["excerpt_url"] != d.get("item_url"):
+    if "status_at_publication" in d and d["status_at_publication"] != "attributed":
+        out.append(f"{pid}: a take's status at publication must be attributed")
+    if not quotes.valid_excerpt(d.get("excerpt")) or not str(d.get("excerpt_url") or "").startswith("https://") or d["excerpt_url"] != d.get("item_url"):
         out.append(f"{pid}: take needs a quote of 25 words and 300 characters or fewer linked to the item")
     if d.get("try_this"):
         out.append(f"{pid}: a take never carries a try-this step")

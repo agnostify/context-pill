@@ -13,6 +13,7 @@ WORK = Path(os.environ.get("CP_WORK", REPO.parent / "context-pill-work"))
 START_DATE = dt.date(2026, 10, 16)          # day 1 of the scanner (provisional period = days 1-14)
 CHECKED = ("verified", "docs-verified", "vendor-claim", "face-value-T1")
 SCORABLE_CATS = ("release", "tool", "automation", "technique", "research", "prediction")
+TEXT_FIELDS = ("source_id", "category", "item_url", "claim", "why_it_matters", "try_this", "excerpt", "excerpt_url", "speaker", "said_on")
 TAKE_KINDS = ("expert", "lab-leader", "creator", "lab")   # lab only on paths listed in its take_paths (sources.yaml)
 TAKE_PER_SOURCE, TAKE_PER_DAY = 2, 8
 AUDIT_RATE = 10                              # 1 in 10 T1 items (deterministic by item id), at least 1 per day if any
@@ -175,6 +176,8 @@ def main():
     take_counts, take_ids = Counter(), set()
     maybe_repeats = []                                            # kept but flagged; the review step reads raw/<date>/repeat-flags.json
     for c in claims:
+        if not isinstance(c, dict) or any(not isinstance(c.get(k), (str, type(None))) for k in TEXT_FIELDS):
+            rejected.append(f"{c.get('source_id') if isinstance(c, dict) else '?'}: malformed extractor row (a text field is not text)"); continue
         sid, category, item_url = c.get("source_id"), c.get("category"), c.get("item_url")
         is_take = category == "take"
         key = f"{sid}|{item_url}|{c.get('claim')}"

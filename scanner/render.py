@@ -9,13 +9,18 @@ LABEL = {"verified": "Verified", "docs-verified": "Docs-verified (not hands-on t
          "unverified": "Unverified, not recommended", "blocked": "Verification blocked", "attributed": "Attributed opinion"}
 
 
+def _one(t):
+    """Model-written text on one line with link brackets escaped, so it can't add a heading or a link to latest.md."""
+    return " ".join(str(t or "").split()).replace("[", "\\[").replace("]", "\\]")
+
+
 def _item_md(n, d):
     v = d["verification"]; s = d["source"]
     if d["category"] == "take":
-        lines = [f"### {n}. {d['claim']}",
+        lines = [f"### {n}. {_one(d['claim'])}",
                  f"- **Status:** {LABEL[v['status']]}. Checked: {v['method']}",
-                 f"- **Why it matters:** {d['why_it_matters']}",
-                 f"- **Quote:** \"{' '.join(d['excerpt'].split())}\" ([{d['speaker']}]({d['excerpt_url']}), {d['said_on']})"]
+                 f"- **Why it matters:** {_one(d['why_it_matters'])}",
+                 f"- **Quote:** \"{_one(d['excerpt'])}\" ([{_one(d['speaker'])}]({d['excerpt_url']}), {d['said_on']})"]
         if d.get("try_this"):
             lines.append(f"- **Try this:** {d['try_this']}")
         lines.append(f"- `{d['id']}` · take")

@@ -10,7 +10,8 @@ def _normalize(text):
     return " ".join(text.casefold().split())
 
 
-SPEAKER_WINDOW = 300          # the speaker's name must appear within this many characters of the quote, in the same text
+SPEAKER_WINDOW = 200          # the speaker's name must appear within this many characters before the quote, in the same text
+SPEAKER_AFTER = 80            # or this close after it ('...,' said Ada Builder)
 BYLINE_ZONE = 1000            # or, for the page's own author, in the first this-many characters of the saved page (the byline)
 
 
@@ -33,7 +34,7 @@ def quote_near_speaker(excerpt, speaker, text, window=SPEAKER_WINDOW):
     hay = _normalize(text)
     names = _find(_normalize(speaker), hay)
     # a name inside the quote itself ("Boris Cherny says ...") is someone talking about him, not him talking
-    return any((ne <= qs and ne > qs - window) or (ns >= qe and ns < qe + window)
+    return any((ne <= qs and ne > qs - window) or (ns >= qe and ns < qe + SPEAKER_AFTER)
                for qs, qe in _find(_normalize(excerpt), hay) for ns, ne in names)
 
 
@@ -60,17 +61,16 @@ def date_forms(iso):
 
 
 def date_on_item(iso, item, pages):
-    """The original publication date appears in the item's saved page or summary, or equals the feed entry's date."""
+    """The original publication date appears near the top of the item's saved page, or equals the feed entry's date."""
     try:
         forms = date_forms(iso)
     except (ValueError, IndexError, AttributeError):
         return False
     if str((item or {}).get("published") or "")[:10] == iso:
         return True
-    for t in _texts(item, pages):
-        if any(quote_found(f, t) for f in forms):
-            return True
-    return False
+    # only the page's top (where the byline and date sit), so a date mentioned in the body can't pass as the post's own
+    page = _texts(item, pages)[0] if item and item.get("snapshot") and _texts(item, pages) else ""
+    return any(quote_found(f, page[:BYLINE_ZONE]) for f in forms)
 
 
 def _texts(item, pages):
