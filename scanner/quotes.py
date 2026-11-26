@@ -22,18 +22,25 @@ _TIME_MARK = rf"(?:\({_TIMESTAMP}\)|\[{_TIMESTAMP}\]|{_TIMESTAMP})"
 _EDGE_TIMESTAMP = re.compile(
     rf"^(?P<leading>{_TIME_MARK})(?![0-9])"
     rf"|^[^:]*?(?P<trailing>{_TIME_MARK})(?=\s*(?:\([^()]*\)\s*)?(?::|$))")
-_LABEL_NOTE = re.compile(r"\s*\([^()]*\)$")
+_ROLE_NOTES = re.compile(r"(?:\s*\((?:guest|host|co-host|interviewer|moderator)\))+$", re.IGNORECASE)
+_SUMMARY_NOTE = re.compile(r"\s*\([^()]*\)$")
+_BRACKETED_LABEL = re.compile(r"^([^()\[\]{}]+)[(\[{].*[)\]}]\s*(?::|$)")
 
 
-def turn_labels(text):
+def turn_labels(text, *, summary=False):
     """Map boundary line indices to the start of speech and a normalized speaker name, if shaped like one."""
     boundaries = {}
+    notes = _SUMMARY_NOTE if summary else _ROLE_NOTES
     for i, raw in enumerate(text.splitlines()):
         line = raw.strip()
         if not line:
             continue                  # a blank line never changes who is speaking (labels often sit on their own line)
         colon = line.find(":", 0, _BOUNDARY_CHARS)
         if len(line) > _BOUNDARY_CHARS and colon == -1:
+            # A name followed by a long bracket note can still end the previous turn.
+            bracketed = _BRACKETED_LABEL.match(line) if not summary else None
+            if bracketed and valid_speaker(" ".join(bracketed[1].split())):
+                boundaries[i] = (len(line), None)
             continue
         timestamp = _EDGE_TIMESTAMP.match(line) if colon != -1 else None
         if timestamp:
@@ -43,36 +50,55 @@ def turn_labels(text):
         label = line if colon == -1 else line[:colon]
         if timestamp:
             label = label[:start] + label[end:]
-        label = " ".join(_LABEL_NOTE.sub("", label.rstrip()).split())
+        label = " ".join(notes.sub("", label.rstrip()).split())
         speech_start = len(line) if colon == -1 else colon + 1
         boundaries[i] = (speech_start, _normalize(label) if valid_speaker(label) else None)
     return boundaries
 
 
-def _creditable_labels(boundaries):
+def _creditable_labels(boundaries, minimum=5):
     counts = Counter(label for _, label in boundaries.values() if label is not None)
-    return {label for label, count in counts.items() if count >= 3}
+    return {label: count for label, count in counts.items() if count >= minimum}
+
+
+def _enough_creditable_labels(creditable):
+    return len(creditable) >= 2 and sum(creditable.values()) >= 12
 
 
 def has_turns(boundaries):
-    return len(_creditable_labels(boundaries)) >= 2
+    return _enough_creditable_labels(_creditable_labels(boundaries))
+
+
+def summary_has_turns(text):
+    """Keep the existing feed-summary guard for sources without a transcript snapshot."""
+    return len(_creditable_labels(turn_labels(text, summary=True), minimum=3)) >= 2
 
 
 def quote_in_turn(excerpt, speaker, text):
-    """Match within one speech line before the page's last creditable turn."""
+    """Match one speech line before the last two speech turns, without another creditable name in between."""
     boundaries = turn_labels(text)
     creditable = _creditable_labels(boundaries)
     name = _normalize(speaker)
-    if len(creditable) < 2 or name not in creditable:
+    if name not in creditable or not _enough_creditable_labels(creditable):
         return False
-    last_turn = max(i for i, (_, label) in boundaries.items() if label in creditable)
-    label = None
-    for i, line in enumerate(text.splitlines()[:last_turn]):
-        start = 0
-        if i in boundaries:
-            start, label = boundaries[i]
-        if label == name and quote_found(excerpt, line.strip()[start:]):
-            return True
+    lines = [line.strip() for line in text.splitlines()]
+    ends = list(boundaries)[1:] + [len(lines)]
+    speech_turns = [(i, start, end, label) for (i, (start, label)), end in zip(boundaries.items(), ends)
+                    if label in creditable and (lines[i][start:].strip() or any(lines[i + 1:end]))]
+    other_names = creditable.keys() - {name}
+    needle = _normalize(excerpt)
+    for i, start, end, label in speech_turns[:-2]:
+        if label != name:
+            continue
+        for j in range(i, end):
+            line = _normalize(lines[j])
+            offset = len(_normalize(lines[i][:start])) if j == i else 0
+            matches = _find(needle, line[offset:])
+            if matches:
+                through_quote = _normalize(" ".join(lines[i:j] + [line[:offset + matches[0][1]]]))
+                if not any(_find(other, through_quote) for other in other_names):
+                    return True
+                break
     return False
 
 
@@ -175,7 +201,7 @@ def matches_item(excerpt, item, pages, speaker=None, byline_ok=False):
         return any(quote_near_speaker(excerpt, speaker, t) for t in texts) or bool(
             byline_ok and in_byline(speaker, text) and quote_found(excerpt, text))
     return (is_source_person(speaker, item.get("source")) and not item.get("summary_has_turns")
-            and not has_turns(turn_labels(text)) and quote_near_speaker(excerpt, speaker, text))
+            and not summary_has_turns(text) and quote_near_speaker(excerpt, speaker, text))
 
 
 HTTPS_LINK = re.compile(r"^https://[^\"'<>@/\s]+(?:/[^\"'<>\s]*)?$")      # the same shape mcp/server.mjs httpsOnly() accepts

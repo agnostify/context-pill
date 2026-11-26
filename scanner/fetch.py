@@ -69,7 +69,7 @@ def feed_items(src, feed, since):
                 "title": e.get("title", "").strip(), "url": link, "published": w.isoformat(),
                 "summary": util.html_to_text(desc, 1500)}
         # Preserve turn detection without changing the flattened RSS excerpt used by other callers.
-        if quotes.has_turns(quotes.turn_labels(util.html_to_text(desc, 1500, keep_lines=True))):
+        if quotes.summary_has_turns(util.html_to_text(desc, 1500, keep_lines=True, summary=True)):
             item["summary_has_turns"] = True
         out.append(item)
     return out
