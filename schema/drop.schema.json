@@ -22,7 +22,7 @@
       "properties": {
         "id": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{8}$"},
         "date": {"type": "string", "format": "date"},
-        "category": {"enum": ["release", "tool", "automation", "technique", "research", "prediction"]},
+        "category": {"enum": ["release", "tool", "automation", "technique", "research", "prediction", "take"]},
         "claim": {"type": "string"},
         "why_it_matters": {"type": ["string", "null"]},
         "try_this": {"type": ["string", "null"]},
@@ -42,7 +42,7 @@
         "verification": {
           "type": "object", "required": ["status", "method", "checked_at", "provisional"],
           "properties": {
-            "status": {"enum": ["verified", "docs-verified", "vendor-claim", "face-value-T1", "unverified", "blocked"]},
+            "status": {"enum": ["verified", "docs-verified", "vendor-claim", "face-value-T1", "unverified", "blocked", "attributed"]},
             "method": {"type": "string"}, "checked_at": {"type": "string"},
             "provisional": {"type": "boolean"}, "t1_audit_sample": {"type": "boolean"},
             "audit_verdict": {"enum": ["pass", "fail", "inconclusive", "not run", null]}, "audit_note": {"type": ["string", "null"]}
@@ -50,10 +50,29 @@
         },
         "excerpt": {"type": ["string", "null"], "maxLength": 300},
         "excerpt_url": {"type": ["string", "null"]},
+        "speaker": {"type": "string"},
+        "said_on": {"type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
         "scorable": {"type": "boolean"},
         "prediction_deadline": {"type": ["string", "null"]},
         "state": {"enum": ["pending", "resolved", "corrected", "superseded", "closed-inconclusive"]},
-        "recheck_on": {"type": "string", "format": "date"}
+        "recheck_on": {"type": ["string", "null"], "format": "date"}
+      },
+      "if": {"properties": {"category": {"enum": ["take"]}}},
+      "then": {
+        "required": ["speaker", "said_on", "excerpt", "excerpt_url", "scorable"],
+        "properties": {
+          "recheck_on": {"type": "null"},
+          "excerpt": {"type": "string"},
+          "excerpt_url": {"type": "string"},
+          "scorable": {"enum": [false]},
+          "verification": {"properties": {"status": {"enum": ["attributed"]}}}
+        }
+      },
+      "else": {
+        "properties": {
+          "recheck_on": {"type": "string"},
+          "verification": {"properties": {"status": {"enum": ["verified", "docs-verified", "vendor-claim", "face-value-T1", "unverified", "blocked"]}}}
+        }
       }
     }
   }

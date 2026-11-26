@@ -32,7 +32,7 @@ def main(argv):
     for c in ledger["claims"]:
         if c["id"] not in ids:
             continue
-        if c.get("state") != "resolved" or c.get("resolved_on") != date:
+        if c.get("scorable") is False or c.get("category") == "take" or c.get("state") != "resolved" or c.get("resolved_on") != date:
             skipped.append(f"{c['id']} ({c.get('state')}, resolved_on {c.get('resolved_on')})"); continue
         c["state"] = "pending"
         for k in ("outcome", "resolved_on", "resolution_note", "source_change_flag"):
@@ -58,8 +58,7 @@ def main(argv):
                 cl += line
         for sid in sorted({c["source_id"] for c in reset} & set(srcs)):
             s = srcs[sid]; old = s.get("trust") or {}; was = (old.get("tier"), s.get("enabled"), s.get("audit_demoted"))
-            ev = [{"date": c["resolved_on"], "outcome": c["outcome"], "reversed_on": c.get("reversed_on")} for c in ledger["claims"]
-                  if c["source_id"] == sid and c["state"] in ("resolved", "corrected") and c.get("outcome") in trust.WEIGHTS]
+            ev = trust.claim_events(ledger["claims"], sid)
             if f"- {date}: {s['name']} recovered from audit demotion" in cl and not s.get("audit_demoted"):
                 # the day's run lifted the audit demotion: keep it lifted only if the remaining resolutions still earn it
                 if trust.score(s | {"audit_demoted": True}, ev, today)["audit_demoted"]:

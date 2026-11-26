@@ -344,15 +344,70 @@ test("onMessage results: rows returned for a single successful tools/call only, 
   assert.deepEqual(Object.keys(n).sort(), ["method", "results", "tool"]);
 });
 
-test("descriptions: days and common words are explained, version 0.2.1", async () => {
+test("descriptions: days, common words and builder takes are explained, version 0.3.0", async () => {
   const l = await call({ jsonrpc: "2.0", id: 1, method: "tools/list" }, { "MCP-Protocol-Version": "2025-11-25" });
   const by = Object.fromEntries(l.body.result.tools.map((x) => [x.name, x]));
   assert.match(by.get_latest.description, /up to the last 14 days/);
+  assert.match(by.get_latest.description, /attributed builder takes/);
+  assert.match(by.search_claims.description, /attributed builder takes/);
   assert.deepEqual(by.get_latest.inputSchema.properties.days, { ...by.get_latest.inputSchema.properties.days, type: "integer", minimum: 1, maximum: 14 });
   assert.match(by.search_claims.inputSchema.properties.query.description, /Common words such as 'is', 'the' or 'on' are ignored/);
   const i = await call({ jsonrpc: "2.0", id: 2, method: "initialize", params: { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "t", version: "1" } } });
-  assert.equal(i.body.result.serverInfo.version, "0.2.1"); assert.match(i.body.result.instructions, /up to the last 14 days/);
+  assert.equal(i.body.result.serverInfo.version, "0.3.0"); assert.match(i.body.result.instructions, /up to the last 14 days/);
+  assert.match(i.body.result.instructions, /Builder takes are attributed opinions/);
   for (const x of Object.values(by)) assert.doesNotMatch(JSON.stringify(x), /\u2014/);
+});
+
+test("builder takes follow all checked claims under the same limit and use attribution in search", async () => {
+  const take = item("t1", "Claude builder tip", "attributed", {
+    category: "take", speaker: "Ada Builder", said_on: "2026-11-17",
+    excerpt: "Start with one example.", excerpt_url: "https://src.example/tip",
+    recheck_on: null, scorable: false,
+    verification: { status: "attributed", method: "quote matched on the linked page" },
+  });
+  const today = [take, item("c1", "Claude release today", "verified"), item("u1", "Claude rumor", "unverified")];
+  const f = feed({
+    "2026-11-21": today,
+    "2026-11-20": [item("c2", "Claude release yesterday", "docs-verified")],
+  }, {
+    "latest.json": drop("2026-11-21", today),
+    "ledger/claims.json": { claims: [
+      { ...take, date: "2026-11-21", status_at_publication: "attributed", state: "pending", source_id: "ada" },
+      { date: "2026-11-20", claim: "Claude release yesterday", category: "release", status_at_publication: "verified", outcome: "good" },
+    ] },
+  });
+  const latest = (await tool(f, "get_latest", { limit: 2 })).text;
+  assert.match(latest, /1 checked claims from 12 items read \(1 more listed as not verified[^\n]+1 builder take with attribution checked/);
+  assert.match(latest, /1\. Claude release today[\s\S]*Builder takes \(opinion; attribution checked\):\n\n2\. Claude builder tip/);
+  assert.match(latest, /status: opinion; attribution checked[\s\S]*"Start with one example\." \(Ada Builder, 2026-11-17\) · https:\/\/src\.example\/tip/);
+  assert.doesNotMatch(latest.split("Builder takes (")[1], /re-check/);
+  assert.doesNotMatch((await tool(f, "get_latest", { limit: 1 })).text, /Claude builder tip/);
+  assert.match((await tool(f, "get_latest", { topic: "Ada Builder" })).text, /1\. Claude builder tip/);
+
+  const window = (await tool(f, "get_latest", { days: 2, limit: 2 })).text;
+  assert.match(window, /1\. Claude release today[\s\S]*2\. Claude release yesterday/);
+  assert.doesNotMatch(window, /Claude builder tip/);
+  assert.match((await tool(f, "get_latest", { days: 2, limit: 3 })).text,
+    /2\. Claude release yesterday[\s\S]*Builder takes \(opinion; attribution checked\):[\s\S]*3\. Claude builder tip/);
+
+  const search = (await tool(f, "search_claims", { query: "claude" })).text;
+  assert.match(search, /Claude builder tip\n   status at publication: opinion; attribution checked\n   how it was checked: quote matched on the linked page/);
+  assert.doesNotMatch(search.split("2. [2026-11-20]")[0], /re-check outcome|current state/);
+  assert.match(search, /Claude release yesterday[\s\S]*re-check outcome: good/);
+  assert.match((await tool(f, "search_claims", { query: "ada example" })).text, /1 claim\(s\) match/);
+
+  const method = await rawCall({ jsonrpc: "2.0", id: 1, method: "resources/read", params: { uri: "contextpill://method" } }, { fetchText: f.fetchText });
+  assert.match(method.body.result.contents[0].text, /- attributed \(opinion; attribution checked\)\n/);
+  const latestResource = await rawCall({ jsonrpc: "2.0", id: 1, method: "resources/read", params: { uri: "contextpill://latest" } }, { fetchText: f.fetchText, now: NOON_NOV21 });
+  assert.match(latestResource.body.result.contents[0].text, /Builder takes \(opinion; attribution checked\)/);
+});
+
+test("list_sources shows an enabled new source at Tier 3 before the first scan", async () => {
+  const yaml = "sources:\n- id: new\n  name: New Builder\n  home_url: https://new.example\n  seed: false\n  enabled: true\n" +
+    "- id: queued\n  name: Queued Builder\n  home_url: https://queued.example\n  seed: false\n  enabled: false\n";
+  const { text } = await tool(filesFeed({ "sources.yaml": yaml }), "list_sources", {});
+  assert.match(text, /New Builder \(https:\/\/new\.example\): tier T3, trust pending first scan/);
+  assert.doesNotMatch(text, /Queued Builder/);
 });
 
 test("get_latest days: an unreadable day is named apart from a held day, and a full outage is an error", async () => {

@@ -3,8 +3,10 @@ Checks every file in the repo (no exemptions): no secrets, nothing from X (no X/
 no maintainer-private text. Private patterns live OUTSIDE the repo ($CP_PRIVATE_PATTERNS, default
 $CP_WORK/private-patterns.txt), so the public code never contains them. Also validates latest.json and every
 daily/weekly archive JSON against schema/drop.schema.json, quote length/attribution, and the tool-status ceiling."""
+import datetime as dt
 import json, os, re
 from pathlib import Path
+from . import quotes
 
 ALLOWED_TOP = {"README.md", "llms.txt", "latest.md", "latest.json", "breaking.json", "breaking.md", "daily", "weekly", "scanner", "sources.yaml", "schema", "METHOD.md",
                "CHANGELOG-sources.md", "TAKEDOWN.md", "skill", "LICENSE", "LICENSE-CONTENT", "ledger", "feedback", ".gitignore", ".git",
@@ -15,6 +17,7 @@ SECRET = [r"sk-[A-Za-z0-9_-]{20,}", r"sk-ant-[A-Za-z0-9_-]{10,}", r"gh[pousr]_[A
 XPAT = [r"https?://([a-z0-9-]+\.)*(x|twitter)\.com/[^\s)\"']+", r"https?://t\.co/\w+", r"/status(es)?/\d{10,}"]
 TOOL_CATS = ("tool", "automation")
 CHECKED = ("verified", "docs-verified", "vendor-claim", "face-value-T1")
+TAKE_METHOD = "quote matched on the linked page"
 
 
 def private_patterns():
@@ -41,7 +44,7 @@ def scan_text(rel, t, private):
     return out
 
 
-# --- minimal JSON Schema subset validator (type, required, enum, properties, items, $ref, pattern, maxLength, minimum)
+# --- minimal JSON Schema subset validator (type, required, enum, properties, items, $ref, pattern, maxLength, minimum, if/then/else)
 _T = {"string": str, "integer": int, "number": (int, float), "boolean": bool, "object": dict, "array": list, "null": type(None)}
 
 
@@ -74,11 +77,41 @@ def _validate(x, sch, root, path, out):
             out.append(f"{path}: too long")
     if isinstance(x, (int, float)) and not isinstance(x, bool) and "minimum" in sch and x < sch["minimum"]:
         out.append(f"{path}: below minimum")
+    if "if" in sch:
+        condition = []
+        _validate(x, sch["if"], root, path, condition)
+        _validate(x, sch.get("else" if condition else "then", {}), root, path, out)
+
+
+def valid_attribution(d):
+    speaker, said_on = d.get("speaker"), d.get("said_on")
+    if not isinstance(speaker, str) or not speaker.strip() or not isinstance(said_on, str):
+        return False
+    try:
+        return dt.date.fromisoformat(said_on).isoformat() == said_on
+    except ValueError:
+        return False
+
+
+def check_take(d, pid):
+    v = d.get("verification") or {}
+    if d.get("category") != "take":
+        return [f"{pid}: attributed status is only for takes"] if v.get("status") == "attributed" else []
+    out = []
+    if v.get("status") != "attributed" or v.get("method") != TAKE_METHOD:
+        out.append(f"{pid}: take must have attributed status and the quote-check method")
+    if not valid_attribution(d):
+        out.append(f"{pid}: take needs a named speaker and original publication date (YYYY-MM-DD)")
+    if not quotes.valid_excerpt(d.get("excerpt")) or not d.get("excerpt_url") or d["excerpt_url"] != d.get("item_url"):
+        out.append(f"{pid}: take needs a quote of 25 words and 300 characters or fewer linked to the item")
+    if d.get("scorable") is not False or d.get("recheck_on") is not None or v.get("t1_audit_sample") or v.get("audit_verdict") is not None:
+        out.append(f"{pid}: takes cannot be scored, re-checked or audited")
+    return out
 
 
 def check_item(d, where):
-    out = []
     pid = f"{where}:{d.get('id')}"
+    out = check_take(d, pid)
     src = d.get("source") or {}
     if not src.get("home_url") or not src.get("name"):
         out.append(f"{pid}: missing attribution")
@@ -87,12 +120,13 @@ def check_item(d, where):
         out.append(f"{pid}: checked status without evidence")
     if d.get("category") in TOOL_CATS and v.get("status") == "verified" and not d.get("smoke_test_log"):
         out.append(f"{pid}: tool/automation marked verified without a smoke-test log (ceiling is docs-verified)")
-    if v.get("status") not in CHECKED and d.get("try_this") and d["try_this"] != "not recommended: terms risk":
+    attributed_take = d.get("category") == "take" and v.get("status") == "attributed"
+    if v.get("status") not in CHECKED and not attributed_take and d.get("try_this") and d["try_this"] != "not recommended: terms risk":
         out.append(f"{pid}: actionable try-this step on an unverified/blocked item")
     if v.get("status") == "face-value-T1" and (d.get("category") in TOOL_CATS or v.get("provisional") or not str(src.get("tier", "")).startswith("T1")):
         out.append(f"{pid}: face-value-T1 on a tool/automation, a provisional item or a non-T1 source")
     if d.get("excerpt"):
-        if len(d["excerpt"].split()) > 25:
+        if isinstance(d["excerpt"], str) and len(d["excerpt"].split()) > 25:
             out.append(f"{pid}: quote over 25 words")
         if not d.get("excerpt_url"):
             out.append(f"{pid}: quote without a source URL")
@@ -148,8 +182,10 @@ def check(repo, require_private=False):
     lp =repo / "ledger" / "claims.json"
     if lp.exists():
         for c in json.loads(lp.read_text()).get("claims", []):
-            if c.get("excerpt") and (len(c["excerpt"].split()) > 25 or not c.get("excerpt_url")):
-                problems.append(f"ledger:{c['id']}: quote over 25 words or without URL")
+            pid = f"ledger:{c['id']}"
+            problems += check_take(c, pid)
+            if c.get("excerpt") and (not quotes.valid_excerpt(c["excerpt"]) or not c.get("excerpt_url")):
+                problems.append(f"{pid}: quote over 25 words or 300 characters, invalid or without URL")
     return problems
 
 

@@ -1,0 +1,188 @@
+"""Offline fixture for builder takes, from saved extraction output to the public drop and ledger."""
+import json
+import shutil
+import sys
+import tempfile
+from collections import Counter
+from pathlib import Path
+from unittest import mock
+
+import yaml
+
+from scanner import extract, gate, quotes, run, trust, util
+
+DAY = "2026-11-25"
+SPEAKER = "Ada Builder"
+EXCERPT = "Give the coding agent one example first."
+
+
+def take(url, claim, sid="builder", **fields):
+    return {
+        "category": "take", "source_id": sid, "item_url": url, "claim": claim,
+        "speaker": SPEAKER, "said_on": "2026-11-18", "excerpt": EXCERPT, "excerpt_url": url,
+        "verification": {"status": "attributed"}, "try_this": "Write one example.",
+    } | fields
+
+
+def take_id(c):
+    return DAY + "-" + format(run._h(f"{c['source_id']}|{c['item_url']}|{c['claim']}|take|{c['speaker']}"), "x")[:8]
+
+
+def fixture(root, source_ids=("builder",)):
+    repo = root / "repo"
+    work = root / "work"
+    raw = work / "raw" / DAY
+    (raw / "pages").mkdir(parents=True)
+    (repo / "ledger").mkdir(parents=True)
+    shutil.copytree(Path(__file__).resolve().parents[2] / "schema", repo / "schema")
+    sources = [{"id": sid, "name": sid, "home_url": "https://builder.example", "kind": "expert",
+                "enabled": True, "seed": sid == "builder", "feeds": []} for sid in source_ids]
+    (repo / "sources.yaml").write_text(yaml.safe_dump({"sources": sources}))
+    (repo / "CHANGELOG-sources.md").write_text("# Source changes\n")
+    return repo, work, raw
+
+
+def publish(repo, work, raw, claims, items):
+    (raw / "claims.raw.json").write_text(json.dumps(claims))
+    (raw / "items.json").write_text(json.dumps(items))
+    with mock.patch.object(run, "REPO", repo), mock.patch.object(run, "WORK", work), \
+         mock.patch.object(sys, "argv", ["run", "--date", DAY, "--skip-extract"]), \
+         mock.patch.object(util, "get", side_effect=AssertionError("unexpected network request")), \
+         mock.patch.object(util, "url_alive", return_value=(True, 200)) as alive, \
+         mock.patch.object(extract, "run_llm", side_effect=AssertionError("unexpected model call")), \
+         mock.patch.object(extract, "audit", return_value={}) as audit:
+        assert run.main() == 0
+    drop = json.loads((repo / "latest.json").read_text())["items"]
+    ledger = json.loads((repo / "ledger" / "claims.json").read_text())
+    return drop, ledger, alive, audit
+
+
+def test_quotes():
+    assert quotes.quote_found('She said "don\'t ship - yet"', "SHE said \u201cdon\u2019t\n ship \u2014 yet\u201d.")
+    assert quotes.quote_found("AI", "\uff21\uff29")
+    assert not quotes.quote_found("test", "contest testing")
+    assert not quotes.quote_found("one example", "one short example")
+    assert not quotes.quote_found("", EXCERPT)
+    with tempfile.TemporaryDirectory() as tmp:
+        pages = Path(tmp)
+        path = pages / "page.txt"
+        item = {"snapshot": str(path), "summary": EXCERPT}
+        assert not quotes.matches_item(EXCERPT, item, pages)
+        path.write_bytes(b"\xff")
+        assert not quotes.matches_item(EXCERPT, item, pages)
+        path.write_text("x " * 12000 + EXCERPT)
+        assert not quotes.matches_item(EXCERPT, item | {"summary": "x " * 750 + EXCERPT}, pages)
+        assert quotes.matches_item(EXCERPT, item, pages)
+
+
+def test_publication():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, work, raw = fixture(Path(tmp), ("builder", "second"))
+        url = "https://builder.example/post"
+        snapshot = raw / "pages" / "page.txt"
+        snapshot.write_text(f"By {SPEAKER}. Originally published November 18, 2026. {EXCERPT}")
+        items = [{"source_id": "builder", "url": url, "snapshot": str(snapshot), "published": DAY, "summary": ""}]
+        good = take(url, "Start with an example when prompting a coding agent")
+        missing_quote = take(url, "The unsupported quotation", excerpt="This was never said.")
+        no_quote = take(url, "A missing quotation", excerpt=None)
+        unnamed_guest = take(url, "An unnamed guest tip", speaker=None)
+        invented_guest = take(url, "A misattributed guest tip", speaker="Unknown Guest")
+        other_url = take(url, "A quote attached to the wrong page", excerpt_url=url + "-other")
+        other_source = take(url, "A quote attached to the wrong source", sid="second")
+        fact = take(url, "Example mode shipped in 1.2", category="release", excerpt="Fabricated quotation.",
+                    verification={"status": "verified", "method": "release notes"},
+                    evidence=[{"url": url + "-release-notes", "kind": "primary"}])
+        claims = [missing_quote, no_quote, unnamed_guest, invented_guest, other_url, other_source, good, fact]
+        drop, ledger, alive, audit = publish(repo, work, raw, claims, items)
+        assert [d["category"] for d in drop] == ["release", "take"], drop
+        checked, opinion = drop
+        assert checked["excerpt"] is None and checked["excerpt_url"] is None
+        assert checked["verification"]["status"] == "verified" and checked["scorable"]
+        assert opinion["speaker"] == SPEAKER and opinion["said_on"] == "2026-11-18"
+        assert opinion["excerpt"] == EXCERPT and opinion["excerpt_url"] == url
+        assert opinion["verification"]["status"] == "attributed" and opinion["verification"]["method"] == gate.TAKE_METHOD
+        assert opinion["try_this"] == good["try_this"] and opinion["scorable"] is False and opinion["recheck_on"] is None
+        assert [x["id"] for x in audit.call_args.args[0]] == [checked["id"]]
+        alive.assert_called_once_with(fact["evidence"][0]["url"])
+        saved = next(c for c in ledger["claims"] if c["category"] == "take")
+        assert saved["speaker"] == SPEAKER and saved["said_on"] == opinion["said_on"]
+        assert saved["status_at_publication"] == "attributed"
+        log = (raw / "run.log").read_text()
+        assert log.count("quote not found") == 5 and "named speaker" in log
+        assert take_id(missing_quote) in log
+        md = (repo / "latest.md").read_text()
+        assert "1 checked claims below, 0 listed as not verified." in md
+        checked_md, take_md = md.split("## Builder takes (opinion; we checked who said it, not whether it's right)")
+        assert "## Checked claims" in checked_md and "re-check" not in take_md
+        assert f'"{EXCERPT}" ([{SPEAKER}]({url}), 2026-11-18)' in take_md
+        assert not gate.check_item(opinion, "fixture")
+        assert any("only for takes" in p for p in gate.check_item(opinion | {"category": "release"}, "fixture"))
+        for fields in ({"excerpt": "x" * 301}, {"excerpt": "word " * 26}, {"said_on": "2026-02-30"}, {"speaker": " "}):
+            assert gate.check_item(opinion | fields, "fixture"), fields
+        schema = json.loads((repo / "schema" / "drop.schema.json").read_text())
+        errors = []
+        gate._validate(checked | {"recheck_on": None}, schema["$defs"]["item"], schema, "fixture", errors)
+        assert errors == ["fixture.recheck_on: wrong type"], errors
+        print("fixture: attributed take published; missing quote rejected; checked fact kept with its invalid excerpt removed")
+
+
+def test_extraction_stages_items_without_missing_snapshots():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, work, raw = fixture(Path(tmp))
+        stage = Path(tmp) / "stage"
+        stage.mkdir()
+        item = {"source_id": "builder", "snapshot": str(raw / "pages" / "missing.txt"), "summary": EXCERPT}
+
+        def fake_extractor(_prompt, cwd, *, stdout, **_kwargs):
+            assert json.loads((cwd / "items-for-llm.json").read_text()) == [{"source_id": "builder", "summary": EXCERPT}]
+            stdout.write("===JSON===\n[]\n===END===\n")
+
+        with mock.patch.object(extract, "stage", return_value=stage), mock.patch.object(extract, "run_llm", fake_extractor):
+            assert extract.extract([item], repo, work, DAY, lambda _: None, 41) == []
+
+
+def test_caps_and_audit_paths():
+    with tempfile.TemporaryDirectory() as tmp:
+        sources = ("builder", "second", "third", "fourth", "fifth")
+        repo, work, raw = fixture(Path(tmp), sources)
+        claims, items = [], []
+        for sid in sources:
+            for n in range(3):
+                url = f"https://builder.example/{sid}/{n}"
+                claims.append(take(url, f"Tip {n} from {sid}", sid=sid))
+                items.append({"source_id": sid, "url": url, "summary": f"{SPEAKER}: {EXCERPT}"})
+        cached_take = take_id(claims[0])
+        replacement_take = take_id(claims[1])
+        capped_take = take_id(claims[2])
+        audit_path = raw / "audit.result.json"
+        audit_path.write_text(json.dumps({
+            cached_take: {"verdict": "fail", "source_id": "builder", "tier": "T1"},
+            capped_take: {"verdict": "fail", "source_id": "builder", "tier": "T1"},
+            DAY + "-12345678": {"superseded_by": replacement_take},
+        }))
+        for _ in range(2):  # includes a rerun from today's ledger and cached audit
+            drop, ledger, alive, audit = publish(repo, work, raw, claims, items)
+            assert Counter(d["source"]["id"] for d in drop) == dict.fromkeys(sources[:4], 2)
+            assert {cached_take, replacement_take} <= {d["id"] for d in drop}
+            assert not ledger["audits"]
+            assert not ({cached_take, capped_take} & json.loads(audit_path.read_text()).keys())
+            assert all(d["verification"]["audit_verdict"] is None and not d["verification"]["t1_audit_sample"] for d in drop)
+            audit.assert_not_called()
+            alive.assert_not_called()
+            registry = yaml.safe_load((repo / "sources.yaml").read_text())
+            assert registry["sources"][0]["trust"]["tier"] == "T1-seed"
+            assert "T1" not in registry["tightened"]
+            assert all((t["alpha"], t["beta"], t["resolved_tips"], t["scorable_claims"]) == (2, 2, 0, 0)
+                       for t in (s["trust"] for s in registry["sources"]))
+        log = (raw / "run.log").read_text()
+        assert f"builder: take cap reached: {capped_take}" in log and "fifth: take cap reached" in log
+        bad_events = [c | {"state": "resolved", "outcome": "bad", "resolved_on": DAY} for c in ledger["claims"]]
+        assert trust.claim_events(bad_events, "builder") == []
+
+
+if __name__ == "__main__":
+    test_quotes()
+    test_extraction_stages_items_without_missing_snapshots()
+    test_publication()
+    test_caps_and_audit_paths()
+    print("takes tests: OK")

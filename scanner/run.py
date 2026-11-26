@@ -3,15 +3,18 @@
 Usage: python -m scanner.run [--date YYYY-MM-DD] [--hours 36] [--skip-extract]
 Repo (public) = this checkout. Work dir (private, never pushed) = $CP_WORK or ../context-pill-work."""
 import argparse, json, os, hashlib, datetime as dt
+from collections import Counter
 from pathlib import Path
 import yaml
-from . import fetch, extract, trust, render, gate, util, repeats, notes
+from . import fetch, extract, trust, render, gate, util, repeats, notes, quotes
 
 REPO = Path(__file__).resolve().parent.parent
 WORK = Path(os.environ.get("CP_WORK", REPO.parent / "context-pill-work"))
 START_DATE = dt.date(2026, 10, 16)          # day 1 of the scanner (provisional period = days 1-14)
 CHECKED = ("verified", "docs-verified", "vendor-claim", "face-value-T1")
 SCORABLE_CATS = ("release", "tool", "automation", "technique", "research", "prediction")
+TAKE_KINDS = ("expert", "lab-leader", "creator", "lab")
+TAKE_PER_SOURCE, TAKE_PER_DAY = 2, 8
 AUDIT_RATE = 10                              # 1 in 10 T1 items (deterministic by item id), at least 1 per day if any
 
 
@@ -70,6 +73,7 @@ def main():
     lp = REPO / "ledger" / "claims.json"
     ledger = json.loads(lp.read_text()) if lp.exists() else {"started": START_DATE.isoformat(), "claims": [], "audits": []}
     ledger.setdefault("audits", [])
+    non_scorable_ids = {c["id"] for c in ledger["claims"] if c.get("scorable") is False or c.get("category") == "take"}
     log(f"start {date} (scanner day {day_no}); {len(ledger['claims'])} claims in ledger")
     if not a.skip_extract and (raw / "claims.raw.json").exists():
         # feeds are fetched once a day, so a second full run would see no items and overwrite the day's drop with nothing
@@ -77,7 +81,8 @@ def main():
         return 3
 
     # 1. resolution of claims due today (14 days after publication, or prediction deadline + 14)
-    due = [c for c in ledger["claims"] if c["state"] == "pending" and c.get("scorable") and c["recheck_on"] <= date]
+    due = [c for c in ledger["claims"] if c["state"] == "pending" and c.get("scorable") and c["id"] not in non_scorable_ids
+           and c["recheck_on"] <= date]
     res = extract.resolve([{"id": c["id"], "claim": c["claim"], "evidence": c["evidence"], "category": c["category"]} for c in due], WORK, date, log)
     res, why = notes.split(res, "outcome", notes.OUTCOMES, keep=(notes.CHANGE_FLAG,))   # an invalid outcome is not judged; model text stays in WORK
     for c in due:
@@ -109,19 +114,17 @@ def main():
     # 2. trust update; apply drop, audit demotion/recovery, and per-tier tightening (>1 audit error in the last 20)
     def update_tightening():
         for base in ("T1", "T2"):
-            last = [x for x in ledger["audits"] if not x.get("removed") and (x.get("tier") or "").split("-")[0] == base and x["verdict"] in ("pass", "fail")][-20:]
+            last = [x for x in ledger["audits"] if not x.get("removed") and x["item_id"] not in non_scorable_ids
+                    and (x.get("tier") or "").split("-")[0] == base and x["verdict"] in ("pass", "fail")][-20:]
             if sum(x["verdict"] == "fail" for x in last) > 1 and base not in reg["tightened"]:
                 reg["tightened"][base] = date
                 changelog(f"{base} research criterion tightened one level (>1 audit error in the last 20) until the next monthly review")
         return set(reg["tightened"])
     tightened = update_tightening()
-    def events_for(sid):
-        return [{"date": c["resolved_on"], "outcome": c["outcome"], "reversed_on": c.get("reversed_on")}
-                for c in ledger["claims"] if c["source_id"] == sid and c["state"] in ("resolved", "corrected") and c.get("outcome") in trust.WEIGHTS]
     def rescore(s):
         prev = (s.get("trust") or {}).get("tier")
         old = s.get("trust") or {}
-        t = trust.score(s, events_for(s["id"]), today)
+        t = trust.score(s, trust.claim_events(ledger["claims"], s["id"]), today)
         if s.get("audit_demoted") and not t["audit_demoted"]:
             s["audit_demoted"] = False; changelog(f"{s['name']} recovered from audit demotion (15+ resolved since, LB10 >= 0.80)")
         t.pop("audit_demoted", None)
@@ -160,53 +163,88 @@ def main():
             s["trust"]["items_seen"] = sum(s["trust"]["items_seen_by_date"].values())
 
     # 4. publication checks: allowed source, cross-day dedupe, evidence alive, quote rules, tool ceiling, ids, recheck dates
-    earlier_items = {c.get("item_url") for c in ledger["claims"] if c["date"] < date}
-    stories = repeats.earlier_stories(ledger, date, log=log)  # cross-day repeat-story check (same story, different URL)
-    same_day = repeats.SameDay()
+    earlier_items = {(c.get("item_url"), c.get("category") == "take") for c in ledger["claims"] if c["date"] < date}
+    earlier_stories = repeats.earlier_stories(ledger, date, log=log)
+    stories = {False: [], True: []}
+    for story in earlier_stories:
+        stories[story.get("take", False)].append(story)
+    same_day = {False: repeats.SameDay(), True: repeats.SameDay()}
+    item_by_source_url = {(i["source_id"], i.get("url")): i for i in items}
     removed = {t["id"] for t in ledger.get("removed", [])}         # scanner.remove tombstones survive rebuilds
     drop, rejected = [], []
+    take_counts, take_ids = Counter(), set()
     maybe_repeats = []                                            # kept but flagged; the review step reads raw/<date>/repeat-flags.json
     for c in claims:
-        s = srcs.get(c.get("source_id"))
+        sid, category, item_url = c.get("source_id"), c.get("category"), c.get("item_url")
+        is_take = category == "take"
+        key = f"{sid}|{item_url}|{c.get('claim')}"
+        if is_take:
+            key += f"|take|{c.get('speaker')}"
+        cid = date + "-" + format(_h(key), "x")[:8]
+        if is_take:
+            non_scorable_ids.add(cid)
+        s = srcs.get(sid)
         if not s or not s.get("enabled") or (s.get("trust") or {}).get("tier") == "drop":
             rejected.append(f"{c.get('source_id')}: source not enabled"); continue
-        if c.get("category") not in SCORABLE_CATS:
-            rejected.append(f"{c.get('source_id')}: category {c.get('category')!r}"); continue
-        if c.get("item_url") and c["item_url"] in earlier_items:
+        if not is_take and category not in SCORABLE_CATS:
+            rejected.append(f"{sid}: category {category!r}"); continue
+        v = c.get("verification") or {}
+        if is_take:
+            if s.get("kind") not in TAKE_KINDS or v.get("status") != "attributed" or not gate.valid_attribution(c):
+                rejected.append(f"{sid}: take without eligible source, attributed status, named speaker or original publication date"); continue
+        elif v.get("status") == "attributed":
+            rejected.append(f"{sid}: attributed status is only for takes"); continue
+        excerpt, excerpt_url = c.get("excerpt"), c.get("excerpt_url")
+        if is_take or excerpt is not None:
+            item = item_by_source_url.get((sid, excerpt_url)) if notes.usable_url(excerpt_url) else None
+            if (is_take and excerpt_url != item_url) or not quotes.matches_item(excerpt, item, raw / "pages", c.get("speaker") if is_take else None):
+                if is_take:
+                    rejected.append(f"{sid}: quote not found: {cid}"); continue
+                c["excerpt"] = c["excerpt_url"] = None
+        if is_take and cid not in removed:
+            if cid in take_ids:
+                rejected.append(f"{sid}: same-day duplicate take: {cid}"); continue
+            if take_counts[sid] >= TAKE_PER_SOURCE or len(take_ids) >= TAKE_PER_DAY:
+                rejected.append(f"{sid}: take cap reached: {cid}"); continue
+        if item_url and (item_url, is_take) in earlier_items:
             rejected.append(f"{c['source_id']}: item already covered on an earlier day"); continue
-        c["evidence"] = [e for e in c.get("evidence", []) if e.get("url") and not util.blocked(e["url"])]
-        cid = date + "-" + format(_h(f"{s['id']}|{c.get('item_url')}|{c['claim']}"), "x")[:8]
+        c["evidence"] = ([{"url": excerpt_url, "kind": "primary"}] if is_take else
+                         [e for e in c.get("evidence", []) if e.get("url") and not util.blocked(e["url"])])
         if cid not in removed:                       # a tombstoned claim is dropped below and must not block another one
             what = f"{cid} ({c.get('item_url')}) {(c.get('claim') or '')[:80]!r}"
-            rep = repeats.find_repeat(c, stories)
+            rep = repeats.find_repeat(c, stories[is_take])
             if rep and rep[2]:
                 rejected.append(f"{c['source_id']}: repeat story: {what}: {rep[1]}"); continue
-            dup = same_day.check(c)
+            dup = same_day[is_take].check(c)
             if dup and dup[1]:
                 rejected.append(f"{c['source_id']}: same-day duplicate: {what}: {dup[0]}"); continue
             for m in ([rep[1]] if rep else []) + ([dup[0]] if dup else []):
                 maybe_repeats.append({"id": cid, "item_url": c.get("item_url"), "claim": c.get("claim"), "match": m})
                 log(f"possible repeat (kept, for review): {what}: {m}")
-            same_day.add(c)
-        alive = [util.url_alive(e["url"])[0] for e in c["evidence"]]
-        v = c.setdefault("verification", {})
-        if not c["evidence"] or any(x is False for x in alive):
-            if v.get("status") in CHECKED:
-                v["status"] = "unverified"; v["method"] = (v.get("method", "") + "; evidence link failed our check").strip("; ")
-        if c.get("category") in ("tool", "automation") and v.get("status") == "verified" and not c.get("smoke_test_log"):
-            v["status"] = "docs-verified"; v["method"] = v.get("method", "") + " (capped: no sandbox smoke test)"
-        if v.get("status") == "face-value-T1" and (day_no <= trust.PROVISIONAL_DAYS or not s["trust"]["tier"].startswith("T1") or "T1" in tightened
-                                                   or c.get("category") in ("tool", "automation")):
-            v["status"] = "unverified"; v["method"] = v.get("method", "") + " (face value not allowed for this source today)"
-        if c.get("excerpt") and (len(c["excerpt"].split()) > 25 or not c.get("excerpt_url") or util.blocked(c.get("excerpt_url") or "")):
-            c["excerpt"] = None; c["excerpt_url"] = None
+            same_day[is_take].add(c)
+            if is_take:
+                take_counts[sid] += 1
+                take_ids.add(cid)
+        if is_take:
+            v["method"] = gate.TAKE_METHOD
+        else:
+            alive = [util.url_alive(e["url"])[0] for e in c["evidence"]]
+            if not c["evidence"] or any(x is False for x in alive):
+                if v.get("status") in CHECKED:
+                    v["status"] = "unverified"; v["method"] = (v.get("method", "") + "; evidence link failed our check").strip("; ")
+            if category in ("tool", "automation") and v.get("status") == "verified" and not c.get("smoke_test_log"):
+                v["status"] = "docs-verified"; v["method"] = v.get("method", "") + " (capped: no sandbox smoke test)"
+            if v.get("status") == "face-value-T1" and (day_no <= trust.PROVISIONAL_DAYS or not s["trust"]["tier"].startswith("T1") or "T1" in tightened
+                                                       or category in ("tool", "automation")):
+                v["status"] = "unverified"; v["method"] = v.get("method", "") + " (face value not allowed for this source today)"
         t = s["trust"]
         # METHOD.md: every specific, checkable claim (release, tool, technique, research number, dated prediction) is scorable
-        c["scorable"] = True
-        base = dt.date.fromisoformat(c["prediction_deadline"]) if c.get("prediction_deadline") else today
+        c["scorable"] = category != "take"
+        deadline = c.get("prediction_deadline") if c["scorable"] else None
+        base = dt.date.fromisoformat(deadline) if deadline else today
         drop.append({
             "id": cid, "date": date, "category": c["category"], "claim": c["claim"], "why_it_matters": c.get("why_it_matters"),
-            "try_this": c.get("try_this") if v.get("status") in CHECKED or c.get("try_this") == "not recommended: terms risk" else None,
+            "try_this": c.get("try_this") if is_take or v.get("status") in CHECKED or c.get("try_this") == "not recommended: terms risk" else None,
             "source": {"id": s["id"], "name": s["name"], "home_url": s["home_url"], "tier": t["tier"], "trust_mean": t["trust_mean"],
                        "lb10": t["lb10"], "seed": bool(s.get("seed"))},
             "also_seen_in": [srcs[x]["name"] for x in c.get("also_seen_in", []) if x in srcs and x != s["id"]],
@@ -214,8 +252,9 @@ def main():
             "verification": {"status": v.get("status", "unverified"), "method": v.get("method", ""), "checked_at": dt.datetime.now().astimezone().isoformat(timespec="minutes"),
                              "provisional": day_no <= trust.PROVISIONAL_DAYS, "t1_audit_sample": False, "audit_verdict": None, "audit_note": None},
             "excerpt": c.get("excerpt"), "excerpt_url": c.get("excerpt_url"),
-            "scorable": True, "prediction_deadline": c.get("prediction_deadline"),
-            "state": "pending", "recheck_on": (base + dt.timedelta(days=trust.RECHECK_DAYS)).isoformat()})
+            "scorable": c["scorable"], "prediction_deadline": deadline,
+            "state": "pending", "recheck_on": (base + dt.timedelta(days=trust.RECHECK_DAYS)).isoformat() if c["scorable"] else None}
+            | ({"speaker": c["speaker"], "said_on": c["said_on"]} if is_take else {}))
     rejected += [f"{d['source']['id']}: {d['id']} was removed by the maintainer" for d in drop if d["id"] in removed]
     drop = [d for d in drop if d["id"] not in removed]
     for r in rejected:
@@ -227,7 +266,7 @@ def main():
     def start_tier(d):
         sx = srcs[d["source"]["id"]]
         return sx.get("audit_demoted_from") if sx.get("audit_demoted_on") == date else d["source"]["tier"]
-    t1 = [d for d in drop if (start_tier(d) or "").startswith("T1") and d["verification"]["status"] in CHECKED]
+    t1 = [d for d in drop if d["scorable"] and (start_tier(d) or "").startswith("T1") and d["verification"]["status"] in CHECKED]
     sample = [d for d in t1 if _h(d["id"]) % AUDIT_RATE == 0] or sorted(t1, key=lambda d: _h(d["id"]))[:1]
     ares_p = raw / "audit.result.json"
     # audit.result.json keeps only the verdict, source_urls and the fields below (superseded_by is set by the maintainer; cause too,
@@ -235,6 +274,7 @@ def main():
     AKEEP = ("cause", "cause_by", "superseded_by", "source_id", "tier", "evidence_url")
     araw = json.loads(ares_p.read_text()) if (a.skip_extract and ares_p.exists()) else {}
     ares, why = notes.split(araw, "verdict", notes.VERDICTS, AKEEP)
+    ares = {k: r for k, r in ares.items() if k not in non_scorable_ids}
     notes.save_reasoning(raw / "audit.reasoning.json", why)
     # an entry with an invalid verdict is re-audited, but its maintainer fields are kept (and written back with the new verdict)
     # (an auditor-set cause is not the maintainer's: the re-audit decides it again; any other cause is the maintainer's)
@@ -242,10 +282,10 @@ def main():
     def mfields(r):
         return {f: r[f] for f in MKEEP if r.get(f) and not (f == "cause" and notes.auditor_set_cause(r))}
     held = {k: mfields(r) for k, r in (araw.items() if isinstance(araw, dict) else ())
-            if isinstance(k, str) and isinstance(r, dict) and k not in ares and mfields(r)}
+            if isinstance(k, str) and isinstance(r, dict) and k not in ares and k not in non_scorable_ids and mfields(r)}
     # a claim rewritten after a failed audit gets a new id; the maintainer links it ("superseded_by") and it is always re-audited
     replaces = {r["superseded_by"]: k for k, r in (held | ares).items() if r.get("superseded_by")}
-    sample += [d for d in drop if d["id"] in replaces and d not in sample]
+    sample += [d for d in drop if d["scorable"] and d["id"] in replaces and d not in sample]
     sample_tier = {d["id"]: start_tier(d) for d in sample}             # recorded before any demotion below
     todo = [d for d in sample if d["id"] not in ares]
     if todo:
@@ -295,7 +335,7 @@ def main():
             if demotes(r) and r.get("source_id") in srcs:
                 demote(srcs[r["source_id"]])
     # any item with a recorded verdict today is treated as audited, even if it isn't in today's sample on a rerun
-    audited = sample + [d for d in drop if d["id"] in ares and d not in sample]
+    audited = sample + [d for d in drop if d["scorable"] and d["id"] in ares and d not in sample]
     for d in audited:
         r = ares.get(d["id"]) or {"verdict": "not run"}
         note = notes.audit_note(r["verdict"], notes.pick_urls(r.get("source_urls"), d["evidence"]))
@@ -317,7 +357,7 @@ def main():
             if demotes(r):
                 demote(srcs[d["source"]["id"]])
 
-    if ares or held:
+    if ares or held or ares_p.exists():
         ares_p.write_text(json.dumps(held | ares, indent=1))
     # 6. ledger (stable ids; reruns replace today's entries)
     corrected = {c["id"]: c for c in ledger["claims"] if c["date"] == date and c.get("state") in ("corrected", "superseded")}   # scanner.correct/supersede survive rebuilds
@@ -328,6 +368,7 @@ def main():
     for d in drop:
         ledger["claims"].append({k: d[k] for k in ("id", "date", "category", "claim", "why_it_matters", "try_this", "evidence", "verification",
                                                    "excerpt", "excerpt_url", "item_url", "scorable", "prediction_deadline", "state", "recheck_on")}
+                                | {k: d[k] for k in ("speaker", "said_on") if k in d}
                                 | {"source_id": d["source"]["id"], "status_at_publication": d["verification"]["status"]})
         if d["id"] in corrected:
             ledger["claims"][-1].update({k: corrected[d["id"]][k] for k in ("correction", "reversed_on", "source_change", "outcome", "resolved_on",

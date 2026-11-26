@@ -16,8 +16,7 @@ T1_LB, T2_LB, DROP_MEAN, MIN_RESOLVED = 0.80, 0.65, 0.50, 15
 PROVISIONAL_DAYS = 14                            # no face-value publishing before day 15
 
 # outcome -> (alpha increment, beta increment). "inconclusive" and "source-changed" (scanner.supersede: accurate when published,
-# then the source changed its own numbers or method) have no entry, so they are never scored. Every trust rebuild must use the
-# same filter: state in ("resolved", "corrected") and outcome in WEIGHTS (scanner.run events_for, quarantine, supersede).
+# then the source changed its own numbers or method) have no entry, so they are never scored.
 WEIGHTS = {"good": (1.0, 0.0), "docs-verified": (0.5, 0.0), "partial": (0.5, 0.5), "bad": (0.0, 1.0)}
 
 
@@ -107,6 +106,13 @@ def set_scorable_claims(sources, claims):
             changed = True
         t["scorable_claims"] = n
     return changed
+
+
+def claim_events(claims, source_id):
+    """Scored ledger events for any trust rebuild, including legacy claims without a scorable field."""
+    return [{"date": c["resolved_on"], "outcome": c["outcome"], "reversed_on": c.get("reversed_on")}
+            for c in claims if c["source_id"] == source_id and c.get("scorable") is not False
+            and c.get("category") != "take" and c["state"] in ("resolved", "corrected") and c.get("outcome") in WEIGHTS]
 
 
 def score(source, events, today):

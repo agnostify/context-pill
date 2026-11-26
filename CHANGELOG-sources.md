@@ -171,3 +171,7 @@ Every add, drop, tier change and audit result is logged here.
 - 2026-11-23: removed 1 item(s) from 2026-11-23 (review: third-party product claim not checked against vendor docs)
 - 2026-11-23: removed 1 item(s) from 2026-11-23 (review: guide page and sitemap carry no publish date, freshness not established)
 - 2026-11-24: audit of 2026-11-24-3653c8c3 (OpenAI (and Sam Altman's blog)): pass (Verdict: pass. Source: https://openai.com/business/customer-stories/ifood)
+- 2026-11-25: added Boris Cherny (bcherny) at T3, 30-day probation; maintainer-named.
+- 2026-11-25: added Armin Ronacher (mitsuhiko) at T3, 30-day probation; maintainer-named.
+- 2026-11-25: added Hamel Husain (hamel) at T3, 30-day probation; maintainer-named.
+- 2026-11-25: queued 8 builder sources under the 3-per-week cap: mitchellh, addyosmani, eugeneyan, jxnl, dbreunig, ghuntley, yegge, zvi.
