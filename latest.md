@@ -5,23 +5,17 @@
 <!-- breaking:start -->
 ## Breaking AI News
 
-_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 25, 6:09 PM PT; refreshed about every 6 hours.
+_Ranked by engagement, not verified. Check the linked source before acting._ Updated Nov 26, 6:15 AM PT; refreshed about every 6 hours.
 
-1. **[Scoot Aaronson, a famous computer scientist, says that he has a lot of information that either one or both of OpenAI and Anthropic have solved factoring in P. This would destroy RSA and the current Internet](https://www.reddit.com/r/singularity/comments/1y5b2m2/scoot_aaronson_a_famous_computer_scientist_says/)**
-   - Reddit (r/singularity): 400 upvotes*, 158 comments across 2 posts · source: r/singularity
-   - `b-caa274eac9`
-2. **[Scott Aaronson: It’s now obvious that we’ll be getting, not one-off solutions to this or that complexity question, but a whole new continent of mathematical truth, one that we’d previously only glimpsed through fog. Picture... Galileo first training his telescope on the stars.](https://www.reddit.com/r/singularity/comments/1y5j8p1/scott_aaronson_its_now_obvious_that_well_be/)**
-   - Reddit (r/singularity): 261 upvotes*, 44 comments · source: r/singularity
-   - `b-b37dc4e35d`
-3. **[Anthropic CEO Dario Amodei Believes Keeping Humans in Control Could Become Unethical Once AI Can Cure Diseases and Save More Lives Than Humans Can](https://www.reddit.com/r/singularity/comments/1y594tm/anthropic_ceo_dario_amodei_believes_keeping/)**
-   - Reddit (r/singularity): 197 upvotes*, 105 comments · source: r/singularity
-   - `b-a027fa4daa`
-4. **[One prompt, no human help: Google's AI took on math problems open since 1964 and 1988 and says it has lean proofs for all six](https://www.reddit.com/r/singularity/comments/1y5635t/one_prompt_no_human_help_googles_ai_took_on_math/)**
-   - Reddit (r/singularity): 383 upvotes*, 79 comments · source: r/singularity
-   - `b-6bfec9c52a`
-5. **[OpenAI says it had a VP vs VNP proof 17 days before Anthropic posted one](https://www.reddit.com/r/OpenAI/comments/1y51qw0/openai_says_it_had_a_vp_vs_vnp_proof_17_days/)**
-   - Reddit (r/OpenAI): 301 upvotes*, 61 comments · source: r/OpenAI
-   - `b-08b4d30f91`
+1. **[Reuters confirms: Cutting off distillation and compute works and slows down Chinese Models massively](https://www.reddit.com/r/LocalLLaMA/comments/1y5ysad/reuters_confirms_cutting_off_distillation_and/)**
+   - Reddit (r/LocalLLaMA, r/singularity): 270 upvotes*, 206 comments across 4 posts · Covered by: reuters.com · source: r/LocalLLaMA
+   - `b-f2a50c2243` · also: [outlet](https://www.reuters.com/world/china/us-chip-curbs-distillation-crackdown-threaten-chinese-ai-model-development-2026-11-26/)
+2. **[Latency doesn't lie: Jev is (probably) Qwen3.5-35B-A3B!](https://www.reddit.com/r/LocalLLaMA/comments/1y5nllv/latency_doesnt_lie_jev_is_probably_qwen3535ba3b/)**
+   - Reddit (r/LocalLLaMA, r/singularity): 370 upvotes*, 57 comments across 2 posts · source: r/LocalLLaMA
+   - `b-ce7730b6c1`
+3. **[In a rare tweet, Dario Amodei rejects framing that Anthropic wants humans to surrender control to AI and says rival CEOs are selling similar products under different slogans](https://www.reddit.com/r/singularity/comments/1y5fs7p/in_a_rare_tweet_dario_amodei_rejects_framing_that/)**
+   - Reddit (r/singularity): 232 upvotes*, 164 comments · source: r/singularity
+   - `b-11cc15b9f6`
 
 \* Reddit upvotes are a snapshot taken soon after posting (Arctic Shift), so the real count is higher.
 
