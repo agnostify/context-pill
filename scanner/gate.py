@@ -83,14 +83,17 @@ def _validate(x, sch, root, path, out):
         _validate(x, sch.get("else" if condition else "then", {}), root, path, out)
 
 
-def valid_attribution(d):
+def valid_attribution(d, drop_date=None):
+    """A named speaker (2 to 6 words, <=80 chars) and an original publication date no later than the drop's date."""
     speaker, said_on = d.get("speaker"), d.get("said_on")
-    if not isinstance(speaker, str) or not speaker.strip() or not isinstance(said_on, str):
+    if not quotes.valid_speaker(speaker) or not isinstance(said_on, str):
         return False
     try:
-        return dt.date.fromisoformat(said_on).isoformat() == said_on
+        ok = dt.date.fromisoformat(said_on).isoformat() == said_on
     except ValueError:
         return False
+    latest = drop_date or d.get("date")
+    return ok and (not isinstance(latest, str) or said_on <= latest)
 
 
 def check_take(d, pid):
@@ -104,6 +107,8 @@ def check_take(d, pid):
         out.append(f"{pid}: take needs a named speaker and original publication date (YYYY-MM-DD)")
     if not quotes.valid_excerpt(d.get("excerpt")) or not d.get("excerpt_url") or d["excerpt_url"] != d.get("item_url"):
         out.append(f"{pid}: take needs a quote of 25 words and 300 characters or fewer linked to the item")
+    if d.get("try_this"):
+        out.append(f"{pid}: a take never carries a try-this step")
     if d.get("scorable") is not False or d.get("recheck_on") is not None or v.get("t1_audit_sample") or v.get("audit_verdict") is not None:
         out.append(f"{pid}: takes cannot be scored, re-checked or audited")
     return out
@@ -120,8 +125,7 @@ def check_item(d, where):
         out.append(f"{pid}: checked status without evidence")
     if d.get("category") in TOOL_CATS and v.get("status") == "verified" and not d.get("smoke_test_log"):
         out.append(f"{pid}: tool/automation marked verified without a smoke-test log (ceiling is docs-verified)")
-    attributed_take = d.get("category") == "take" and v.get("status") == "attributed"
-    if v.get("status") not in CHECKED and not attributed_take and d.get("try_this") and d["try_this"] != "not recommended: terms risk":
+    if v.get("status") not in CHECKED and d.get("try_this") and d["try_this"] != "not recommended: terms risk":
         out.append(f"{pid}: actionable try-this step on an unverified/blocked item")
     if v.get("status") == "face-value-T1" and (d.get("category") in TOOL_CATS or v.get("provisional") or not str(src.get("tier", "")).startswith("T1")):
         out.append(f"{pid}: face-value-T1 on a tool/automation, a provisional item or a non-T1 source")

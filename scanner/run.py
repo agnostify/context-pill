@@ -13,7 +13,7 @@ WORK = Path(os.environ.get("CP_WORK", REPO.parent / "context-pill-work"))
 START_DATE = dt.date(2026, 10, 16)          # day 1 of the scanner (provisional period = days 1-14)
 CHECKED = ("verified", "docs-verified", "vendor-claim", "face-value-T1")
 SCORABLE_CATS = ("release", "tool", "automation", "technique", "research", "prediction")
-TAKE_KINDS = ("expert", "lab-leader", "creator", "lab")
+TAKE_KINDS = ("expert", "lab-leader", "creator", "lab")   # lab only on paths listed in its take_paths (sources.yaml)
 TAKE_PER_SOURCE, TAKE_PER_DAY = 2, 8
 AUDIT_RATE = 10                              # 1 in 10 T1 items (deterministic by item id), at least 1 per day if any
 
@@ -190,14 +190,26 @@ def main():
             rejected.append(f"{sid}: category {category!r}"); continue
         v = c.get("verification") or {}
         if is_take:
-            if s.get("kind") not in TAKE_KINDS or v.get("status") != "attributed" or not gate.valid_attribution(c):
+            lab_ok = s.get("kind") != "lab" or any(p in (item_url or "") for p in s.get("take_paths") or [])
+            if s.get("kind") not in TAKE_KINDS or not lab_ok or v.get("status") != "attributed" or not gate.valid_attribution(c, date):
                 rejected.append(f"{sid}: take without eligible source, attributed status, named speaker or original publication date"); continue
+            pub = str((item_by_source_url.get((sid, item_url)) or {}).get("published") or "")[:10]
+            if pub and c["said_on"] > pub:
+                rejected.append(f"{sid}: take dated after its feed entry ({c['said_on']} > {pub}): {cid}"); continue
+            c["try_this"] = None                     # an opinion never carries an actionable step
+            hits = gate.scan_text(f"take {cid}", f"{c.get('excerpt') or ''} {c.get('speaker') or ''} {c.get('claim') or ''}", gate.private_patterns()[0])
+            if hits:
+                rejected.append(f"{sid}: take quote failed the publication scan ({'; '.join(hits)}): {cid}"); continue
         elif v.get("status") == "attributed":
             rejected.append(f"{sid}: attributed status is only for takes"); continue
         excerpt, excerpt_url = c.get("excerpt"), c.get("excerpt_url")
         if is_take or excerpt is not None:
             item = item_by_source_url.get((sid, excerpt_url)) if notes.usable_url(excerpt_url) else None
-            if (is_take and excerpt_url != item_url) or not quotes.matches_item(excerpt, item, raw / "pages", c.get("speaker") if is_take else None):
+            if not is_take and excerpt and gate.scan_text(f"excerpt {cid}", excerpt, gate.private_patterns()[0]):
+                c["excerpt"] = c["excerpt_url"] = None; excerpt = None
+            if (is_take or excerpt is not None) and ((is_take and excerpt_url != item_url) or not quotes.matches_item(
+                    excerpt, item, raw / "pages", (c.get("speaker") or "") if is_take else None,
+                    byline_ok=is_take and (s.get("kind") == "lab" or quotes.is_source_person(c.get("speaker"), s.get("name"))))):
                 if is_take:
                     rejected.append(f"{sid}: quote not found: {cid}"); continue
                 c["excerpt"] = c["excerpt_url"] = None
@@ -244,7 +256,7 @@ def main():
         base = dt.date.fromisoformat(deadline) if deadline else today
         drop.append({
             "id": cid, "date": date, "category": c["category"], "claim": c["claim"], "why_it_matters": c.get("why_it_matters"),
-            "try_this": c.get("try_this") if is_take or v.get("status") in CHECKED or c.get("try_this") == "not recommended: terms risk" else None,
+            "try_this": None if is_take else c.get("try_this") if v.get("status") in CHECKED or c.get("try_this") == "not recommended: terms risk" else None,
             "source": {"id": s["id"], "name": s["name"], "home_url": s["home_url"], "tier": t["tier"], "trust_mean": t["trust_mean"],
                        "lb10": t["lb10"], "seed": bool(s.get("seed"))},
             "also_seen_in": [srcs[x]["name"] for x in c.get("also_seen_in", []) if x in srcs and x != s["id"]],
@@ -357,7 +369,7 @@ def main():
             if demotes(r):
                 demote(srcs[d["source"]["id"]])
 
-    if ares or held or ares_p.exists():
+    if ares or held or (a.skip_extract and ares_p.exists()):   # a full run never read the file, so it must not overwrite it
         ares_p.write_text(json.dumps(held | ares, indent=1))
     # 6. ledger (stable ids; reruns replace today's entries)
     corrected = {c["id"]: c for c in ledger["claims"] if c["date"] == date and c.get("state") in ("corrected", "superseded")}   # scanner.correct/supersede survive rebuilds

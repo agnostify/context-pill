@@ -14,6 +14,7 @@ from scanner import extract, gate, quotes, run, trust, util
 DAY = "2026-11-25"
 SPEAKER = "Ada Builder"
 EXCERPT = "Give the coding agent one example first."
+XLINK = "https://" + "x" + ".com/someone/" + "sta" + "tus/" + "1234567890" + "1"   # built from parts: the gate scans this file too
 
 
 def take(url, claim, sid="builder", **fields):
@@ -73,6 +74,41 @@ def test_quotes():
         path.write_text("x " * 12000 + EXCERPT)
         assert not quotes.matches_item(EXCERPT, item | {"summary": "x " * 750 + EXCERPT}, pages)
         assert quotes.matches_item(EXCERPT, item, pages)
+        # the speaker must be named next to the quote; a name only in the byline counts only for the page's own author
+        page = f"By {SPEAKER}. " + "filler " * 200 + "Comments. Bob Troll wrote: Never use type hints."
+        path.write_text(page)
+        troll = "Never use type hints."
+        assert quotes.matches_item(troll, item, pages, "Bob Troll")
+        assert not quotes.matches_item(troll, item, pages, SPEAKER)
+        assert quotes.matches_item(troll, item, pages, SPEAKER, byline_ok=True)      # known limit, see scanner/breakage.md
+        assert not quotes.matches_item(troll, item, pages, "Carol Nobody", byline_ok=True)
+        assert not quotes.matches_item(troll, item, pages, "AI")
+        assert quotes.is_source_person("Armin Ronacher", "Armin Ronacher") and not quotes.is_source_person("Bob Troll", "Armin Ronacher")
+
+
+def test_take_guards():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, work, raw = fixture(Path(tmp), ("builder", "lab"))
+        reg = yaml.safe_load((repo / "sources.yaml").read_text())
+        reg["sources"][1] |= {"kind": "lab", "take_paths": ["/engineering/"]}
+        (repo / "sources.yaml").write_text(yaml.safe_dump(reg))
+        page = f"By {SPEAKER}. {EXCERPT}"
+        items, claims = [], []
+        def add(sid, url, published=DAY, claim=None, **fields):
+            snap = raw / "pages" / f"p{len(items)}.txt"; snap.write_text(page)
+            items.append({"source_id": sid, "url": url, "snapshot": str(snap), "published": published, "summary": ""})
+            claims.append(take(url, claim or f"Tip at {url}", sid=sid, **fields))
+            return take_id(claims[-1])
+        ok_lab = add("lab", "https://lab.example/engineering/a")
+        news_lab = add("lab", "https://lab.example/news/b")
+        late = add("builder", "https://builder.example/c", published="2026-11-10")
+        xlink = add("builder", "https://builder.example/d", claim="See " + XLINK + " for more")
+        drop, *_ = publish(repo, work, raw, claims, items)
+        assert [d["id"] for d in drop] == [ok_lab], drop
+        log = (raw / "run.log").read_text()
+        assert f"take dated after its feed entry (2026-11-18 > 2026-11-10): {late}" in log
+        assert "failed the publication scan" in log and xlink in log
+        assert log.count("named speaker or original publication date") == 1   # the lab news page
 
 
 def test_publication():
@@ -101,7 +137,7 @@ def test_publication():
         assert opinion["speaker"] == SPEAKER and opinion["said_on"] == "2026-11-18"
         assert opinion["excerpt"] == EXCERPT and opinion["excerpt_url"] == url
         assert opinion["verification"]["status"] == "attributed" and opinion["verification"]["method"] == gate.TAKE_METHOD
-        assert opinion["try_this"] == good["try_this"] and opinion["scorable"] is False and opinion["recheck_on"] is None
+        assert opinion["try_this"] is None and opinion["scorable"] is False and opinion["recheck_on"] is None
         assert [x["id"] for x in audit.call_args.args[0]] == [checked["id"]]
         alive.assert_called_once_with(fact["evidence"][0]["url"])
         saved = next(c for c in ledger["claims"] if c["category"] == "take")
@@ -117,7 +153,9 @@ def test_publication():
         assert f'"{EXCERPT}" ([{SPEAKER}]({url}), 2026-11-18)' in take_md
         assert not gate.check_item(opinion, "fixture")
         assert any("only for takes" in p for p in gate.check_item(opinion | {"category": "release"}, "fixture"))
-        for fields in ({"excerpt": "x" * 301}, {"excerpt": "word " * 26}, {"said_on": "2026-02-30"}, {"speaker": " "}):
+        for fields in ({"excerpt": "x" * 301}, {"excerpt": "word " * 26}, {"said_on": "2026-02-30"}, {"speaker": " "},
+                       {"said_on": "2026-12-01"}, {"speaker": "AI"}, {"speaker": "https://example.com/ada"},
+                       {"try_this": "Run this."}):
             assert gate.check_item(opinion | fields, "fixture"), fields
         schema = json.loads((repo / "schema" / "drop.schema.json").read_text())
         errors = []
@@ -182,6 +220,7 @@ def test_caps_and_audit_paths():
 
 if __name__ == "__main__":
     test_quotes()
+    test_take_guards()
     test_extraction_stages_items_without_missing_snapshots()
     test_publication()
     test_caps_and_audit_paths()

@@ -1,3 +1,4 @@
 # Breakage
 
 - Builder takes rely on saved page text and RSS summaries. A feed, article template or snapshot path change can hide the quote, byline or original date and reduce the number of published takes. Check the day's `items.json`, snapshots and publication rejections in `run.log`. When a page has multiple voices or dates, compare the extracted speaker and date to the article before publication.
+- Byline matching for a source's own author: when the speaker is the person the source is named after, the quote may sit anywhere on the saved page as long as the name is in the first 1,000 characters. If a page's saved text includes reader comments or long quoted passages, someone else's words could be credited to the author. Trigger: a source whose snapshots start including comment threads, or a link blog that is mostly quotes. Check: compare a sample of that source's takes with the live page; if it happens, drop the byline route for that source.
