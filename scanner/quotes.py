@@ -1,7 +1,6 @@
 """Match excerpts against the scanner's saved page text and RSS summary."""
 import re
 import unicodedata
-from bisect import bisect_right
 from collections import Counter
 from pathlib import Path
 
@@ -17,53 +16,46 @@ SPEAKER_AFTER = 80            # or this close after it ('...,' said Ada Builder)
 BYLINE_ZONE = 1000            # or, for the page's own author, in the first this-many characters of the saved page (the byline)
 MAX_SNAPSHOT_CHARS = 200_000
 
-# A label starts a line and has up to six name words, an optional timestamp, then a colon or end of line.
-# Check Unicode letters and uppercase initials separately because re has no uppercase-letter character class.
-_NAME_WORD = r"[^\W\d_][^\W\d_.'\u2019-]*"
+# Detect boundaries even when the label cannot identify a speaker.
+_NAME_WORD = r"@?[^\W_]\w*(?:[.'\u2019\u2010\u2011-]\w+)*\.?"
 _TIMESTAMP = r"[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?"
+_TIME_MARK = rf"(?:\({_TIMESTAMP}\)|\[{_TIMESTAMP}\]|{_TIMESTAMP})"
 _TURN_LABEL = re.compile(
-    rf"^[ \t]*(?P<label>{_NAME_WORD}(?:[ \t]+{_NAME_WORD}){{0,5}})"
-    rf"(?:[ \t]*(?:\({_TIMESTAMP}\)|\[{_TIMESTAMP}\]|{_TIMESTAMP}))?[ \t]*(?::|\r?$)", re.MULTILINE)
+    rf"^[ \t]*(?P<prefix>(?:(?P<before>{_TIME_MARK})[ \t]*)?"
+    rf"(?P<label>{_NAME_WORD}(?:[ \t]+{_NAME_WORD}){{0,5}}?)"
+    rf"(?:[ \t]*(?P<after>{_TIME_MARK}))?)[ \t]*(?:(?P<colon>:)|\r?$)", re.MULTILINE)
 
 
 def turn_labels(text):
-    """Return the raw line offset and name for each turn label, in text order."""
+    """Return each boundary's line start, label end, and name, in text order."""
     labels = []
-    for match in _TURN_LABEL.finditer(text):
-        label = match["label"]
-        if (len(label) <= 60 and all(word[0].isupper() for word in label.split())
-                and all(ch.isalpha() or ch in " \t.'\u2019-" for ch in label)):
-            labels.append((match.start(), label))
+    for match in _TURN_LABEL.finditer(text.replace("\u00a0", " ")):
+        if len(match["prefix"]) > 60:
+            continue
+        words = match["label"].split()
+        if not (match["colon"] or match["before"] or match["after"]):
+            # Bare labels need to look like names or handles, since speech also wraps onto its own lines.
+            if (words[-1].endswith(".") and len(words[-1]) > 2
+                    or len(words) > 1 and (not words[0][0].isupper() or words[-1][0].islower())):
+                continue
+        labels.append((match.start(), match.end(), " ".join(words)))
     return labels
 
 
+def _creditable_labels(labels):
+    counts = Counter(_normalize(label) for _, _, label in labels if valid_speaker(label))
+    return {label for label, count in counts.items() if count >= 3}
+
+
 def has_turns(labels):
-    counts = Counter(_normalize(label) for _, label in labels)
-    return sum(count >= 3 for count in counts.values()) >= 2
+    return len(_creditable_labels(labels)) >= 2
 
 
 def quote_in_turn(excerpt, speaker, text, labels):
-    """Map normalized quote offsets to raw turns using the starts of their label lines."""
-    parts, starts = [], []
-    raw_start = length = 0
-    # Turn boundaries are line breaks, so normalizing each part and joining with a space preserves matching.
-    for raw_end, _ in labels:
-        part = _normalize(text[raw_start:raw_end])
-        if part:
-            parts.append(part)
-            length += len(part) + 1
-        starts.append(length)
-        raw_start = raw_end
-    parts.append(_normalize(text[raw_start:]))
+    """Find the quote between the end of its speaker label and the next boundary."""
     name = _normalize(speaker)
-    words = name.split()
-    for start, end in _find(_normalize(excerpt), " ".join(parts)):
-        turn = bisect_right(starts, start) - 1
-        if turn < 0 or start == starts[turn] or (turn + 1 < len(starts) and end > starts[turn + 1]):
-            continue
-        if _normalize(labels[turn][1]) in (name, words[0], words[-1]):
-            return True
-    return False
+    return any(valid_speaker(label) and _normalize(label) == name and quote_found(excerpt, text[end:next_start])
+               for (_, end, label), (next_start, _, _) in zip(labels, labels[1:]))
 
 
 def _find(needle, hay):
@@ -162,8 +154,9 @@ def matches_item(excerpt, item, pages, speaker=None, byline_ok=False):
     if item.get("snapshot"):
         if item.get("transcript") is True:
             turns = turn_labels(text)
-            if has_turns(turns):
-                return quote_in_turn(excerpt, speaker, text, turns)
+            creditable = _creditable_labels(turns)
+            if len(creditable) >= 2:
+                return _normalize(speaker) in creditable and quote_in_turn(excerpt, speaker, text, turns)
             return is_source_person(speaker, item.get("source")) and quote_near_speaker(excerpt, speaker, text)
         return any(quote_near_speaker(excerpt, speaker, t) for t in texts) or bool(
             byline_ok and in_byline(speaker, text) and quote_found(excerpt, text))

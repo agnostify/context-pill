@@ -126,17 +126,70 @@ def test_transcript_turns():
         transcript = ("Nathan Labenz (00:01:02)\n" + "filler " * 450 + "We\u2019re doing \ufb01ne.\n"
                       "Chris: Start here.\nNathan Labenz [1:02:03]: Keep going.\n"
                       "Benson 12:34\nKeep it simple.\nNathan Labenz\nOne last point.\n"
-                      "Chris: Got it.\nChris: Thanks.")
+                      "Chris: Got it.\nChris: Thanks.\n"
+                      "Paul Christiano: Hello.\nPaul Christiano: Listening.\nPaul Christiano: Bye.")
         path.write_text(transcript, encoding="utf-8")
-        labels = ["Nathan Labenz", "Chris", "Nathan Labenz", "Benson", "Nathan Labenz", "Chris", "Chris"]
+        labels = ["Nathan Labenz", "Chris", "Nathan Labenz", "Benson", "Nathan Labenz", "Chris", "Chris",
+                  "Paul Christiano", "Paul Christiano", "Paul Christiano"]
         lines = ["Nathan Labenz (", "Chris: Start", "Nathan Labenz [", "Benson 12:", "Nathan Labenz\n",
-                 "Chris: Got", "Chris: Thanks"]
-        assert quotes.turn_labels(transcript) == list(zip((transcript.index(line) for line in lines), labels))
+                 "Chris: Got", "Chris: Thanks", "Paul Christiano: Hello", "Paul Christiano: Listening", "Paul Christiano: Bye"]
+        boundaries = quotes.turn_labels(transcript)
+        assert [(start, label) for start, _, label in boundaries] == list(zip((transcript.index(line) for line in lines), labels))
+        assert not quotes.has_turns(boundaries[:-3])
+        assert quotes.has_turns(boundaries)
         assert quotes.matches_item("We're doing fine.", item, pages, "Nathan Labenz")
         assert not quotes.matches_item("We're doing fine.", item, pages, "Chris Benson")
-        assert quotes.matches_item("Start here.", item, pages, "Chris Benson")
-        assert quotes.matches_item("Keep it simple.", item, pages, "Chris Benson")
-        assert not quotes.turn_labels("Then I said: no\nA B C D E F G: no\n" + "A" * 61 + ": no")
+        assert not quotes.matches_item("Start here.", item, pages, "Chris Benson")
+        assert not quotes.matches_item("Keep it simple.", item, pages, "Chris Benson")
+        assert [label for _, _, label in quotes.turn_labels("Then I said: no\nA B C D E F G: no\n" + "A" * 61 + ": no")] == ["Then I said"]
+
+
+def test_wrong_transcript_credit():
+    host, guest = "Alessio Fanelli", "Dylan Patel"
+    base = "".join(f"{host}: Question {n}.\n{guest}: Answer {n}.\n" for n in range(3))
+    excerpt = "Open weights will win."
+    with tempfile.TemporaryDirectory() as tmp:
+        pages = Path(tmp)
+        path = pages / "episode.txt"
+        item = {"snapshot": str(path), "transcript": True, "source": host}
+        boundaries = (
+            ("lowercase handle after host", host, "swyx: "),
+            ("lowercase handle after guest", guest, "swyx: "),
+            ("hyphenated name", guest, "Jean-Luc Picard: "),
+            ("apostrophe in name", guest, "Sam O'Brien: "),
+            ("leading timestamp", guest, "[01:02:03] Sam Altman: "),
+            ("trailing timestamp", guest, "Sam Altman (00:01:02)\n"),
+            ("bare name", guest, "Sam Altman\n"),
+            ("title", guest, "Dr. X: "),
+            ("digits", guest, "Speaker 1: "),
+            ("saved non-breaking space", guest, "Sam\u00a0Altman: "),
+        )
+        for case, speaker, label in boundaries:
+            page = base + f"{speaker}: Sure.\n{label}{excerpt}\n{host}: Follow-up?"
+            path.write_text(page, encoding="utf-8")
+            assert not quotes.matches_item(excerpt, item, pages, speaker), case
+
+        for label, speaker in (("Paul", "Paul Graham"), ("Patel", guest), ("Sam Altman", "Sam Altman")):
+            page = base + f"{label}: {excerpt}\n{host}: Follow-up?"
+            path.write_text(page, encoding="utf-8")
+            assert not quotes.matches_item(excerpt, item, pages, speaker), label
+
+        path.write_text(base + f"{guest}: {excerpt}\n{host}: Follow-up?")
+        assert quotes.matches_item(excerpt, item, pages, "dylan patel")
+        assert not quotes.matches_item(f"Patel: {excerpt}", item, pages, guest)
+
+        path.write_text(base + f"{guest}: {excerpt}\nSubscribe for free to receive new posts.")
+        assert not quotes.matches_item(excerpt, item, pages, guest)
+        assert not quotes.matches_item("Subscribe for free to receive new posts.", item, pages, guest)
+
+        for nbsp in ("&nbsp;", "\u00a0"):
+            html = (f"<p>{guest}: Sure.</p><p>Sam{nbsp}Altman: {excerpt}</p>"
+                    f"<p>{host}: Follow-up?</p>")
+            text = util.html_to_text(html, keep_lines=True)
+            assert f"Sam Altman: {excerpt}" in text
+            assert util.html_to_text(html) == f"{guest}: Sure. Sam Altman: {excerpt} {host}: Follow-up?"
+            path.write_text(base + text, encoding="utf-8")
+            assert not quotes.matches_item(excerpt, item, pages, guest), nbsp
 
 
 def test_blog_and_turnless_transcript():
@@ -162,22 +215,27 @@ def test_blog_and_turnless_transcript():
         assert quotes.matches_item(own_quote, item, pages, SPEAKER)
 
 
-def test_saved_dwarkesh_transcript():
-    html = Path("/tmp/cp-pod/dw.html")
-    if not html.is_file():
-        print("saved Dwarkesh transcript smoke test: skipped (fixture missing)")
-        return
-    transcript = util.html_to_text(html.read_text(encoding="utf-8"), quotes.MAX_SNAPSHOT_CHARS, keep_lines=True)
-    assert quotes.has_turns(quotes.turn_labels(transcript))
+def test_multi_turn_transcript():
+    host, guest = "Dwarkesh Patel", "Paul Christiano"
     excerpt = "A couple things are on my mind, especially over the last few weeks."
+    footer = "Subscribe for free to receive new posts."
+    html = "<p>Home</p><p>Recent Episodes</p><p>You've reached the episode page.</p>"
+    for n in range(40):
+        speaker = host if n % 2 == 0 else guest
+        body = excerpt if n == 21 else f"This is the discussion for turn {n}."
+        html += f"<p><strong>{speaker}</strong></p><p>{body}</p>"
+    transcript = util.html_to_text(html + f"<p>{footer}</p>", keep_lines=True)
+    assert quotes.has_turns(quotes.turn_labels(transcript))
     with tempfile.TemporaryDirectory() as tmp:
         pages = Path(tmp)
         path = pages / "dw.txt"
         path.write_text(transcript, encoding="utf-8")
-        item = {"snapshot": str(path), "transcript": True, "source": "Dwarkesh Patel"}
-        assert quotes.matches_item(excerpt, item, pages, "Paul Christiano")
-        assert not quotes.matches_item(excerpt, item, pages, "Dwarkesh Patel")
-    print("saved Dwarkesh transcript smoke test: OK")
+        item = {"snapshot": str(path), "transcript": True, "source": host}
+        assert quotes.matches_item(excerpt, item, pages, guest)
+        assert not quotes.matches_item(excerpt, item, pages, host)
+        assert not quotes.matches_item("You've reached the episode page.", item, pages, host)
+        assert not quotes.matches_item("This is the discussion for turn 39.", item, pages, guest)
+        assert not quotes.matches_item(footer, item, pages, guest)
 
 
 def test_snapshot_limits():
@@ -205,12 +263,40 @@ def test_snapshot_limits():
              mock.patch.object(util, "get", return_value=mock.Mock(status_code=200, text=transcript)), \
              mock.patch.object(util, "add_page"), mock.patch.object(util, "page_count", return_value=0):
             (default, extended), _ = fetch.run(repo, work, DAY, 36)
-        assert "transcript" not in default and extended["transcript"] is True
+        assert "transcript" not in default and "transcript" not in extended
         assert len(Path(default["snapshot"]).read_text()) == 24000
         assert not quotes.matches_item(EXCERPT, default, raw / "pages")
         assert not quotes.matches_item(EXCERPT, default, raw / "pages", "Paul Christiano")
-        assert quotes.matches_item(EXCERPT, extended, raw / "pages", "Paul Christiano")
-        assert not quotes.matches_item(EXCERPT, extended, raw / "pages", "Dwarkesh Patel")
+        transcript_item = extended | {"transcript": True}
+        assert quotes.matches_item(EXCERPT, transcript_item, raw / "pages", "Paul Christiano")
+        assert not quotes.matches_item(EXCERPT, transcript_item, raw / "pages", "Dwarkesh Patel")
+
+
+def test_skip_extract_transcript_registry():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, work, raw = fixture(Path(tmp))
+        registry = repo / "sources.yaml"
+        reg = yaml.safe_load(registry.read_text())
+        reg["sources"][0] |= {"transcript": True, "snapshot_chars": 200000}
+        registry.write_text(yaml.safe_dump(reg))
+        path = raw / "pages" / "episode.txt"
+        guest = "Bob Troll"
+        path.write_text("".join(f"{SPEAKER}: Question {n}?\n{guest}: Answer {n}.\n" for n in range(3))
+                        + f"{SPEAKER}: One more?\n{guest}: {EXCERPT}\n{SPEAKER}: Thanks.")
+        url = "https://builder.example/episode"
+        claims = [take(url, "Give the agent an example.")]
+        items = [{"source_id": "builder", "url": url, "snapshot": str(path), "published": "2026-11-18"}]
+        drop, *_ = publish(repo, work, raw, claims, items)
+        assert not drop
+        assert f"builder: quote not found: {take_id(claims[0])}" in (raw / "run.log").read_text()
+        rewritten = yaml.safe_load(registry.read_text())
+        source = rewritten["sources"][0]
+        assert source["transcript"] is True and source["snapshot_chars"] == 200000
+
+        source["transcript"] = False
+        registry.write_text(yaml.safe_dump(rewritten))
+        drop, *_ = publish(repo, work, raw, claims, [items[0] | {"transcript": True}])
+        assert [d["id"] for d in drop] == [take_id(claims[0])]
 
 
 def test_summary_quotes():
@@ -413,9 +499,11 @@ def test_caps_and_audit_paths():
 if __name__ == "__main__":
     test_quotes()
     test_transcript_turns()
+    test_wrong_transcript_credit()
     test_blog_and_turnless_transcript()
-    test_saved_dwarkesh_transcript()
+    test_multi_turn_transcript()
     test_snapshot_limits()
+    test_skip_extract_transcript_registry()
     test_summary_quotes()
     test_take_guards()
     test_extraction_stages_items_without_missing_snapshots()

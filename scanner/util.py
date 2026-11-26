@@ -199,6 +199,6 @@ def html_to_text(s, limit=20000, keep_lines=False):
     s = re.sub(r"(?s)<[^>]+>", " ", s)
     s = html.unescape(s)
     if keep_lines:
-        s = "\n".join(re.sub(r"[ \t]+", " ", line).strip() for line in s.splitlines())
+        s = "\n".join(re.sub(r"[ \t\u00a0]+", " ", line).strip() for line in s.splitlines())
         return re.sub(r"\n{3,}", "\n\n", s).strip()[:limit]
     return re.sub(r"\s+", " ", s).strip()[:limit]

@@ -211,6 +211,8 @@ def main():
             item = item_by_source_url.get((sid, excerpt_url)) if notes.usable_url(excerpt_url) else None
             pages = raw / "pages"
             if is_take:
+                if item:
+                    item = item | {"transcript": s.get("transcript") is True}
                 # the speaker's name next to the quote; the byline counts only for a lab's listed pages or an opted-in source's own person
                 byline_ok = s.get("kind") == "lab" or (s.get("take_byline") is True and quotes.is_source_person(c.get("speaker"), s.get("name")))
                 if excerpt_url != item_url or not quotes.https_link(excerpt_url) or not quotes.matches_item(excerpt, item, pages, c.get("speaker") or "", byline_ok=byline_ok):

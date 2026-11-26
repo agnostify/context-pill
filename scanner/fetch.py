@@ -192,12 +192,6 @@ def run(repo, work, date, hours):
         kept = [i for i in json.loads(old_p.read_text()) if i["url"].rstrip("/") not in have]
         items += kept
         report.append({"source": "_rerun", "status": "info", "note": f"{len(kept)} items reused from an earlier run today"})
-    transcript_sources = {s["id"] for s in sources if s.get("transcript") is True}
-    for i in items:
-        if i.get("source_id") in transcript_sources:
-            i["transcript"] = True
-        else:
-            i.pop("transcript", None)
     seen_p.write_text(json.dumps(seen, indent=0))
     (raw / "items.json").write_text(json.dumps(items, indent=1, ensure_ascii=False))
     (raw / "fetch-report.json").write_text(json.dumps(report, indent=1))
