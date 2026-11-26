@@ -13,7 +13,7 @@ WORK = Path(os.environ.get("CP_WORK", REPO.parent / "context-pill-work"))
 START_DATE = dt.date(2026, 10, 16)          # day 1 of the scanner (provisional period = days 1-14)
 CHECKED = ("verified", "docs-verified", "vendor-claim", "face-value-T1")
 SCORABLE_CATS = ("release", "tool", "automation", "technique", "research", "prediction")
-TEXT_FIELDS = ("source_id", "category", "item_url", "claim", "why_it_matters", "try_this", "excerpt", "excerpt_url", "speaker", "said_on")
+TEXT_FIELDS = ("source_id", "category", "item_url", "claim", "why_it_matters", "try_this", "excerpt", "excerpt_url", "speaker", "said_on", "prediction_deadline")
 TAKE_KINDS = ("expert", "lab-leader", "creator", "lab")   # lab only on paths listed in its take_paths (sources.yaml)
 TAKE_PER_SOURCE, TAKE_PER_DAY = 2, 8
 AUDIT_RATE = 10                              # 1 in 10 T1 items (deterministic by item id), at least 1 per day if any
@@ -213,7 +213,7 @@ def main():
             if is_take:
                 # the speaker's name next to the quote; the byline counts only for a lab's listed pages or an opted-in source's own person
                 byline_ok = s.get("kind") == "lab" or (s.get("take_byline") is True and quotes.is_source_person(c.get("speaker"), s.get("name")))
-                if excerpt_url != item_url or not quotes.matches_item(excerpt, item, pages, c.get("speaker") or "", byline_ok=byline_ok):
+                if excerpt_url != item_url or not quotes.https_link(excerpt_url) or not quotes.matches_item(excerpt, item, pages, c.get("speaker") or "", byline_ok=byline_ok):
                     rejected.append(f"{sid}: quote not found: {cid}"); continue
                 if not quotes.date_on_item(c.get("said_on"), item, pages):
                     rejected.append(f"{sid}: original date not found on the page or feed entry: {cid}"); continue

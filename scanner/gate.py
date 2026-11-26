@@ -107,7 +107,7 @@ def check_take(d, pid):
         out.append(f"{pid}: take needs a named speaker and original publication date (YYYY-MM-DD)")
     if "status_at_publication" in d and d["status_at_publication"] != "attributed":
         out.append(f"{pid}: a take's status at publication must be attributed")
-    if not quotes.valid_excerpt(d.get("excerpt")) or not str(d.get("excerpt_url") or "").startswith("https://") or d["excerpt_url"] != d.get("item_url"):
+    if not quotes.valid_excerpt(d.get("excerpt")) or not quotes.https_link(d.get("excerpt_url")) or d["excerpt_url"] != d.get("item_url"):
         out.append(f"{pid}: take needs a quote of 25 words and 300 characters or fewer linked to the item")
     if d.get("try_this"):
         out.append(f"{pid}: a take never carries a try-this step")
@@ -190,6 +190,8 @@ def check(repo, require_private=False):
         for c in json.loads(lp.read_text()).get("claims", []):
             pid = f"ledger:{c['id']}"
             problems += check_take(c, pid)
+            if c.get("category") == "take" and "status_at_publication" not in c:
+                problems.append(f"{pid}: a ledger take needs its status at publication (attributed)")
             if c.get("excerpt") and (not quotes.valid_excerpt(c["excerpt"]) or not c.get("excerpt_url")):
                 problems.append(f"{pid}: quote over 25 words or 300 characters, invalid or without URL")
     return problems

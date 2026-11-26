@@ -69,8 +69,8 @@ def date_on_item(iso, item, pages):
     if str((item or {}).get("published") or "")[:10] == iso:
         return True
     # only the page's top (where the byline and date sit), so a date mentioned in the body can't pass as the post's own
-    page = _texts(item, pages)[0] if item and item.get("snapshot") and _texts(item, pages) else ""
-    return any(quote_found(f, page[:BYLINE_ZONE]) for f in forms)
+    page = _texts({"snapshot": item.get("snapshot")}, pages) if item and item.get("snapshot") else []
+    return bool(page) and any(quote_found(f, page[0][:BYLINE_ZONE]) for f in forms)      # the saved page only, never the summary
 
 
 def _texts(item, pages):
@@ -124,3 +124,10 @@ def matches_item(excerpt, item, pages, speaker=None, byline_ok=False):
         return any(quote_found(excerpt, t) for t in texts)
     except (OSError, ValueError, RuntimeError, TypeError):
         return False
+
+
+HTTPS_LINK = re.compile(r"^https://[^\"'<>@/\s]+(?:/[^\"'<>\s]*)?$")      # the same shape mcp/server.mjs httpsOnly() accepts
+
+
+def https_link(url):
+    return isinstance(url, str) and len(url) <= 500 and all(0x21 <= ord(ch) <= 0x7e for ch in url) and bool(HTTPS_LINK.match(url))

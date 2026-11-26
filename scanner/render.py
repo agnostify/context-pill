@@ -11,7 +11,7 @@ LABEL = {"verified": "Verified", "docs-verified": "Docs-verified (not hands-on t
 
 def _one(t):
     """Model-written text on one line with link brackets escaped, so it can't add a heading or a link to latest.md."""
-    return " ".join(str(t or "").split()).replace("[", "\\[").replace("]", "\\]")
+    return " ".join(str(t or "").split()).replace("[", "\\[").replace("]", "\\]").replace("<", "\\<")
 
 
 def _item_md(n, d):

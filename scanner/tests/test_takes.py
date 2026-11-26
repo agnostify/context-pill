@@ -95,6 +95,8 @@ def test_quotes():
         assert quotes.date_on_item("2026-11-17", {"published": "2026-11-17T09:00:00+00:00"}, pages)
         path.write_text("filler " * 200 + "Back on November 18, 2026 we shipped it.")
         assert not quotes.date_on_item("2026-11-18", item, pages)          # a date in the body is not the post's date
+        assert not quotes.date_on_item("2026-11-18", {"snapshot": str(pages / "gone.txt"), "summary": "November 18, 2026"}, pages)
+        assert quotes.https_link("https://a.example/p") and not quotes.https_link("http://a.example/p") and not quotes.https_link("https://a@b.example/")
         path.write_text(f"{EXCERPT} " + "filler " * 30 + SPEAKER)
         assert not quotes.matches_item(EXCERPT, item, pages, SPEAKER)      # name too far after the quote
         path.write_text(f"\u201c{EXCERPT}\u201d said {SPEAKER}.")
@@ -136,6 +138,7 @@ def test_take_guards():
         assert "malformed extractor row" in (raw / "run.log").read_text() and len(drop) == 1
         md = (repo / "latest.md").read_text()
         assert "\n## Fake heading" not in md and "\\[link\\]" in md
+        assert any("status at publication" in x for x in gate.check(repo)) is False
         opinion = drop[0]
         assert any("status at publication" in x for x in gate.check_take(opinion | {"status_at_publication": "verified"}, "l"))
         assert any("only for takes" in x for x in gate.check_take(opinion | {"category": "release", "verification": {"status": "verified"}, "status_at_publication": "attributed"}, "l"))
