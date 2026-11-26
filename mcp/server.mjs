@@ -611,7 +611,7 @@ function messageVersion(msg, headerPv) {
 }
 
 // single: this message is the whole request (not part of a batch); only then is a result count reported.
-async function handleOne(msg, fetchText, headerPv, note = () => {}, now = Date.now(), single = false) {
+async function handleOne(msg, fetchText, headerPv, note = () => {}, now = Date.now(), single = false, latestNote = "") {
   // A JSON-RPC response sent to us (we never send requests, so there's nothing to match): accept it with no reply.
   if (msg && msg.jsonrpc === "2.0" && msg.method === undefined && msg.id !== undefined && ("result" in msg || "error" in msg)) return null;
   if (!msg || typeof msg !== "object" || msg.jsonrpc !== "2.0" || typeof msg.method !== "string") {
@@ -662,7 +662,11 @@ async function handleOne(msg, fetchText, headerPv, note = () => {}, now = Date.n
         try {
           const { text, results } = await callTool(p.name, p.arguments, fetchText, now);
           if (single) note({ results });
-          return reply({ content: [{ type: "text", text }], isError: false });
+          const content = [{ type: "text", text }];
+          // An optional one-line note the host adds after get_latest results that list at least one item (off unless the
+          // host passes latestNote).
+          if (latestNote && p.name === "get_latest" && results > 0) content.push({ type: "text", text: latestNote });
+          return reply({ content, isError: false });
         } catch (e) {
           if (e instanceof RpcError) throw e;
           return reply({ content: [{ type: "text", text: "Context Pill feed is unavailable right now. Try again later." }], isError: true });
@@ -775,6 +779,7 @@ async function readBounded(request, max) {
 // opts.now: optional clock in milliseconds since the epoch, for tests (default Date.now()).
 export async function handleMcp(request, opts = {}) {
   const now = opts.now ?? Date.now();
+  const latestNote = typeof opts.latestNote === "string" ? oneLine(opts.latestNote, 300) : "";
   const fetchText = requestFetcher(opts.fetchText || defaultFetchText, opts.fetchTimeoutMs || FETCH_TIMEOUT_MS);
   // Origin check (Streamable HTTP spec): browsers may call only from the allowed origins.
   // Requests without an Origin header (CLI and desktop MCP clients) are allowed.
@@ -813,7 +818,7 @@ export async function handleMcp(request, opts = {}) {
   note(Array.isArray(msg) ? { method: "batch", tool: null } : { method: noted(msg && msg.method), tool: noted(msg && msg.params && msg.params.name) });
   if (Array.isArray(msg)) {
     if (msg.length === 0 || msg.length > 20) { note({ error: -32600, reason: "batch" }); return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid batch" } }, 400, h); }
-    const out = (await Promise.all(msg.map((m) => handleOne(m, fetchText, pv, note, now)))).filter(Boolean);
+    const out = (await Promise.all(msg.map((m) => handleOne(m, fetchText, pv, note, now, false, latestNote)))).filter(Boolean);
     if (out.some(isVersionError)) note({ reason: "version" });
     return out.length ? json(out, out.some(isVersionError) ? 400 : 200, h) : new Response(null, { status: 202, headers: h });
   }
@@ -827,7 +832,7 @@ export async function handleMcp(request, opts = {}) {
     note({ error: -32020, reason: "header" });
     return json({ jsonrpc: "2.0", id: okId(msg.id) ? msg.id : null, error: { code: -32020, message: "Mcp-Method or Mcp-Name header does not match the request body" } }, 400, h);
   }
-  const out = await handleOne(msg, fetchText, pv, note, now, true);
+  const out = await handleOne(msg, fetchText, pv, note, now, true, latestNote);
   // Version errors are 400 on HTTP (UnsupportedProtocolVersion, HeaderMismatch).
   const status = isVersionError(out) ? 400 : 200;
   if (status === 400) note({ reason: "version" });

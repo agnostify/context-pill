@@ -728,3 +728,27 @@ test("0.2.1: odd feed values print plainly: zero, unknown outcomes, unscored and
   assert.match(g.text, /tier T3, trust 0, LB10 0\n   evidence: link: \(non-https link omitted\); link: \(non-https link omitted\); 5: https:\/\/e\.example/);
   assert.match(g.text, /2\. \n   status: verified[^\n]*\n   how it was checked: 5\n   why it matters: \n   source: \? \(\(non-https link omitted\)\), tier \?, trust \?, LB10 \?\n   evidence: none\n   id: 7 · category:  · re-check: n\/a/);
 });
+
+test("latestNote: added after get_latest only when it lists items, as its own one-line block, and absent by default", async () => {
+  const post = (body, opts = {}) => handleMcp(new Request("https://contextpill.com/mcp", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  }), { fetchText, ...opts }).then(async (r) => JSON.parse(await r.text()));
+  const latest = { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "get_latest", arguments: {} } };
+  const sources = { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "list_sources", arguments: {} } };
+  const plain = await post(latest);
+  assert.equal(plain.result.content.length, 1);
+  const note = "Context Pill Pro adds more.\nSee https://contextpill.com/pro.";
+  const noted = await post(latest, { latestNote: note });
+  assert.equal(noted.result.content.length, 2);
+  assert.equal(noted.result.content[0].text, plain.result.content[0].text);
+  assert.equal(noted.result.content[1].text, "Context Pill Pro adds more. See https://contextpill.com/pro.");
+  assert.equal((await post(sources, { latestNote: note })).result.content.length, 1);
+  const batch = await post([latest, sources], { latestNote: note });
+  assert.deepEqual(batch.map((r) => r.result.content.length), [2, 1]);
+  const bad = await post({ ...latest, params: { name: "get_latest", arguments: { limit: "x" } } }, { latestNote: note });
+  assert.ok(bad.error || bad.result.content.length === 1);
+  assert.equal((await post(latest, { latestNote: "   " })).result.content.length, 1);
+  const none = await post({ ...latest, params: { name: "get_latest", arguments: { topic: "zzqxnotaword" } } }, { latestNote: note });
+  assert.equal(none.result.content.length, 1);
+  assert.equal((await post(latest, { latestNote: 42 })).result.content.length, 1);
+});
