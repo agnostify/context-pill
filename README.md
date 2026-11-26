@@ -6,6 +6,7 @@
 [![Code: MIT](https://img.shields.io/badge/code-MIT-green)](LICENSE)
 [![Content: CC BY 4.0](https://img.shields.io/badge/content-CC_BY_4.0-green)](LICENSE-CONTENT)
 [![Website: contextpill.com](https://img.shields.io/badge/web-contextpill.com-black)](https://contextpill.com/?ref=cp&utm_content=V13)
+[![agnostify/context-pill MCP server](https://glama.ai/mcp/servers/agnostify/context-pill/badges/score.svg)](https://glama.ai/mcp/servers/agnostify/context-pill)
 
 ## Install (one line)
 
