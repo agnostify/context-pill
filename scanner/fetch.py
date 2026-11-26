@@ -110,7 +110,7 @@ def sitemap_items(src, feed, since, seen):
     return out, first_run, len(known)
 
 
-def snapshot(item, pages_dir, snapshot_chars=DEFAULT_SNAPSHOT_CHARS):
+def snapshot(item, pages_dir, source):
     host = re.sub(r"^https?://([^/]+).*", r"\1", item["url"])
     if item["kind"] == "youtube" or _blocked(item["url"]) or util.page_count(host) >= PAGE_CAP_PER_SITE:
         return
@@ -119,8 +119,8 @@ def snapshot(item, pages_dir, snapshot_chars=DEFAULT_SNAPSHOT_CHARS):
         r = util.get(item["url"])
         if r.status_code >= 400:
             item["snapshot_error"] = f"HTTP {r.status_code}"; return
-        limit = min(max(snapshot_chars, DEFAULT_SNAPSHOT_CHARS), quotes.MAX_SNAPSHOT_CHARS)
-        text = util.html_to_text(r.text, limit, keep_lines=True)
+        limit = source.get("snapshot_chars", DEFAULT_SNAPSHOT_CHARS)
+        text = util.html_to_text(r.text, limit, keep_lines=source.get("transcript") is True)
         if not item["title"]:
             m = re.search(r"(?is)<title[^>]*>(.*?)</title>", r.text)
             item["title"] = util.html_to_text(m.group(1), 200) if m else item["url"]
@@ -181,9 +181,9 @@ def run(repo, work, date, hours):
     for u in uniq:
         mem.setdefault(u, date)
     report.append({"source": "_dedupe", "status": "ok", "note": f"{repeats} items skipped as already ingested on an earlier day"})
-    snapshot_sizes = {s["id"]: s.get("snapshot_chars", DEFAULT_SNAPSHOT_CHARS) for s in sources}
+    source_by_id = {s["id"]: s for s in sources}
     for i in items:
-        snapshot(i, pages, snapshot_sizes[i["source_id"]])
+        snapshot(i, pages, source_by_id[i["source_id"]])
     # feeds skipped as already fetched today: keep the items an earlier run of the same day ingested, so a rerun never
     # overwrites the day's items with fewer
     old_p = raw / "items.json"

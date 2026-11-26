@@ -16,46 +16,64 @@ SPEAKER_AFTER = 80            # or this close after it ('...,' said Ada Builder)
 BYLINE_ZONE = 1000            # or, for the page's own author, in the first this-many characters of the saved page (the byline)
 MAX_SNAPSHOT_CHARS = 200_000
 
-# Detect boundaries even when the label cannot identify a speaker.
-_NAME_WORD = r"@?[^\W_]\w*(?:[.'\u2019\u2010\u2011-]\w+)*\.?"
+_BOUNDARY_CHARS = 60
 _TIMESTAMP = r"[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?"
 _TIME_MARK = rf"(?:\({_TIMESTAMP}\)|\[{_TIMESTAMP}\]|{_TIMESTAMP})"
-_TURN_LABEL = re.compile(
-    rf"^[ \t]*(?P<prefix>(?:(?P<before>{_TIME_MARK})[ \t]*)?"
-    rf"(?P<label>{_NAME_WORD}(?:[ \t]+{_NAME_WORD}){{0,5}}?)"
-    rf"(?:[ \t]*(?P<after>{_TIME_MARK}))?)[ \t]*(?:(?P<colon>:)|\r?$)", re.MULTILINE)
+_EDGE_TIMESTAMP = re.compile(
+    rf"^(?P<leading>{_TIME_MARK})(?![0-9])"
+    rf"|^[^:]*?(?P<trailing>{_TIME_MARK})(?=\s*(?:\([^()]*\)\s*)?(?::|$))")
+_LABEL_NOTE = re.compile(r"\s*\([^()]*\)$")
 
 
 def turn_labels(text):
-    """Return each boundary's line start, label end, and name, in text order."""
-    labels = []
-    for match in _TURN_LABEL.finditer(text.replace("\u00a0", " ")):
-        if len(match["prefix"]) > 60:
+    """Map boundary line indices to the start of speech and a normalized speaker name, if shaped like one."""
+    boundaries = {}
+    for i, raw in enumerate(text.splitlines()):
+        line = raw.strip()
+        if not line:
+            continue                  # a blank line never changes who is speaking (labels often sit on their own line)
+        colon = line.find(":", 0, _BOUNDARY_CHARS)
+        if len(line) > _BOUNDARY_CHARS and colon == -1:
             continue
-        words = match["label"].split()
-        if not (match["colon"] or match["before"] or match["after"]):
-            # Bare labels need to look like names or handles, since speech also wraps onto its own lines.
-            if (words[-1].endswith(".") and len(words[-1]) > 2
-                    or len(words) > 1 and (not words[0][0].isupper() or words[-1][0].islower())):
-                continue
-        labels.append((match.start(), match.end(), " ".join(words)))
-    return labels
+        timestamp = _EDGE_TIMESTAMP.match(line) if colon != -1 else None
+        if timestamp:
+            # Colons inside a timestamp are part of the label.
+            start, end = timestamp.span(timestamp.lastgroup)
+            colon = line.find(":", end, _BOUNDARY_CHARS)
+        label = line if colon == -1 else line[:colon]
+        if timestamp:
+            label = label[:start] + label[end:]
+        label = " ".join(_LABEL_NOTE.sub("", label.rstrip()).split())
+        speech_start = len(line) if colon == -1 else colon + 1
+        boundaries[i] = (speech_start, _normalize(label) if valid_speaker(label) else None)
+    return boundaries
 
 
-def _creditable_labels(labels):
-    counts = Counter(_normalize(label) for _, _, label in labels if valid_speaker(label))
+def _creditable_labels(boundaries):
+    counts = Counter(label for _, label in boundaries.values() if label is not None)
     return {label for label, count in counts.items() if count >= 3}
 
 
-def has_turns(labels):
-    return len(_creditable_labels(labels)) >= 2
+def has_turns(boundaries):
+    return len(_creditable_labels(boundaries)) >= 2
 
 
-def quote_in_turn(excerpt, speaker, text, labels):
-    """Find the quote between the end of its speaker label and the next boundary."""
+def quote_in_turn(excerpt, speaker, text):
+    """Match within one speech line before the page's last creditable turn."""
+    boundaries = turn_labels(text)
+    creditable = _creditable_labels(boundaries)
     name = _normalize(speaker)
-    return any(valid_speaker(label) and _normalize(label) == name and quote_found(excerpt, text[end:next_start])
-               for (_, end, label), (next_start, _, _) in zip(labels, labels[1:]))
+    if len(creditable) < 2 or name not in creditable:
+        return False
+    last_turn = max(i for i, (_, label) in boundaries.items() if label in creditable)
+    label = None
+    for i, line in enumerate(text.splitlines()[:last_turn]):
+        start = 0
+        if i in boundaries:
+            start, label = boundaries[i]
+        if label == name and quote_found(excerpt, line.strip()[start:]):
+            return True
+    return False
 
 
 def _find(needle, hay):
@@ -151,13 +169,9 @@ def matches_item(excerpt, item, pages, speaker=None, byline_ok=False):
     if not texts or not valid_speaker(speaker):
         return False
     text = texts[0]
+    if item.get("transcript") is True:
+        return bool(item.get("snapshot") and quote_in_turn(excerpt, speaker, text))
     if item.get("snapshot"):
-        if item.get("transcript") is True:
-            turns = turn_labels(text)
-            creditable = _creditable_labels(turns)
-            if len(creditable) >= 2:
-                return _normalize(speaker) in creditable and quote_in_turn(excerpt, speaker, text, turns)
-            return is_source_person(speaker, item.get("source")) and quote_near_speaker(excerpt, speaker, text)
         return any(quote_near_speaker(excerpt, speaker, t) for t in texts) or bool(
             byline_ok and in_byline(speaker, text) and quote_found(excerpt, text))
     return (is_source_person(speaker, item.get("source")) and not item.get("summary_has_turns")

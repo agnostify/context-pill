@@ -191,7 +191,9 @@ def main():
             rejected.append(f"{c.get('source_id')}: source not enabled"); continue
         if not is_take and category not in SCORABLE_CATS:
             rejected.append(f"{sid}: category {category!r}"); continue
-        v = c.get("verification") or {}
+        v = c.get("verification")
+        if not isinstance(v, dict):
+            v = {}
         if is_take:
             lab_ok = s.get("kind") != "lab" or any(p in (item_url or "") for p in s.get("take_paths") or [])
             if s.get("kind") not in TAKE_KINDS or not lab_ok or v.get("status") != "attributed" or not gate.valid_attribution(c, date):

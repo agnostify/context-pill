@@ -72,8 +72,9 @@ def test_quotes():
         assert not quotes.matches_item(EXCERPT, item, pages)
         path.write_bytes(b"\xff")
         assert not quotes.matches_item(EXCERPT, item, pages)
-        path.write_text("x " * 100000 + EXCERPT)
+        path.write_text("x " * 100000 + f"{SPEAKER}: {EXCERPT}")
         assert not quotes.matches_item(EXCERPT, item | {"summary": "x " * 750 + EXCERPT}, pages)
+        assert not quotes.matches_item(EXCERPT, item, pages, SPEAKER)
         assert quotes.matches_item(EXCERPT, item, pages)
         # the speaker must be named next to the quote; a name only in the byline counts only for the page's own author
         page = f"By {SPEAKER}. " + "filler " * 200 + "Comments. Bob Troll wrote: Never use type hints."
@@ -108,8 +109,11 @@ def test_quotes():
 def test_transcript_turns():
     host, guest = "Dwarkesh Patel", "Paul Christiano"
     transcript = (f"By {host}, the host.\n{host}: Why?\n"
-                  f"{guest}: Give the coding agent\n\tone example first.\n"
+                  f"{guest}: {EXCERPT}\n"
+                  "The next task is a practical example of how our team might split the coding\n"
+                  "agent's work. Each person would be responsible for one separate piece of it.\n"
                   "Production Notes\nUse a separate fixture.\n"
+                  "A separate fixture makes it easier to check the output before sharing it.\n"
                   f"{host}: Thanks.\n{guest}: Sure.\n{host}: Anything else?\n{guest}: That's all.")
     with tempfile.TemporaryDirectory() as tmp:
         pages = Path(tmp)
@@ -121,27 +125,52 @@ def test_transcript_turns():
         assert not quotes.matches_item(EXCERPT, item, pages, host, byline_ok=True)
         assert quotes.matches_item(EXCERPT, {"snapshot": str(path)}, pages, host)
         assert not quotes.matches_item(f"Why? {guest}: {EXCERPT}", item, pages, host)
+        assert not quotes.matches_item("Split the coding agent's work.", item, pages, guest)
         assert not quotes.matches_item("Use a separate fixture.", item, pages, guest)
+        assert not quotes.matches_item("Check the output before sharing it.", item, pages, guest)
 
         transcript = ("Nathan Labenz (00:01:02)\n" + "filler " * 450 + "We\u2019re doing \ufb01ne.\n"
-                      "Chris: Start here.\nNathan Labenz [1:02:03]: Keep going.\n"
-                      "Benson 12:34\nKeep it simple.\nNathan Labenz\nOne last point.\n"
+                      "Chris: Start here.\n[1:02:03] Nathan Labenz (host): Keep going.\n"
+                      "Benson 12:34\nKeep it simple.\nNathan Labenz 12:34: One last point.\n"
                       "Chris: Got it.\nChris: Thanks.\n"
-                      "Paul Christiano: Hello.\nPaul Christiano: Listening.\nPaul Christiano: Bye.")
+                      "Chris Benson Jones: Hello.\nChris Benson Jones: Listening.\nChris Benson Jones: Bye.\n"
+                      "Chris Benson: How do you know?\nChris Benson: All right.\nChris Benson: Thanks.")
         path.write_text(transcript, encoding="utf-8")
-        labels = ["Nathan Labenz", "Chris", "Nathan Labenz", "Benson", "Nathan Labenz", "Chris", "Chris",
-                  "Paul Christiano", "Paul Christiano", "Paul Christiano"]
-        lines = ["Nathan Labenz (", "Chris: Start", "Nathan Labenz [", "Benson 12:", "Nathan Labenz\n",
-                 "Chris: Got", "Chris: Thanks", "Paul Christiano: Hello", "Paul Christiano: Listening", "Paul Christiano: Bye"]
         boundaries = quotes.turn_labels(transcript)
-        assert [(start, label) for start, _, label in boundaries] == list(zip((transcript.index(line) for line in lines), labels))
-        assert not quotes.has_turns(boundaries[:-3])
+        assert [label for _, label in boundaries.values()] == [
+            "nathan labenz", None, "nathan labenz", None, "keep it simple.", "nathan labenz", None, None,
+            "chris benson jones", "chris benson jones", "chris benson jones", "chris benson", "chris benson", "chris benson",
+        ]
         assert quotes.has_turns(boundaries)
         assert quotes.matches_item("We're doing fine.", item, pages, "Nathan Labenz")
+        assert quotes.matches_item("Keep going.", item, pages, "Nathan Labenz")
+        assert quotes.matches_item("One last point.", item, pages, "Nathan Labenz")
+        assert quotes.matches_item("Listening.", item, pages, "Chris Benson Jones")
+        assert not quotes.matches_item("Listening.", item, pages, "Chris Benson")
+        assert quotes.matches_item("How do you know?", item, pages, "Chris Benson")
+        assert not quotes.matches_item("How do you know?", item, pages, "Chris")
         assert not quotes.matches_item("We're doing fine.", item, pages, "Chris Benson")
         assert not quotes.matches_item("Start here.", item, pages, "Chris Benson")
         assert not quotes.matches_item("Keep it simple.", item, pages, "Chris Benson")
-        assert [label for _, _, label in quotes.turn_labels("Then I said: no\nA B C D E F G: no\n" + "A" * 61 + ": no")] == ["Then I said"]
+        boundaries = quotes.turn_labels("Then I said: no\nA B C D E F G: no\n" + "A" * 59 + ": no\n" + "A" * 60 + ": no")
+        assert boundaries == {0: (12, "then i said"), 1: (14, None), 2: (60, None)}
+
+
+def test_transcript_turn_threshold():
+    host, guest = "Ada Lane", "Bob Reed"
+    two = (f"{host}: {EXCERPT}\n{guest}: Why?\n{host}: Here's why.\n"
+           f"{guest}: Understood.\n{guest}: Thanks.")
+    three = two + f"\n{host}: Goodbye."
+    with tempfile.TemporaryDirectory() as tmp:
+        pages = Path(tmp)
+        path = pages / "episode.txt"
+        item = {"snapshot": str(path), "transcript": True, "source": host}
+        path.write_text(two)
+        assert not quotes.matches_item(EXCERPT, item, pages, host)
+        assert not quotes.has_turns(quotes.turn_labels(two))
+        path.write_text(three)
+        assert quotes.matches_item(EXCERPT, item, pages, host)
+        assert quotes.has_turns(quotes.turn_labels(three))
 
 
 def test_wrong_transcript_credit():
@@ -157,6 +186,7 @@ def test_wrong_transcript_credit():
             ("lowercase handle after guest", guest, "swyx: "),
             ("hyphenated name", guest, "Jean-Luc Picard: "),
             ("apostrophe in name", guest, "Sam O'Brien: "),
+            ("guest note", guest, "Sam Lee (guest): "),
             ("leading timestamp", guest, "[01:02:03] Sam Altman: "),
             ("trailing timestamp", guest, "Sam Altman (00:01:02)\n"),
             ("bare name", guest, "Sam Altman\n"),
@@ -169,7 +199,7 @@ def test_wrong_transcript_credit():
             path.write_text(page, encoding="utf-8")
             assert not quotes.matches_item(excerpt, item, pages, speaker), case
 
-        for label, speaker in (("Paul", "Paul Graham"), ("Patel", guest), ("Sam Altman", "Sam Altman")):
+        for label, speaker in (("Paul", "Paul Graham"), ("Patel", guest), ("Alessio", host), ("Sam Altman", "Sam Altman")):
             page = base + f"{label}: {excerpt}\n{host}: Follow-up?"
             path.write_text(page, encoding="utf-8")
             assert not quotes.matches_item(excerpt, item, pages, speaker), label
@@ -178,7 +208,7 @@ def test_wrong_transcript_credit():
         assert quotes.matches_item(excerpt, item, pages, "dylan patel")
         assert not quotes.matches_item(f"Patel: {excerpt}", item, pages, guest)
 
-        path.write_text(base + f"{guest}: {excerpt}\nSubscribe for free to receive new posts.")
+        path.write_text(base + f"{guest}: {excerpt}\nThanks for reading Latent Space! Subscribe for free to receive new posts.")
         assert not quotes.matches_item(excerpt, item, pages, guest)
         assert not quotes.matches_item("Subscribe for free to receive new posts.", item, pages, guest)
 
@@ -199,8 +229,8 @@ def test_blog_and_turnless_transcript():
             "Release Notes\nRecent Work\nRelease Notes\nExample Projects\nMore Reading\n"
             f"{EXCERPT}\n" + "filler " * 75 + "\n"
             f"As {guest} wrote, {guest_quote}\nAs {SPEAKER} wrote, {own_quote}")
-    labels = quotes.turn_labels(page)
-    assert len(labels) == 5 and not quotes.has_turns(labels)
+    boundaries = quotes.turn_labels(page)
+    assert len(boundaries) == 9 and not quotes.has_turns(boundaries)
     with tempfile.TemporaryDirectory() as tmp:
         pages = Path(tmp)
         path = pages / "page.txt"
@@ -212,19 +242,50 @@ def test_blog_and_turnless_transcript():
         item["transcript"] = True
         assert not quotes.matches_item(guest_quote, item, pages, guest)
         assert not quotes.matches_item(EXCERPT, item, pages, SPEAKER, byline_ok=True)
-        assert quotes.matches_item(own_quote, item, pages, SPEAKER)
+        assert not quotes.matches_item(own_quote, item, pages, SPEAKER)
+        turnless = "Ada Lane: Any tips?\nBob Reed: Use small models."
+        path.write_text(turnless)
+        item["source"] = "Ada Lane"
+        assert not quotes.matches_item("Use small models.", item, pages, "Ada Lane", byline_ok=True)
+        summary = {"source": "Ada Lane", "summary": util.html_to_text(turnless, 1500)}
+        assert quotes.matches_item("Use small models.", summary, pages, "Ada Lane")
+        assert not quotes.matches_item("Use small models.", summary | {"transcript": True}, pages, "Ada Lane")
+
+
+def test_label_paragraph_then_blank_line():
+    """Substack-style transcripts put the speaker name in its own paragraph, then a blank line, then the speech."""
+    host, guest = "Dwarkesh Patel", "Paul Christiano"
+    excerpt = "For the very short term, the main worry on my mind is automation of AI development."
+    html = ""
+    for n in range(8):
+        speaker = host if n % 2 == 0 else guest
+        body = excerpt if n == 3 else f"This is the long answer for turn {n}, " + "with more words " * 10
+        html += f"<p>{speaker}</p><p>{body}</p><p>{'A second paragraph in the same turn, ' * 3}</p>"
+    text = util.html_to_text(html, 200_000, keep_lines=True)
+    assert "\n\n" in text                                       # blank lines between label and speech
+    with tempfile.TemporaryDirectory() as tmp:
+        pages = Path(tmp)
+        path = pages / "t.txt"
+        path.write_text(text, encoding="utf-8")
+        item = {"snapshot": str(path), "transcript": True, "source": "Podcast"}
+        assert quotes.matches_item(excerpt, item, pages, guest)
+        assert not quotes.matches_item(excerpt, item, pages, host)
+        # without the blank-line rule every speech line would sit after an unlabelled boundary and nothing would pass
+        assert quotes.matches_item("A second paragraph in the same turn,", item, pages, host)
 
 
 def test_multi_turn_transcript():
     host, guest = "Dwarkesh Patel", "Paul Christiano"
     excerpt = "A couple things are on my mind, especially over the last few weeks."
     footer = "Subscribe for free to receive new posts."
+    heading = "Discussion about this video"
     html = "<p>Home</p><p>Recent Episodes</p><p>You've reached the episode page.</p>"
     for n in range(40):
         speaker = host if n % 2 == 0 else guest
         body = excerpt if n == 21 else f"This is the discussion for turn {n}."
-        html += f"<p><strong>{speaker}</strong></p><p>{body}</p>"
-    transcript = util.html_to_text(html + f"<p>{footer}</p>", keep_lines=True)
+        html += f"<p><strong>{speaker}</strong><br>{body} " + "filler " * 700 + "</p>"
+    transcript = util.html_to_text(html + f"<p>{footer}<br>{heading}<br>Related Posts</p>", 200_000, keep_lines=True)
+    assert 190_000 < len(transcript) <= 200_000 and transcript.endswith(f"{heading}\nRelated Posts")
     assert quotes.has_turns(quotes.turn_labels(transcript))
     with tempfile.TemporaryDirectory() as tmp:
         pages = Path(tmp)
@@ -235,6 +296,7 @@ def test_multi_turn_transcript():
         assert not quotes.matches_item(excerpt, item, pages, host)
         assert not quotes.matches_item("You've reached the episode page.", item, pages, host)
         assert not quotes.matches_item("This is the discussion for turn 39.", item, pages, guest)
+        assert not quotes.matches_item(heading, item, pages, guest)
         assert not quotes.matches_item(footer, item, pages, guest)
 
 
@@ -242,17 +304,19 @@ def test_snapshot_limits():
     html = "<p> Hello\t world <br />  next </p><p>Again</p>"
     assert util.html_to_text(html) == util.html_to_text(html, keep_lines=False) == "Hello world next Again"
     assert util.html_to_text(html, keep_lines=True) == "Hello world\nnext\n\nAgain"
+    blog = "<p>First</p>" * 500 + "<p>" + "filler " * 2982 + f"Paul Christiano: {EXCERPT}</p><p>" + "filler " * 150
     transcript = ("<p>Dwarkesh Patel: Why?</p><p>Paul Christiano: " + "filler " * 3500
                   + f"{EXCERPT}</p><p>Dwarkesh Patel: Thanks.</p><p>Paul Christiano: Sure.</p>"
                   "<p>Dwarkesh Patel: Anything else?</p><p>Paul Christiano: That's all.</p>")
     with tempfile.TemporaryDirectory() as tmp:
-        repo, work, raw = fixture(Path(tmp), ("default", "extended"))
+        repo, work, raw = fixture(Path(tmp), ("default", "extended", "custom"))
         reg = yaml.safe_load((repo / "sources.yaml").read_text())
         for src in reg["sources"]:
             src["register"] = dict.fromkeys(("route", "basis", "republish", "limit", "stop_rule", "opt_out"), "fixture")
             src["feeds"] = [{"type": "rss", "url": f"https://{src['id']}.example/feed"}]
         reg["sources"][1]["snapshot_chars"] = 200000
         reg["sources"][1]["transcript"] = True
+        reg["sources"][2]["snapshot_chars"] = 80
         (repo / "sources.yaml").write_text(yaml.safe_dump(reg))
 
         def feed_item(src, _feed, _since):
@@ -260,13 +324,20 @@ def test_snapshot_limits():
                      "url": f"https://{src['id']}.example/episode"}]
 
         with mock.patch.object(fetch, "feed_items", side_effect=feed_item), \
-             mock.patch.object(util, "get", return_value=mock.Mock(status_code=200, text=transcript)), \
+             mock.patch.object(util, "get", side_effect=lambda url: mock.Mock(
+                 status_code=200, text=transcript if "extended.example" in url else blog)), \
              mock.patch.object(util, "add_page"), mock.patch.object(util, "page_count", return_value=0):
-            (default, extended), _ = fetch.run(repo, work, DAY, 36)
+            (default, extended, custom), _ = fetch.run(repo, work, DAY, 36)
         assert "transcript" not in default and "transcript" not in extended
         assert len(Path(default["snapshot"]).read_text()) == 24000
-        assert not quotes.matches_item(EXCERPT, default, raw / "pages")
-        assert not quotes.matches_item(EXCERPT, default, raw / "pages", "Paul Christiano")
+        assert Path(default["snapshot"]).read_bytes() == util.html_to_text(blog, 24_000).encode()
+        assert Path(custom["snapshot"]).read_bytes() == util.html_to_text(blog, 80).encode()
+        assert EXCERPT not in util.html_to_text(blog, 24_000, keep_lines=True)
+        assert not quotes.matches_item(EXCERPT, custom, raw / "pages")
+        assert not quotes.matches_item(EXCERPT, custom, raw / "pages", "Paul Christiano")
+        assert quotes.matches_item(EXCERPT, default, raw / "pages")
+        assert quotes.matches_item(EXCERPT, default, raw / "pages", "Paul Christiano")
+        assert Path(extended["snapshot"]).read_text() == util.html_to_text(transcript, 200_000, keep_lines=True)
         transcript_item = extended | {"transcript": True}
         assert quotes.matches_item(EXCERPT, transcript_item, raw / "pages", "Paul Christiano")
         assert not quotes.matches_item(EXCERPT, transcript_item, raw / "pages", "Dwarkesh Patel")
@@ -307,6 +378,7 @@ def test_summary_quotes():
         assert not quotes.matches_item(EXCERPT, summary, pages, "Bob Troll")
         own = summary | {"summary": f"{SPEAKER}: {EXCERPT}"}
         assert quotes.matches_item(EXCERPT, own, pages, SPEAKER)
+        assert not quotes.matches_item(EXCERPT, own | {"transcript": True}, pages, SPEAKER)
         path = pages / "page.txt"
         path.write_text("The page has other material.")
         with_page = own | {"snapshot": str(path)}
@@ -358,9 +430,13 @@ def test_take_guards():
         snap = raw / "pages" / "p.txt"; snap.write_text(f"By {SPEAKER}. November 18, 2026. {EXCERPT}")
         items = [{"source_id": "builder", "url": url, "snapshot": str(snap), "published": DAY, "summary": ""}]
         bad_row = take(url, "Malformed", item_url=[url])
+        bad_verification = take(url, "Verification is malformed", verification=[{"status": "attributed"}])
         heading = take(url, "Line one\n## Fake heading [link](https://evil.example)")
-        drop, *_ = publish(repo, work, raw, [bad_row, heading], items)
-        assert "malformed extractor row" in (raw / "run.log").read_text() and len(drop) == 1
+        drop, *_ = publish(repo, work, raw, [bad_row, bad_verification, heading], items)
+        log = (raw / "run.log").read_text()
+        assert "malformed extractor row" in log and len(drop) == 1
+        assert "take without eligible source, attributed status" in log
+        assert drop[0]["id"] == take_id(heading)
         md = (repo / "latest.md").read_text()
         assert "\n## Fake heading" not in md and "\\[link\\]" in md
         assert any("status at publication" in x for x in gate.check(repo)) is False
@@ -499,8 +575,10 @@ def test_caps_and_audit_paths():
 if __name__ == "__main__":
     test_quotes()
     test_transcript_turns()
+    test_transcript_turn_threshold()
     test_wrong_transcript_credit()
     test_blog_and_turnless_transcript()
+    test_label_paragraph_then_blank_line()
     test_multi_turn_transcript()
     test_snapshot_limits()
     test_skip_extract_transcript_registry()
