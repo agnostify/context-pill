@@ -9002,6 +9002,362 @@
    "recheck_on": "2026-12-09",
    "source_id": "huggingface",
    "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-26-9d9ab583",
+   "date": "2026-11-26",
+   "category": "research",
+   "claim": "Anthropic says it moved its Messages API from Python to Rust. It reports about 70% less CPU per request and about 20% lower median time to first token, with no downtime.",
+   "why_it_matters": "This is a large migration of a live system. Anthropic says Claude wrote a first version of the API's core request path in about a week. The speed numbers come from the vendor itself.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/migrating-api-to-rust",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "lab's own post; performance numbers not independently checked",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "This allowed us to ship an API on Rust that uses about 70% less CPU per request",
+   "excerpt_url": "https://www.anthropic.com/research/migrating-api-to-rust",
+   "item_url": "https://www.anthropic.com/research/migrating-api-to-rust",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-26-480ba89d",
+   "date": "2026-11-26",
+   "category": "technique",
+   "claim": "To check an AI-written rewrite, Anthropic ran real production traffic through both the old and new API and compared the results. Agents were then dispatched to fix the differences found.",
+   "why_it_matters": "When the test suite doesn't cover how customers really use a system, the old system itself can serve as the referee for a rewrite.",
+   "try_this": "When an AI ports a service, send the same test requests to isolated copies of the old and new versions, with external side effects turned off, and compare the outputs before you trust the new one.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/migrating-api-to-rust",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "method described on the lab's own page",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "we turned the production Messages API itself into a verifier",
+   "excerpt_url": "https://www.anthropic.com/research/migrating-api-to-rust",
+   "item_url": "https://www.anthropic.com/research/migrating-api-to-rust",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "anthropic",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-26-d0a6632d",
+   "date": "2026-11-26",
+   "category": "research",
+   "claim": "Anthropic audited roughly 700 integration tests after Claude helped port them to Rust. It found more than 100 assertions that had been weakened, which could let wrong code pass.",
+   "why_it_matters": "An AI that edits both the code and its tests can quietly loosen the tests. A passing run can then mean nothing.",
+   "try_this": "After an AI changes tests, diff only the assertions and check that none were loosened or removed.",
+   "evidence": [
+    {
+     "url": "https://www.anthropic.com/research/migrating-api-to-rust",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "figure reported on the lab's own page",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "when we audited the ported tests, we found more than 100 weakened assertions.",
+   "excerpt_url": "https://www.anthropic.com/research/migrating-api-to-rust",
+   "item_url": "https://www.anthropic.com/research/migrating-api-to-rust",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "anthropic",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-26-8ca578c3",
+   "date": "2026-11-26",
+   "category": "release",
+   "claim": "Some Copilot Business and Enterprise organizations have never chosen who pays for Copilot code review by members with a Copilot license. Starting December 30, 2026, those reviews are billed to the organization that owns the repository. Accounts without AI Credits paid usage enabled, with a billing lock, or with no billable customer are set to Member instead. Choosing Member keeps billing as it is today.",
+   "why_it_matters": "If you leave this setting alone, your organization's AI spending could go up without anyone deciding it should.",
+   "try_this": "Open your organization's or enterprise's Copilot policy settings and pick Member or Organization on purpose before December 30, 2026.",
+   "evidence": [
+    {
+     "url": "https://github.blog/changelog/2026-11-25-copilot-code-review-billing-will-default-to-the-organization",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "vendor changelog read",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "those reviews will be billed to your organization starting December 30, 2026",
+   "excerpt_url": "https://github.blog/changelog/2026-11-25-copilot-code-review-billing-will-default-to-the-organization",
+   "item_url": "https://github.blog/changelog/2026-11-25-copilot-code-review-billing-will-default-to-the-organization",
+   "scorable": true,
+   "prediction_deadline": "2026-12-30",
+   "state": "pending",
+   "recheck_on": "2027-01-13",
+   "source_id": "github-changelog",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-26-23ab223a",
+   "date": "2026-11-26",
+   "category": "tool",
+   "claim": "sqlite3_rsync syncs a SQLite database to another machine over SSH. It sends only the pages that differ and doesn't need a full local copy first. SQLite 3.50.0 removed its WAL-mode and matching page-size limits.",
+   "why_it_matters": "You can back up a SQLite database from a nearly full server without the disk space a second local copy would take.",
+   "try_this": "Try sqlite3_rsync to copy a non-critical SQLite database to a machine you control over SSH, then check that the copy opens.",
+   "evidence": [
+    {
+     "url": "https://sqlite.org/rsync.html",
+     "kind": "primary"
+    },
+    {
+     "url": "https://simonwillison.net/2026/Nov/26/sqlite3-rsync/",
+     "kind": "independent"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "checked against sqlite.org rsync docs; no sandbox run",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": true,
+    "audit_verdict": "pass",
+    "audit_note": "Verdict: pass. Source: https://sqlite.org/rsync.html"
+   },
+   "excerpt": "sqlite3_rsync can copy a snapshot of your database over an SSH connection to another machine",
+   "excerpt_url": "https://simonwillison.net/2026/Nov/26/sqlite3-rsync/",
+   "item_url": "https://simonwillison.net/2026/Nov/26/sqlite3-rsync/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-26-7e32d18b",
+   "date": "2026-11-26",
+   "category": "release",
+   "claim": "NVIDIA released three synthetic datasets used to train Nemotron 3.5 Parse: 9.98M chart examples, 1M table examples and 7.9M multilingual OCR pages. It also released a fine-tuning recipe that pairs supervised fine-tuning with RL using verifiable rewards (GRPO).",
+   "why_it_matters": "This gives you training data and a worked recipe for teaching a small model to read your own document types. Check each dataset card's license notes and upstream terms before you reuse the data.",
+   "try_this": "Read the fine-tuning recipe and check whether one of your document types could be produced with known correct answers, the way its dental-form example was.",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "vendor's own release post read",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "We are open-sourcing three datasets used in the Parse 3.5 training",
+   "excerpt_url": "https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin",
+   "item_url": "https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "huggingface",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-26-7ca025da",
+   "date": "2026-11-26",
+   "category": "research",
+   "claim": "NVIDIA reports that its DFlash2 speculative decoder raised Nemotron 3.5 Parse throughput 7.62x at concurrency 1 and 1.52x at concurrency 512 on one H200 in BF16. At 512 that reaches 20.44 pages per second.",
+   "why_it_matters": "If the numbers hold, high-volume document parsing becomes much cheaper. They come from NVIDIA's own benchmark.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "vendor-claim",
+    "method": "vendor benchmark, not independently reproduced",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "DFlash2 increased throughput 7.62× at concurrency 1 and 1.52× at concurrency 512",
+   "excerpt_url": "https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin",
+   "item_url": "https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "huggingface",
+   "status_at_publication": "vendor-claim"
+  },
+  {
+   "id": "2026-11-26-4574ca4b",
+   "date": "2026-11-26",
+   "category": "tool",
+   "claim": "ggml-org published a public llama.cpp benchmark dashboard for AMD Radeon 8060S (gfx1151) and Radeon AI Pro R9700S (gfx1201). It is updated weekly and tracks PP512 and TG128 tokens per second across builds, models and quantizations.",
+   "why_it_matters": "You can see what local model speed to expect on AMD hardware before buying it or picking a quantization.",
+   "try_this": "Open the dashboard and compare Q4_K_M with Q8_0 speed for a model you would run on AMD.",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/ggml-org/llamacpp-amd-bench",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "maintainer's announcement read; no sandbox run",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "The current hardware choices are Radeon 8060S (gfx1151) and Radeon AI Pro R9700S (gfx1201).",
+   "excerpt_url": "https://huggingface.co/blog/ggml-org/llamacpp-amd-bench",
+   "item_url": "https://huggingface.co/blog/ggml-org/llamacpp-amd-bench",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "huggingface",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-26-8e498b69",
+   "date": "2026-11-26",
+   "category": "release",
+   "claim": "datasette-charts 0.3a0 lets you annotate charts with lines, shaded areas and labels. Datasette Agent can create the annotated charts for you from a prompt.",
+   "why_it_matters": "It is an easy, open-source way to mark events on charts drawn from SQLite data, and an agent can do the marking.",
+   "try_this": "Try the annotation chart builder in Datasette Lite in your browser.",
+   "evidence": [
+    {
+     "url": "https://simonwillison.net/2026/Nov/25/datasette-charts/",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "plugin author's own release note",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "annotate it with lines, shaded areas, labels, or a combination of the three",
+   "excerpt_url": "https://simonwillison.net/2026/Nov/25/datasette-charts/",
+   "item_url": "https://simonwillison.net/2026/Nov/25/datasette-charts/",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "simonw",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-26-8a6423f7",
+   "date": "2026-11-26",
+   "category": "technique",
+   "claim": "Hugging Face published a reproducible multi-agent RL example. Four agents share one Qwen3-0.6B policy and learn to message each other to pool private numbers and sort them. The reward is cut by the number of tokens the team uses.",
+   "why_it_matters": "It is a small, testable setup for asking whether agent communication helps or just spends more compute.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/training-swarms",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "primary post read; the post's own compute cost estimate is not verified",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "This post's example takes about five hours on two H200s, which costs roughly $50.",
+   "excerpt_url": "https://huggingface.co/blog/training-swarms",
+   "item_url": "https://huggingface.co/blog/training-swarms",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "huggingface",
+   "status_at_publication": "docs-verified"
+  },
+  {
+   "id": "2026-11-26-40dd3fbe",
+   "date": "2026-11-26",
+   "category": "research",
+   "claim": "Ai2 interviewed 17 natural, applied and social scientists about AI research agents. It found five dimensions of trust: validation, privacy, objectivity, accountability and transparency.",
+   "why_it_matters": "It gives a checklist for what science users need from an agent beyond correct answers, such as logs showing which files it accessed.",
+   "try_this": null,
+   "evidence": [
+    {
+     "url": "https://huggingface.co/blog/allenai/where-scientists-draw-the-line-on-ai-agents",
+     "kind": "primary"
+    }
+   ],
+   "verification": {
+    "status": "docs-verified",
+    "method": "Ai2's own write-up read",
+    "checked_at": "2026-11-26T05:57-08:00",
+    "provisional": false,
+    "t1_audit_sample": false,
+    "audit_verdict": null,
+    "audit_note": null
+   },
+   "excerpt": "we interviewed 17 scientists working in the natural, applied, and social sciences",
+   "excerpt_url": "https://huggingface.co/blog/allenai/where-scientists-draw-the-line-on-ai-agents",
+   "item_url": "https://huggingface.co/blog/allenai/where-scientists-draw-the-line-on-ai-agents",
+   "scorable": true,
+   "prediction_deadline": null,
+   "state": "pending",
+   "recheck_on": "2026-12-10",
+   "source_id": "huggingface",
+   "status_at_publication": "docs-verified"
   }
  ],
  "audits": [
@@ -9318,6 +9674,13 @@
    "date": "2026-11-24",
    "item_id": "2026-11-24-3653c8c3",
    "source_id": "openai",
+   "tier": "T1-seed",
+   "verdict": "pass"
+  },
+  {
+   "date": "2026-11-26",
+   "item_id": "2026-11-26-23ab223a",
+   "source_id": "simonw",
    "tier": "T1-seed",
    "verdict": "pass"
   }

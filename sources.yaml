@@ -27,16 +27,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 6.414
+    alpha: 6.38
     beta: 2.0
-    trust_mean: 0.762
-    lb10: 0.568
+    trust_mean: 0.761
+    lb10: 0.566
     lb10_basis: decayed
     resolved_tips: 6
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-23': 1
@@ -92,7 +92,7 @@ sources:
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -127,15 +127,15 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 16.198
+    alpha: 16.089
     beta: 2.0
-    trust_mean: 0.89
-    lb10: 0.792
+    trust_mean: 0.889
+    lb10: 0.791
     lb10_basis: decayed
     resolved_tips: 20
     tier: T2
     research_criterion: main claim checked against one primary or independent source
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-16': 10
       '2026-10-19': 2
@@ -159,8 +159,9 @@ sources:
       '2026-11-20': 4
       '2026-11-21': 1
       '2026-11-24': 5
-    items_seen: 134
-    scorable_claims: 58
+      '2026-11-26': 1
+    items_seen: 135
+    scorable_claims: 61
 - id: openai
   name: OpenAI (and Sam Altman's blog)
   home_url: https://openai.com
@@ -193,16 +194,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 8.079
-    beta: 3.316
-    trust_mean: 0.709
-    lb10: 0.532
+    alpha: 8.033
+    beta: 3.306
+    trust_mean: 0.708
+    lb10: 0.531
     lb10_basis: decayed
     resolved_tips: 9
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-16': 7
       '2026-10-17': 2
@@ -231,7 +232,8 @@ sources:
       '2026-11-20': 10
       '2026-11-21': 7
       '2026-11-24': 25
-    items_seen: 263
+      '2026-11-26': 6
+    items_seen: 269
     scorable_claims: 37
 - id: deepmind
   name: Google DeepMind / Google AI
@@ -264,16 +266,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 6.744
+    alpha: 6.707
     beta: 2.0
-    trust_mean: 0.771
-    lb10: 0.583
+    trust_mean: 0.77
+    lb10: 0.581
     lb10_basis: decayed
     resolved_tips: 8
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -342,7 +344,7 @@ sources:
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-11-01': 1
     items_seen: 1
@@ -369,8 +371,8 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 4.138
-    beta: 2.861
+    alpha: 4.121
+    beta: 2.854
     trust_mean: 0.591
     lb10: 0.37
     lb10_basis: undecayed-12mo (low volume)
@@ -378,7 +380,7 @@ sources:
     tier: T1-seed
     research_criterion: 'main claim checked against one primary or independent source (tightened: >1 audit error in last 20); plus the random
       full audit'
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -412,8 +414,9 @@ sources:
       '2026-11-22': 1
       '2026-11-23': 1
       '2026-11-24': 6
-    items_seen: 73
-    scorable_claims: 25
+      '2026-11-26': 3
+    items_seen: 76
+    scorable_claims: 27
 - id: ray
   name: Ray Fu (RayCFU)
   home_url: https://www.raycfu.com
@@ -448,8 +451,8 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.888
-    beta: 2.888
+    alpha: 2.881
+    beta: 2.881
     trust_mean: 0.5
     lb10: 0.247
     lb10_basis: undecayed-12mo (low volume)
@@ -457,7 +460,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 2
@@ -475,7 +478,8 @@ sources:
       '2026-11-18': 3
       '2026-11-19': 1
       '2026-11-23': 1
-    items_seen: 26
+      '2026-11-26': 3
+    items_seen: 29
     scorable_claims: 8
 - id: latentspace
   name: Latent Space (swyx)
@@ -499,15 +503,15 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 11.674
-    beta: 2.865
-    trust_mean: 0.803
-    lb10: 0.664
+    alpha: 11.599
+    beta: 2.858
+    trust_mean: 0.802
+    lb10: 0.663
     lb10_basis: decayed
     resolved_tips: 15
     tier: T2
     research_criterion: main claim checked against one primary or independent source
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-16': 2
       '2026-10-17': 1
@@ -534,7 +538,8 @@ sources:
       '2026-11-21': 2
       '2026-11-24': 1
       '2026-11-25': 1
-    items_seen: 49
+      '2026-11-26': 2
+    items_seen: 51
     scorable_claims: 19
 - id: mollick
   name: Ethan Mollick (One Useful Thing)
@@ -567,7 +572,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-11-10': 1
     items_seen: 1
@@ -593,16 +598,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 7.305
+    alpha: 7.264
     beta: 2.0
-    trust_mean: 0.785
-    lb10: 0.606
+    trust_mean: 0.784
+    lb10: 0.604
     lb10_basis: decayed
     resolved_tips: 7
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-22': 5
@@ -621,8 +626,9 @@ sources:
       '2026-11-19': 3
       '2026-11-24': 2
       '2026-11-25': 1
-    items_seen: 31
-    scorable_claims: 18
+      '2026-11-26': 4
+    items_seen: 35
+    scorable_claims: 23
 - id: cursor
   name: Cursor Changelog
   home_url: https://cursor.com/changelog
@@ -644,7 +650,7 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.416
+    alpha: 2.412
     beta: 2.0
     trust_mean: 0.547
     lb10: 0.262
@@ -653,7 +659,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-16': 1
     items_seen: 1
@@ -679,16 +685,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 5.939
-    beta: 2.422
+    alpha: 5.909
+    beta: 2.419
     trust_mean: 0.71
-    lb10: 0.504
+    lb10: 0.503
     lb10_basis: decayed
     resolved_tips: 6
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-19': 1
       '2026-10-20': 3
@@ -712,8 +718,9 @@ sources:
       '2026-11-20': 3
       '2026-11-21': 4
       '2026-11-24': 4
-    items_seen: 88
-    scorable_claims: 39
+      '2026-11-26': 1
+    items_seen: 89
+    scorable_claims: 40
 - id: fireship
   name: Fireship
   home_url: https://www.youtube.com/@Fireship
@@ -738,16 +745,16 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.877
+    alpha: 2.871
     beta: 2.0
-    trust_mean: 0.59
+    trust_mean: 0.589
     lb10: 0.32
     lb10_basis: undecayed-12mo (low volume)
     resolved_tips: 1
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-23': 1
       '2026-10-24': 1
@@ -761,7 +768,8 @@ sources:
       '2026-11-20': 1
       '2026-11-21': 1
       '2026-11-24': 1
-    items_seen: 12
+      '2026-11-26': 1
+    items_seen: 13
     scorable_claims: 3
 - id: aiexplained
   name: AI Explained
@@ -796,7 +804,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-11-03': 1
       '2026-11-11': 1
@@ -824,8 +832,8 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 4.193
-    beta: 2.439
+    alpha: 4.176
+    beta: 2.435
     trust_mean: 0.632
     lb10: 0.408
     lb10_basis: undecayed-12mo (low volume)
@@ -833,7 +841,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-18': 1
       '2026-10-25': 1
@@ -861,7 +869,7 @@ sources:
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
   trust:
-    alpha: 2.891
+    alpha: 2.884
     beta: 2.0
     trust_mean: 0.591
     lb10: 0.32
@@ -870,7 +878,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-10-20': 1
       '2026-10-27': 1
@@ -914,7 +922,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-11-10': 1
       '2026-11-12': 1
@@ -956,7 +964,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date:
       '2026-11-17': 2
       '2026-11-21': 1
@@ -998,7 +1006,7 @@ sources:
     tier: T3
     research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
       left out or listed as not recommended
-    updated: '2026-11-25'
+    updated: '2026-11-26'
     items_seen_by_date: {}
     items_seen: 0
     scorable_claims: 0
@@ -1024,6 +1032,20 @@ sources:
     stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: Created Claude Code.
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-11-26'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
 - id: mitsuhiko
   name: Armin Ronacher
   home_url: https://lucumr.pocoo.org
@@ -1046,6 +1068,20 @@ sources:
     stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-11-26'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
 - id: hamel
   name: Hamel Husain
   home_url: https://hamel.dev
@@ -1068,13 +1104,27 @@ sources:
     stop_rule: Stop the host for the day on 403/429; stop on a robots or terms change, or on opt-out
     opt_out: TAKEDOWN.md (GitHub issue or email); honored within 24 h
   notes: null
+  trust:
+    alpha: 2.0
+    beta: 2.0
+    trust_mean: 0.5
+    lb10: 0.196
+    lb10_basis: undecayed-12mo (low volume)
+    resolved_tips: 0
+    tier: T3
+    research_criterion: every claim checked against a primary source; tools capped at docs-verified until the sandbox exists; unverified items
+      left out or listed as not recommended
+    updated: '2026-11-26'
+    items_seen_by_date: {}
+    items_seen: 0
+    scorable_claims: 0
 - id: mitchellh
   name: Mitchell Hashimoto
   home_url: https://mitchellh.com
   kind: expert
   seed: false
   enabled: false
-  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  disabled_reason: 'queued: at most 3 new sources a week (METHOD.md section 5)'
   feeds:
   - type: rss
     url: https://mitchellh.com/feed.xml
@@ -1096,7 +1146,7 @@ sources:
   kind: expert
   seed: false
   enabled: false
-  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  disabled_reason: 'queued: at most 3 new sources a week (METHOD.md section 5)'
   feeds:
   - type: rss
     url: https://addyo.substack.com/feed
@@ -1118,7 +1168,7 @@ sources:
   kind: expert
   seed: false
   enabled: false
-  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  disabled_reason: 'queued: at most 3 new sources a week (METHOD.md section 5)'
   feeds:
   - type: rss
     url: https://eugeneyan.com/rss/
@@ -1140,7 +1190,7 @@ sources:
   kind: expert
   seed: false
   enabled: false
-  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  disabled_reason: 'queued: at most 3 new sources a week (METHOD.md section 5)'
   feeds:
   - type: rss
     url: https://jxnl.co/feed_rss_created.xml
@@ -1162,7 +1212,7 @@ sources:
   kind: expert
   seed: false
   enabled: false
-  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  disabled_reason: 'queued: at most 3 new sources a week (METHOD.md section 5)'
   feeds:
   - type: rss
     url: https://www.dbreunig.com/feed.xml
@@ -1184,7 +1234,7 @@ sources:
   kind: expert
   seed: false
   enabled: false
-  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  disabled_reason: 'queued: at most 3 new sources a week (METHOD.md section 5)'
   feeds:
   - type: rss
     url: https://ghuntley.com/rss/
@@ -1206,7 +1256,7 @@ sources:
   kind: expert
   seed: false
   enabled: false
-  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  disabled_reason: 'queued: at most 3 new sources a week (METHOD.md section 5)'
   feeds:
   - type: rss
     url: https://steve-yegge.medium.com/feed
@@ -1228,7 +1278,7 @@ sources:
   kind: expert
   seed: false
   enabled: false
-  disabled_reason: "queued: at most 3 new sources a week (METHOD.md section 5)"
+  disabled_reason: 'queued: at most 3 new sources a week (METHOD.md section 5)'
   feeds:
   - type: rss
     url: https://thezvi.substack.com/feed
