@@ -483,6 +483,7 @@ sources:
   kind: expert
   seed: false
   enabled: true
+  transcript: true
   feeds:
   - type: rss
     url: https://www.latent.space/feed

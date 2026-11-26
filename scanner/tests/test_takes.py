@@ -1,4 +1,5 @@
 """Offline fixture for builder takes, from saved extraction output to the public drop and ledger."""
+import datetime as dt
 import json
 import shutil
 import sys
@@ -9,7 +10,7 @@ from unittest import mock
 
 import yaml
 
-from scanner import extract, gate, quotes, run, trust, util
+from scanner import extract, fetch, gate, quotes, run, trust, util
 
 DAY = "2026-11-25"
 SPEAKER = "Ada Builder"
@@ -71,7 +72,7 @@ def test_quotes():
         assert not quotes.matches_item(EXCERPT, item, pages)
         path.write_bytes(b"\xff")
         assert not quotes.matches_item(EXCERPT, item, pages)
-        path.write_text("x " * 12000 + EXCERPT)
+        path.write_text("x " * 100000 + EXCERPT)
         assert not quotes.matches_item(EXCERPT, item | {"summary": "x " * 750 + EXCERPT}, pages)
         assert quotes.matches_item(EXCERPT, item, pages)
         # the speaker must be named next to the quote; a name only in the byline counts only for the page's own author
@@ -102,6 +103,144 @@ def test_quotes():
         path.write_text(f"\u201c{EXCERPT}\u201d said {SPEAKER}.")
         assert quotes.matches_item(EXCERPT, item, pages, SPEAKER)
         assert quotes.is_source_person("Armin Ronacher", "Armin Ronacher") and not quotes.is_source_person("Bob Troll", "Armin Ronacher")
+
+
+def test_transcript_turns():
+    host, guest = "Dwarkesh Patel", "Paul Christiano"
+    transcript = (f"By {host}, the host.\n{host}: Why?\n"
+                  f"{guest}: Give the coding agent\n\tone example first.\n"
+                  "Production Notes\nUse a separate fixture.\n"
+                  f"{host}: Thanks.\n{guest}: Sure.\n{host}: Anything else?\n{guest}: That's all.")
+    with tempfile.TemporaryDirectory() as tmp:
+        pages = Path(tmp)
+        path = pages / "transcript.txt"
+        path.write_text(transcript)
+        item = {"snapshot": str(path), "transcript": True}
+        assert quotes.matches_item(EXCERPT, item, pages, guest)
+        assert not quotes.matches_item(EXCERPT, item, pages, host)
+        assert not quotes.matches_item(EXCERPT, item, pages, host, byline_ok=True)
+        assert quotes.matches_item(EXCERPT, {"snapshot": str(path)}, pages, host)
+        assert not quotes.matches_item(f"Why? {guest}: {EXCERPT}", item, pages, host)
+        assert not quotes.matches_item("Use a separate fixture.", item, pages, guest)
+
+        transcript = ("Nathan Labenz (00:01:02)\n" + "filler " * 450 + "We\u2019re doing \ufb01ne.\n"
+                      "Chris: Start here.\nNathan Labenz [1:02:03]: Keep going.\n"
+                      "Benson 12:34\nKeep it simple.\nNathan Labenz\nOne last point.\n"
+                      "Chris: Got it.\nChris: Thanks.")
+        path.write_text(transcript, encoding="utf-8")
+        labels = ["Nathan Labenz", "Chris", "Nathan Labenz", "Benson", "Nathan Labenz", "Chris", "Chris"]
+        lines = ["Nathan Labenz (", "Chris: Start", "Nathan Labenz [", "Benson 12:", "Nathan Labenz\n",
+                 "Chris: Got", "Chris: Thanks"]
+        assert quotes.turn_labels(transcript) == list(zip((transcript.index(line) for line in lines), labels))
+        assert quotes.matches_item("We're doing fine.", item, pages, "Nathan Labenz")
+        assert not quotes.matches_item("We're doing fine.", item, pages, "Chris Benson")
+        assert quotes.matches_item("Start here.", item, pages, "Chris Benson")
+        assert quotes.matches_item("Keep it simple.", item, pages, "Chris Benson")
+        assert not quotes.turn_labels("Then I said: no\nA B C D E F G: no\n" + "A" * 61 + ": no")
+
+
+def test_blog_and_turnless_transcript():
+    guest, guest_quote = "Bob Troll", "Try a smaller example."
+    own_quote = "Check the output before sharing it."
+    page = (f"By {SPEAKER}, the author.\n" + "filler " * 75 + "\n"
+            "Release Notes\nRecent Work\nRelease Notes\nExample Projects\nMore Reading\n"
+            f"{EXCERPT}\n" + "filler " * 75 + "\n"
+            f"As {guest} wrote, {guest_quote}\nAs {SPEAKER} wrote, {own_quote}")
+    labels = quotes.turn_labels(page)
+    assert len(labels) == 5 and not quotes.has_turns(labels)
+    with tempfile.TemporaryDirectory() as tmp:
+        pages = Path(tmp)
+        path = pages / "page.txt"
+        path.write_text(page)
+        item = {"source": SPEAKER, "snapshot": str(path)}
+        assert not quotes.matches_item(EXCERPT, item, pages, SPEAKER)
+        assert quotes.matches_item(EXCERPT, item, pages, SPEAKER, byline_ok=True)
+        assert quotes.matches_item(guest_quote, item, pages, guest)
+        item["transcript"] = True
+        assert not quotes.matches_item(guest_quote, item, pages, guest)
+        assert not quotes.matches_item(EXCERPT, item, pages, SPEAKER, byline_ok=True)
+        assert quotes.matches_item(own_quote, item, pages, SPEAKER)
+
+
+def test_saved_dwarkesh_transcript():
+    html = Path("/tmp/cp-pod/dw.html")
+    if not html.is_file():
+        print("saved Dwarkesh transcript smoke test: skipped (fixture missing)")
+        return
+    transcript = util.html_to_text(html.read_text(encoding="utf-8"), quotes.MAX_SNAPSHOT_CHARS, keep_lines=True)
+    assert quotes.has_turns(quotes.turn_labels(transcript))
+    excerpt = "A couple things are on my mind, especially over the last few weeks."
+    with tempfile.TemporaryDirectory() as tmp:
+        pages = Path(tmp)
+        path = pages / "dw.txt"
+        path.write_text(transcript, encoding="utf-8")
+        item = {"snapshot": str(path), "transcript": True, "source": "Dwarkesh Patel"}
+        assert quotes.matches_item(excerpt, item, pages, "Paul Christiano")
+        assert not quotes.matches_item(excerpt, item, pages, "Dwarkesh Patel")
+    print("saved Dwarkesh transcript smoke test: OK")
+
+
+def test_snapshot_limits():
+    html = "<p> Hello\t world <br />  next </p><p>Again</p>"
+    assert util.html_to_text(html) == util.html_to_text(html, keep_lines=False) == "Hello world next Again"
+    assert util.html_to_text(html, keep_lines=True) == "Hello world\nnext\n\nAgain"
+    transcript = ("<p>Dwarkesh Patel: Why?</p><p>Paul Christiano: " + "filler " * 3500
+                  + f"{EXCERPT}</p><p>Dwarkesh Patel: Thanks.</p><p>Paul Christiano: Sure.</p>"
+                  "<p>Dwarkesh Patel: Anything else?</p><p>Paul Christiano: That's all.</p>")
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, work, raw = fixture(Path(tmp), ("default", "extended"))
+        reg = yaml.safe_load((repo / "sources.yaml").read_text())
+        for src in reg["sources"]:
+            src["register"] = dict.fromkeys(("route", "basis", "republish", "limit", "stop_rule", "opt_out"), "fixture")
+            src["feeds"] = [{"type": "rss", "url": f"https://{src['id']}.example/feed"}]
+        reg["sources"][1]["snapshot_chars"] = 200000
+        reg["sources"][1]["transcript"] = True
+        (repo / "sources.yaml").write_text(yaml.safe_dump(reg))
+
+        def feed_item(src, _feed, _since):
+            return [{"source_id": src["id"], "kind": "rss", "title": "Transcript",
+                     "url": f"https://{src['id']}.example/episode"}]
+
+        with mock.patch.object(fetch, "feed_items", side_effect=feed_item), \
+             mock.patch.object(util, "get", return_value=mock.Mock(status_code=200, text=transcript)), \
+             mock.patch.object(util, "add_page"), mock.patch.object(util, "page_count", return_value=0):
+            (default, extended), _ = fetch.run(repo, work, DAY, 36)
+        assert "transcript" not in default and extended["transcript"] is True
+        assert len(Path(default["snapshot"]).read_text()) == 24000
+        assert not quotes.matches_item(EXCERPT, default, raw / "pages")
+        assert not quotes.matches_item(EXCERPT, default, raw / "pages", "Paul Christiano")
+        assert quotes.matches_item(EXCERPT, extended, raw / "pages", "Paul Christiano")
+        assert not quotes.matches_item(EXCERPT, extended, raw / "pages", "Dwarkesh Patel")
+
+
+def test_summary_quotes():
+    summary = {"source": SPEAKER, "summary": f"Bob Troll: {EXCERPT}"}
+    with tempfile.TemporaryDirectory() as tmp:
+        pages = Path(tmp)
+        assert quotes.matches_item(EXCERPT, summary, pages)
+        assert not quotes.matches_item(EXCERPT, summary, pages, "Bob Troll")
+        own = summary | {"summary": f"{SPEAKER}: {EXCERPT}"}
+        assert quotes.matches_item(EXCERPT, own, pages, SPEAKER)
+        path = pages / "page.txt"
+        path.write_text("The page has other material.")
+        with_page = own | {"snapshot": str(path)}
+        assert quotes.matches_item(EXCERPT, with_page, pages, SPEAKER)
+        assert not quotes.matches_item(EXCERPT, with_page | {"transcript": True}, pages, SPEAKER)
+        turns = (f"{SPEAKER}: {EXCERPT}\nBob Troll: Why?\n{SPEAKER}: It helps.\n"
+                 f"Bob Troll: How?\n{SPEAKER}: Try it.\nBob Troll: Thanks.")
+        assert not quotes.matches_item(EXCERPT, own | {"summary": turns}, pages, SPEAKER)
+
+        desc = turns.replace("\n", "<br>")
+        rss = ("<rss version='2.0'><channel><item><link>https://builder.example/p</link>"
+               "<pubDate>Wed, 25 Nov 2026 12:00:00 GMT</pubDate>"
+               f"<description><![CDATA[{desc}]]></description></item></channel></rss>")
+        with mock.patch.object(util, "get", return_value=mock.Mock(status_code=200, content=rss.encode())):
+            (item,) = fetch.feed_items({"id": "builder", "name": SPEAKER},
+                                       {"type": "rss", "url": "https://builder.example/feed"},
+                                       dt.datetime(2026, 11, 25, tzinfo=dt.timezone.utc))
+        assert item["summary"] == turns.replace("\n", " ")
+        assert quotes.matches_item(EXCERPT, item, pages)
+        assert not quotes.matches_item(EXCERPT, item, pages, SPEAKER)
 
 
 def test_take_guards():
@@ -230,12 +369,18 @@ def test_caps_and_audit_paths():
     with tempfile.TemporaryDirectory() as tmp:
         sources = ("builder", "second", "third", "fourth", "fifth")
         repo, work, raw = fixture(Path(tmp), sources)
+        reg = yaml.safe_load((repo / "sources.yaml").read_text())
+        for src in reg["sources"]:
+            src["name"] = f"{SPEAKER} ({src['id']})"
+        (repo / "sources.yaml").write_text(yaml.safe_dump(reg))
         claims, items = [], []
-        for sid in sources:
+        for src in reg["sources"]:
+            sid = src["id"]
             for n in range(3):
                 url = f"https://builder.example/{sid}/{n}"
                 claims.append(take(url, f"Tip {n} from {sid}", sid=sid))
-                items.append({"source_id": sid, "url": url, "published": "2026-11-18", "summary": f"{SPEAKER}: {EXCERPT}"})
+                items.append({"source_id": sid, "source": src["name"], "url": url,
+                              "published": "2026-11-18", "summary": f"{SPEAKER}: {EXCERPT}"})
         cached_take = take_id(claims[0])
         replacement_take = take_id(claims[1])
         capped_take = take_id(claims[2])
@@ -267,6 +412,11 @@ def test_caps_and_audit_paths():
 
 if __name__ == "__main__":
     test_quotes()
+    test_transcript_turns()
+    test_blog_and_turnless_transcript()
+    test_saved_dwarkesh_transcript()
+    test_snapshot_limits()
+    test_summary_quotes()
     test_take_guards()
     test_extraction_stages_items_without_missing_snapshots()
     test_publication()

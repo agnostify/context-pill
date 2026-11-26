@@ -1,6 +1,8 @@
 """Match excerpts against the scanner's saved page text and RSS summary."""
 import re
 import unicodedata
+from bisect import bisect_right
+from collections import Counter
 from pathlib import Path
 
 
@@ -13,6 +15,55 @@ def _normalize(text):
 SPEAKER_WINDOW = 200          # the speaker's name must appear within this many characters before the quote, in the same text
 SPEAKER_AFTER = 80            # or this close after it ('...,' said Ada Builder)
 BYLINE_ZONE = 1000            # or, for the page's own author, in the first this-many characters of the saved page (the byline)
+MAX_SNAPSHOT_CHARS = 200_000
+
+# A label starts a line and has up to six name words, an optional timestamp, then a colon or end of line.
+# Check Unicode letters and uppercase initials separately because re has no uppercase-letter character class.
+_NAME_WORD = r"[^\W\d_][^\W\d_.'\u2019-]*"
+_TIMESTAMP = r"[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?"
+_TURN_LABEL = re.compile(
+    rf"^[ \t]*(?P<label>{_NAME_WORD}(?:[ \t]+{_NAME_WORD}){{0,5}})"
+    rf"(?:[ \t]*(?:\({_TIMESTAMP}\)|\[{_TIMESTAMP}\]|{_TIMESTAMP}))?[ \t]*(?::|\r?$)", re.MULTILINE)
+
+
+def turn_labels(text):
+    """Return the raw line offset and name for each turn label, in text order."""
+    labels = []
+    for match in _TURN_LABEL.finditer(text):
+        label = match["label"]
+        if (len(label) <= 60 and all(word[0].isupper() for word in label.split())
+                and all(ch.isalpha() or ch in " \t.'\u2019-" for ch in label)):
+            labels.append((match.start(), label))
+    return labels
+
+
+def has_turns(labels):
+    counts = Counter(_normalize(label) for _, label in labels)
+    return sum(count >= 3 for count in counts.values()) >= 2
+
+
+def quote_in_turn(excerpt, speaker, text, labels):
+    """Map normalized quote offsets to raw turns using the starts of their label lines."""
+    parts, starts = [], []
+    raw_start = length = 0
+    # Turn boundaries are line breaks, so normalizing each part and joining with a space preserves matching.
+    for raw_end, _ in labels:
+        part = _normalize(text[raw_start:raw_end])
+        if part:
+            parts.append(part)
+            length += len(part) + 1
+        starts.append(length)
+        raw_start = raw_end
+    parts.append(_normalize(text[raw_start:]))
+    name = _normalize(speaker)
+    words = name.split()
+    for start, end in _find(_normalize(excerpt), " ".join(parts)):
+        turn = bisect_right(starts, start) - 1
+        if turn < 0 or start == starts[turn] or (turn + 1 < len(starts) and end > starts[turn + 1]):
+            continue
+        if _normalize(labels[turn][1]) in (name, words[0], words[-1]):
+            return True
+    return False
 
 
 def _find(needle, hay):
@@ -78,9 +129,10 @@ def _texts(item, pages):
     try:
         if item and item.get("snapshot"):
             path = Path(item["snapshot"]).resolve()
-            if path.is_relative_to(pages.resolve()) and path.is_file():
-                with path.open(encoding="utf-8") as f:
-                    out.append(f.read(24000))
+            if not path.is_relative_to(pages.resolve()) or not path.is_file():
+                return []
+            with path.open(encoding="utf-8") as f:
+                out.append(f.read(MAX_SNAPSHOT_CHARS))
         if item and isinstance(item.get("summary"), str):
             out.append(item["summary"][:1500])
     except (OSError, ValueError, RuntimeError, TypeError):
@@ -98,32 +150,25 @@ def is_source_person(speaker, source_name):
 
 
 def matches_item(excerpt, item, pages, speaker=None, byline_ok=False):
-    """The excerpt must appear in the item's saved page text or its RSS summary. With a speaker (takes), the speaker's
-    name must appear near the quote in the same text; or, when byline_ok (the speaker is the source's own person, or the
-    source is a lab page), the name may instead sit in the saved page's byline zone with the quote anywhere on the page."""
+    """Match takes using transcript turns or the source's proximity and byline rules."""
     if not item or not valid_excerpt(excerpt):
         return False
-    try:
-        texts = []
-        if item.get("snapshot"):
-            path = Path(item["snapshot"]).resolve()
-            if not path.is_relative_to(pages.resolve()) or not path.is_file():
-                return False
-            with path.open(encoding="utf-8") as f:
-                texts.append(f.read(24000))
-        summary = item.get("summary")
-        if isinstance(summary, str):
-            texts.append(summary[:1500])
-        if speaker is not None:
-            if not valid_speaker(speaker):
-                return False
-            if any(quote_near_speaker(excerpt, speaker, t) for t in texts):
-                return True
-            page = texts[0] if item.get("snapshot") and texts else ""
-            return bool(byline_ok and page and in_byline(speaker, page) and quote_found(excerpt, page))
+    texts = _texts(item, pages)
+    if speaker is None:
         return any(quote_found(excerpt, t) for t in texts)
-    except (OSError, ValueError, RuntimeError, TypeError):
+    if not texts or not valid_speaker(speaker):
         return False
+    text = texts[0]
+    if item.get("snapshot"):
+        if item.get("transcript") is True:
+            turns = turn_labels(text)
+            if has_turns(turns):
+                return quote_in_turn(excerpt, speaker, text, turns)
+            return is_source_person(speaker, item.get("source")) and quote_near_speaker(excerpt, speaker, text)
+        return any(quote_near_speaker(excerpt, speaker, t) for t in texts) or bool(
+            byline_ok and in_byline(speaker, text) and quote_found(excerpt, text))
+    return (is_source_person(speaker, item.get("source")) and not item.get("summary_has_turns")
+            and not has_turns(turn_labels(text)) and quote_near_speaker(excerpt, speaker, text))
 
 
 HTTPS_LINK = re.compile(r"^https://[^\"'<>@/\s]+(?:/[^\"'<>\s]*)?$")      # the same shape mcp/server.mjs httpsOnly() accepts
