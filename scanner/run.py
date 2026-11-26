@@ -264,12 +264,15 @@ def main():
         c["scorable"] = category != "take"
         deadline = c.get("prediction_deadline") if c["scorable"] else None
         base = dt.date.fromisoformat(deadline) if deadline else today
+        also_seen_in = c.get("also_seen_in")
+        if not isinstance(also_seen_in, list):
+            also_seen_in = []
         drop.append({
             "id": cid, "date": date, "category": c["category"], "claim": c["claim"], "why_it_matters": c.get("why_it_matters"),
             "try_this": None if is_take else c.get("try_this") if v.get("status") in CHECKED or c.get("try_this") == "not recommended: terms risk" else None,
             "source": {"id": s["id"], "name": s["name"], "home_url": s["home_url"], "tier": t["tier"], "trust_mean": t["trust_mean"],
                        "lb10": t["lb10"], "seed": bool(s.get("seed"))},
-            "also_seen_in": [srcs[x]["name"] for x in c.get("also_seen_in", []) if x in srcs and x != s["id"]],
+            "also_seen_in": [srcs[x]["name"] for x in also_seen_in if isinstance(x, str) and x in srcs and x != s["id"]],
             "item_url": c.get("item_url"), "evidence": c["evidence"],
             "verification": {"status": v.get("status", "unverified"), "method": v.get("method", ""), "checked_at": dt.datetime.now().astimezone().isoformat(timespec="minutes"),
                              "provisional": day_no <= trust.PROVISIONAL_DAYS, "t1_audit_sample": False, "audit_verdict": None, "audit_note": None},

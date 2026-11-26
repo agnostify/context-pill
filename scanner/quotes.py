@@ -24,6 +24,8 @@ _EDGE_TIMESTAMP = re.compile(
     rf"|^[^:]*?(?P<trailing>{_TIME_MARK})(?=\s*(?:\([^()]*\)\s*)?(?::|$))")
 _ROLE_NOTES = re.compile(r"(?:\s*\((?:guest|host|co-host|interviewer|moderator)\))+$", re.IGNORECASE)
 _SUMMARY_NOTE = re.compile(r"\s*\([^()]*\)$")
+_NAME_WORD = r"(?:(?:[^\W\d_]\.)+|[^\W\d_]+(?:[-'\u2019][^\W\d_]+)*)"
+_SUMMARY_LABEL = re.compile(rf"(?<![\w'\u2019-])({_NAME_WORD}(?:[^\S\r\n]+{_NAME_WORD})*)[^\S\r\n]*:")
 _BRACKETED_LABEL = re.compile(r"^([^()\[\]{}]+)[(\[{].*[)\]}]\s*(?::|$)")
 
 
@@ -62,11 +64,18 @@ def _creditable_labels(boundaries, minimum=5):
 
 
 def _enough_creditable_labels(creditable):
-    return len(creditable) >= 2 and sum(creditable.values()) >= 12
+    return len(creditable) >= 2 and sum(creditable.values()) >= 20
+
+
+def _has_turns(boundaries, creditable):
+    if not _enough_creditable_labels(creditable):
+        return False
+    labels = [label for _, label in boundaries.values() if label in creditable]
+    return sum(first != second for first, second in zip(labels, labels[1:])) >= 10
 
 
 def has_turns(boundaries):
-    return _enough_creditable_labels(_creditable_labels(boundaries))
+    return _has_turns(boundaries, _creditable_labels(boundaries))
 
 
 def summary_has_turns(text):
@@ -74,12 +83,26 @@ def summary_has_turns(text):
     return len(_creditable_labels(turn_labels(text, summary=True), minimum=3)) >= 2
 
 
+def _summary_names_other_speaker(text, speaker):
+    name = _normalize(speaker)
+    for match in _SUMMARY_LABEL.finditer(text):
+        words = match[1].split()
+        label = []
+        for word in reversed(words):
+            if not word[0].istitle():
+                break
+            label.append(word)
+        if 1 <= len(label) <= 6 and _normalize(" ".join(reversed(label))) != name:
+            return True
+    return False
+
+
 def quote_in_turn(excerpt, speaker, text):
     """Match one speech line before the last two speech turns, without another creditable name in between."""
     boundaries = turn_labels(text)
     creditable = _creditable_labels(boundaries)
     name = _normalize(speaker)
-    if name not in creditable or not _enough_creditable_labels(creditable):
+    if name not in creditable or not _has_turns(boundaries, creditable):
         return False
     lines = [line.strip() for line in text.splitlines()]
     ends = list(boundaries)[1:] + [len(lines)]
@@ -201,7 +224,8 @@ def matches_item(excerpt, item, pages, speaker=None, byline_ok=False):
         return any(quote_near_speaker(excerpt, speaker, t) for t in texts) or bool(
             byline_ok and in_byline(speaker, text) and quote_found(excerpt, text))
     return (is_source_person(speaker, item.get("source")) and not item.get("summary_has_turns")
-            and not summary_has_turns(text) and quote_near_speaker(excerpt, speaker, text))
+            and not summary_has_turns(text) and not _summary_names_other_speaker(text, speaker)
+            and quote_near_speaker(excerpt, speaker, text))
 
 
 HTTPS_LINK = re.compile(r"^https://[^\"'<>@/\s]+(?:/[^\"'<>\s]*)?$")      # the same shape mcp/server.mjs httpsOnly() accepts

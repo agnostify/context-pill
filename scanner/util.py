@@ -198,7 +198,7 @@ def html_to_text(s, limit=20000, keep_lines=False, *, summary=False):
         tags = "br|p|div|li|h[1-6]|tr|blockquote|section|article|dt|dd"
         if not summary:
             tags += "|td|th|figcaption|hr|pre|table|ul|ol|dl"
-        s = re.sub(rf"(?i)</?(?:{tags})(?=[\s/>])[^>]*>", "\n", s)
+        s = re.sub(rf"(?i)<(?:/?(?:{tags})|/(?:b|strong))(?=[\s/>])[^>]*>", "\n", s)
     s = re.sub(r"(?s)<[^>]+>", " ", s)
     s = html.unescape(s)
     if keep_lines:
