@@ -197,7 +197,8 @@ def main():
             if pub and c["said_on"] > pub:
                 rejected.append(f"{sid}: take dated after its feed entry ({c['said_on']} > {pub}): {cid}"); continue
             c["try_this"] = None                     # an opinion never carries an actionable step
-            hits = gate.scan_text(f"take {cid}", f"{c.get('excerpt') or ''} {c.get('speaker') or ''} {c.get('claim') or ''}", gate.private_patterns()[0])
+            hits = gate.scan_text(f"take {cid}", " ".join(str(c.get(k) or "") for k in ("excerpt", "speaker", "claim", "why_it_matters")),
+                                  gate.private_patterns()[0])
             if hits:
                 rejected.append(f"{sid}: take quote failed the publication scan ({'; '.join(hits)}): {cid}"); continue
         elif v.get("status") == "attributed":
@@ -205,13 +206,15 @@ def main():
         excerpt, excerpt_url = c.get("excerpt"), c.get("excerpt_url")
         if is_take or excerpt is not None:
             item = item_by_source_url.get((sid, excerpt_url)) if notes.usable_url(excerpt_url) else None
-            if not is_take and excerpt and gate.scan_text(f"excerpt {cid}", excerpt, gate.private_patterns()[0]):
-                c["excerpt"] = c["excerpt_url"] = None; excerpt = None
-            if (is_take or excerpt is not None) and ((is_take and excerpt_url != item_url) or not quotes.matches_item(
-                    excerpt, item, raw / "pages", (c.get("speaker") or "") if is_take else None,
-                    byline_ok=is_take and (s.get("kind") == "lab" or quotes.is_source_person(c.get("speaker"), s.get("name"))))):
-                if is_take:
+            pages = raw / "pages"
+            if is_take:
+                # the speaker's name next to the quote; the byline counts only for a lab's listed pages or an opted-in source's own person
+                byline_ok = s.get("kind") == "lab" or (s.get("take_byline") is True and quotes.is_source_person(c.get("speaker"), s.get("name")))
+                if excerpt_url != item_url or not quotes.matches_item(excerpt, item, pages, c.get("speaker") or "", byline_ok=byline_ok):
                     rejected.append(f"{sid}: quote not found: {cid}"); continue
+                if not quotes.date_on_item(c.get("said_on"), item, pages):
+                    rejected.append(f"{sid}: original date not found on the page or feed entry: {cid}"); continue
+            elif gate.scan_text(f"excerpt {cid}", excerpt, gate.private_patterns()[0]) or not quotes.matches_item(excerpt, item, pages):
                 c["excerpt"] = c["excerpt_url"] = None
         if is_take and cid not in removed:
             if cid in take_ids:

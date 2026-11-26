@@ -83,6 +83,16 @@ def test_quotes():
         assert quotes.matches_item(troll, item, pages, SPEAKER, byline_ok=True)      # known limit, see scanner/breakage.md
         assert not quotes.matches_item(troll, item, pages, "Carol Nobody", byline_ok=True)
         assert not quotes.matches_item(troll, item, pages, "AI")
+        inside = "Boris Cherny says plan mode is overrated for small fixes."
+        path.write_text("Jane Roe wrote: " + inside)
+        assert not quotes.matches_item(inside, item, pages, "Boris Cherny")
+        assert quotes.matches_item(inside, item, pages, "Jane Roe")
+        for bad in ("Boris](javascript:alert(1)) Cherny", "Ada\nBuilder", "Ada  Builder", "Ada <b>Builder</b>"):
+            assert not quotes.valid_speaker(bad), bad
+        assert quotes.valid_speaker("Mary-Jane O'Neil") and quotes.valid_speaker("J. R. Smith")
+        path.write_text("Posted Nov. 18, 2026 by someone")
+        assert quotes.date_on_item("2026-11-18", item, pages) and not quotes.date_on_item("2026-11-17", item, pages)
+        assert quotes.date_on_item("2026-11-17", {"published": "2026-11-17T09:00:00+00:00"}, pages)
         assert quotes.is_source_person("Armin Ronacher", "Armin Ronacher") and not quotes.is_source_person("Bob Troll", "Armin Ronacher")
 
 
@@ -92,7 +102,7 @@ def test_take_guards():
         reg = yaml.safe_load((repo / "sources.yaml").read_text())
         reg["sources"][1] |= {"kind": "lab", "take_paths": ["/engineering/"]}
         (repo / "sources.yaml").write_text(yaml.safe_dump(reg))
-        page = f"By {SPEAKER}. {EXCERPT}"
+        page = f"By {SPEAKER}. November 18, 2026. {EXCERPT}"
         items, claims = [], []
         def add(sid, url, published=DAY, claim=None, **fields):
             snap = raw / "pages" / f"p{len(items)}.txt"; snap.write_text(page)
@@ -109,6 +119,19 @@ def test_take_guards():
         assert f"take dated after its feed entry (2026-11-18 > 2026-11-10): {late}" in log
         assert "failed the publication scan" in log and xlink in log
         assert log.count("named speaker or original publication date") == 1   # the lab news page
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, work, raw = fixture(Path(tmp), ("builder",))
+        snap = raw / "pages" / "p.txt"
+        snap.write_text(f"By {SPEAKER}. " + "filler " * 200 + EXCERPT)
+        url = "https://builder.example/e"
+        items = [{"source_id": "builder", "url": url, "snapshot": str(snap), "published": "2026-11-18", "summary": ""}]
+        far = take(url, "Name only in the byline, source not opted in")
+        drop, *_ = publish(repo, work, raw, [far], items)
+        assert drop == [] and "quote not found" in (raw / "run.log").read_text()
+        snap.write_text(f"By {SPEAKER}. {EXCERPT}")
+        items[0]["published"] = DAY
+        drop, *_ = publish(repo, work, raw, [take(url, "No date anywhere")], items)
+        assert drop == [] and "original date not found" in (raw / "run.log").read_text()
 
 
 def test_publication():
@@ -188,7 +211,7 @@ def test_caps_and_audit_paths():
             for n in range(3):
                 url = f"https://builder.example/{sid}/{n}"
                 claims.append(take(url, f"Tip {n} from {sid}", sid=sid))
-                items.append({"source_id": sid, "url": url, "summary": f"{SPEAKER}: {EXCERPT}"})
+                items.append({"source_id": sid, "url": url, "published": "2026-11-18", "summary": f"{SPEAKER}: {EXCERPT}"})
         cached_take = take_id(claims[0])
         replacement_take = take_id(claims[1])
         capped_take = take_id(claims[2])

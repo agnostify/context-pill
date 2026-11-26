@@ -1008,6 +1008,7 @@ sources:
   kind: expert
   seed: false
   enabled: true
+  take_byline: true
   feeds:
   - type: rss
     url: https://borischerny.com/feed.xml
@@ -1029,6 +1030,7 @@ sources:
   kind: expert
   seed: false
   enabled: true
+  take_byline: true
   feeds:
   - type: rss
     url: https://lucumr.pocoo.org/feed.atom
@@ -1050,6 +1052,7 @@ sources:
   kind: expert
   seed: false
   enabled: true
+  take_byline: true
   feeds:
   - type: rss
     url: https://hamel.dev/index.xml
