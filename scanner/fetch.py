@@ -5,9 +5,10 @@ import json, re, os, datetime as dt, hashlib, sys, urllib.parse
 import requests
 from pathlib import Path
 import feedparser, yaml
-from . import util
+from . import quotes, util
 
 PAGE_CAP_PER_SITE = 20
+DEFAULT_SNAPSHOT_CHARS = 24_000
 ITEM_MEMORY_DAYS = 45          # item URLs already ingested in the last 45 days are not ingested again
 
 
@@ -64,9 +65,13 @@ def feed_items(src, feed, since):
         if _blocked(link):
             continue
         desc = e.get("summary", "") or ""
-        out.append({"source_id": src["id"], "source": src["name"], "feed": feed["url"], "kind": feed["type"],
-                    "title": e.get("title", "").strip(), "url": link, "published": w.isoformat(),
-                    "summary": util.html_to_text(desc, 1500)})
+        item = {"source_id": src["id"], "source": src["name"], "feed": feed["url"], "kind": feed["type"],
+                "title": e.get("title", "").strip(), "url": link, "published": w.isoformat(),
+                "summary": util.html_to_text(desc, 1500)}
+        # Preserve turn detection without changing the flattened RSS excerpt used by other callers.
+        if quotes.summary_has_turns(util.html_to_text(desc, 1500, keep_lines=True, summary=True)):
+            item["summary_has_turns"] = True
+        out.append(item)
     return out
 
 
@@ -105,7 +110,7 @@ def sitemap_items(src, feed, since, seen):
     return out, first_run, len(known)
 
 
-def snapshot(item, pages_dir, counts):
+def snapshot(item, pages_dir, source):
     host = re.sub(r"^https?://([^/]+).*", r"\1", item["url"])
     if item["kind"] == "youtube" or _blocked(item["url"]) or util.page_count(host) >= PAGE_CAP_PER_SITE:
         return
@@ -114,7 +119,8 @@ def snapshot(item, pages_dir, counts):
         r = util.get(item["url"])
         if r.status_code >= 400:
             item["snapshot_error"] = f"HTTP {r.status_code}"; return
-        text = util.html_to_text(r.text, 24000)
+        limit = source.get("snapshot_chars", DEFAULT_SNAPSHOT_CHARS)
+        text = util.html_to_text(r.text, limit, keep_lines=source.get("transcript") is True)
         if not item["title"]:
             m = re.search(r"(?is)<title[^>]*>(.*?)</title>", r.text)
             item["title"] = util.html_to_text(m.group(1), 200) if m else item["url"]
@@ -175,9 +181,9 @@ def run(repo, work, date, hours):
     for u in uniq:
         mem.setdefault(u, date)
     report.append({"source": "_dedupe", "status": "ok", "note": f"{repeats} items skipped as already ingested on an earlier day"})
-    counts = {}
+    source_by_id = {s["id"]: s for s in sources}
     for i in items:
-        snapshot(i, pages, counts)
+        snapshot(i, pages, source_by_id[i["source_id"]])
     # feeds skipped as already fetched today: keep the items an earlier run of the same day ingested, so a rerun never
     # overwrites the day's items with fewer
     old_p = raw / "items.json"

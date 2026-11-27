@@ -490,6 +490,8 @@ sources:
   kind: expert
   seed: false
   enabled: true
+  transcript: true
+  snapshot_chars: 200000
   feeds:
   - type: rss
     url: https://www.latent.space/feed

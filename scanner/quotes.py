@@ -1,6 +1,7 @@
 """Match excerpts against the scanner's saved page text and RSS summary."""
 import re
 import unicodedata
+from collections import Counter
 from pathlib import Path
 
 
@@ -13,6 +14,115 @@ def _normalize(text):
 SPEAKER_WINDOW = 200          # the speaker's name must appear within this many characters before the quote, in the same text
 SPEAKER_AFTER = 80            # or this close after it ('...,' said Ada Builder)
 BYLINE_ZONE = 1000            # or, for the page's own author, in the first this-many characters of the saved page (the byline)
+MAX_SNAPSHOT_CHARS = 200_000
+
+_BOUNDARY_CHARS = 60
+_TIMESTAMP = r"[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?"
+_TIME_MARK = rf"(?:\({_TIMESTAMP}\)|\[{_TIMESTAMP}\]|{_TIMESTAMP})"
+_EDGE_TIMESTAMP = re.compile(
+    rf"^(?P<leading>{_TIME_MARK})(?![0-9])"
+    rf"|^[^:]*?(?P<trailing>{_TIME_MARK})(?=\s*(?:\([^()]*\)\s*)?(?::|$))")
+_ROLE_NOTES = re.compile(r"(?:\s*\((?:guest|host|co-host|interviewer|moderator)\))+$", re.IGNORECASE)
+_SUMMARY_NOTE = re.compile(r"\s*\([^()]*\)$")
+_NAME_WORD = r"(?:(?:[^\W\d_]\.)+|[^\W\d_]+(?:[-'\u2019][^\W\d_]+)*)"
+_SUMMARY_LABEL = re.compile(rf"(?<![\w'\u2019-])({_NAME_WORD}(?:[^\S\r\n]+{_NAME_WORD})*)[^\S\r\n]*:")
+_BRACKETED_LABEL = re.compile(r"^([^()\[\]{}]+)[(\[{].*[)\]}]\s*(?::|$)")
+
+
+def turn_labels(text, *, summary=False):
+    """Map boundary line indices to the start of speech and a normalized speaker name, if shaped like one."""
+    boundaries = {}
+    notes = _SUMMARY_NOTE if summary else _ROLE_NOTES
+    for i, raw in enumerate(text.splitlines()):
+        line = raw.strip()
+        if not line:
+            continue                  # a blank line never changes who is speaking (labels often sit on their own line)
+        colon = line.find(":", 0, _BOUNDARY_CHARS)
+        if len(line) > _BOUNDARY_CHARS and colon == -1:
+            # A name followed by a long bracket note can still end the previous turn.
+            bracketed = _BRACKETED_LABEL.match(line) if not summary else None
+            if bracketed and valid_speaker(" ".join(bracketed[1].split())):
+                boundaries[i] = (len(line), None)
+            continue
+        timestamp = _EDGE_TIMESTAMP.match(line) if colon != -1 else None
+        if timestamp:
+            # Colons inside a timestamp are part of the label.
+            start, end = timestamp.span(timestamp.lastgroup)
+            colon = line.find(":", end, _BOUNDARY_CHARS)
+        label = line if colon == -1 else line[:colon]
+        if timestamp:
+            label = label[:start] + label[end:]
+        label = " ".join(notes.sub("", label.rstrip()).split())
+        speech_start = len(line) if colon == -1 else colon + 1
+        boundaries[i] = (speech_start, _normalize(label) if valid_speaker(label) else None)
+    return boundaries
+
+
+def _creditable_labels(boundaries, minimum=5):
+    counts = Counter(label for _, label in boundaries.values() if label is not None)
+    return {label: count for label, count in counts.items() if count >= minimum}
+
+
+def _enough_creditable_labels(creditable):
+    return len(creditable) >= 2 and sum(creditable.values()) >= 20
+
+
+def _has_turns(boundaries, creditable):
+    if not _enough_creditable_labels(creditable):
+        return False
+    labels = [label for _, label in boundaries.values() if label in creditable]
+    return sum(first != second for first, second in zip(labels, labels[1:])) >= 10
+
+
+def has_turns(boundaries):
+    return _has_turns(boundaries, _creditable_labels(boundaries))
+
+
+def summary_has_turns(text):
+    """Keep the existing feed-summary guard for sources without a transcript snapshot."""
+    return len(_creditable_labels(turn_labels(text, summary=True), minimum=3)) >= 2
+
+
+def _summary_names_other_speaker(text, speaker):
+    name = _normalize(speaker)
+    for match in _SUMMARY_LABEL.finditer(text):
+        words = match[1].split()
+        label = []
+        for word in reversed(words):
+            if not word[0].istitle():
+                break
+            label.append(word)
+        if 1 <= len(label) <= 6 and _normalize(" ".join(reversed(label))) != name:
+            return True
+    return False
+
+
+def quote_in_turn(excerpt, speaker, text):
+    """Match one speech line before the last two speech turns, without another creditable name in between."""
+    boundaries = turn_labels(text)
+    creditable = _creditable_labels(boundaries)
+    name = _normalize(speaker)
+    if name not in creditable or not _has_turns(boundaries, creditable):
+        return False
+    lines = [line.strip() for line in text.splitlines()]
+    ends = list(boundaries)[1:] + [len(lines)]
+    speech_turns = [(i, start, end, label) for (i, (start, label)), end in zip(boundaries.items(), ends)
+                    if label in creditable and (lines[i][start:].strip() or any(lines[i + 1:end]))]
+    other_names = creditable.keys() - {name}
+    needle = _normalize(excerpt)
+    for i, start, end, label in speech_turns[:-2]:
+        if label != name:
+            continue
+        for j in range(i, end):
+            line = _normalize(lines[j])
+            offset = len(_normalize(lines[i][:start])) if j == i else 0
+            matches = _find(needle, line[offset:])
+            if matches:
+                through_quote = _normalize(" ".join(lines[i:j] + [line[:offset + matches[0][1]]]))
+                if not any(_find(other, through_quote) for other in other_names):
+                    return True
+                break
+    return False
 
 
 def _find(needle, hay):
@@ -78,9 +188,10 @@ def _texts(item, pages):
     try:
         if item and item.get("snapshot"):
             path = Path(item["snapshot"]).resolve()
-            if path.is_relative_to(pages.resolve()) and path.is_file():
-                with path.open(encoding="utf-8") as f:
-                    out.append(f.read(24000))
+            if not path.is_relative_to(pages.resolve()) or not path.is_file():
+                return []
+            with path.open(encoding="utf-8") as f:
+                out.append(f.read(MAX_SNAPSHOT_CHARS))
         if item and isinstance(item.get("summary"), str):
             out.append(item["summary"][:1500])
     except (OSError, ValueError, RuntimeError, TypeError):
@@ -98,32 +209,23 @@ def is_source_person(speaker, source_name):
 
 
 def matches_item(excerpt, item, pages, speaker=None, byline_ok=False):
-    """The excerpt must appear in the item's saved page text or its RSS summary. With a speaker (takes), the speaker's
-    name must appear near the quote in the same text; or, when byline_ok (the speaker is the source's own person, or the
-    source is a lab page), the name may instead sit in the saved page's byline zone with the quote anywhere on the page."""
+    """Match takes using transcript turns or the source's proximity and byline rules."""
     if not item or not valid_excerpt(excerpt):
         return False
-    try:
-        texts = []
-        if item.get("snapshot"):
-            path = Path(item["snapshot"]).resolve()
-            if not path.is_relative_to(pages.resolve()) or not path.is_file():
-                return False
-            with path.open(encoding="utf-8") as f:
-                texts.append(f.read(24000))
-        summary = item.get("summary")
-        if isinstance(summary, str):
-            texts.append(summary[:1500])
-        if speaker is not None:
-            if not valid_speaker(speaker):
-                return False
-            if any(quote_near_speaker(excerpt, speaker, t) for t in texts):
-                return True
-            page = texts[0] if item.get("snapshot") and texts else ""
-            return bool(byline_ok and page and in_byline(speaker, page) and quote_found(excerpt, page))
+    texts = _texts(item, pages)
+    if speaker is None:
         return any(quote_found(excerpt, t) for t in texts)
-    except (OSError, ValueError, RuntimeError, TypeError):
+    if not texts or not valid_speaker(speaker):
         return False
+    text = texts[0]
+    if item.get("transcript") is True:
+        return bool(item.get("snapshot") and quote_in_turn(excerpt, speaker, text))
+    if item.get("snapshot"):
+        return any(quote_near_speaker(excerpt, speaker, t) for t in texts) or bool(
+            byline_ok and in_byline(speaker, text) and quote_found(excerpt, text))
+    return (is_source_person(speaker, item.get("source")) and not item.get("summary_has_turns")
+            and not summary_has_turns(text) and not _summary_names_other_speaker(text, speaker)
+            and quote_near_speaker(excerpt, speaker, text))
 
 
 HTTPS_LINK = re.compile(r"^https://[^\"'<>@/\s]+(?:/[^\"'<>\s]*)?$")      # the same shape mcp/server.mjs httpsOnly() accepts

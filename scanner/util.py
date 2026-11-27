@@ -192,8 +192,16 @@ def url_alive(url):
         return None, type(e).__name__
 
 
-def html_to_text(s, limit=20000):
+def html_to_text(s, limit=20000, keep_lines=False, *, summary=False):
     s = re.sub(r"(?is)<(script|style|noscript|svg|nav|footer|header)[^>]*>.*?</\1>", " ", s)
+    if keep_lines:
+        tags = "br|p|div|li|h[1-6]|tr|blockquote|section|article|dt|dd"
+        if not summary:
+            tags += "|td|th|figcaption|hr|pre|table|ul|ol|dl"
+        s = re.sub(rf"(?i)<(?:/?(?:{tags})|/(?:b|strong))(?=[\s/>])[^>]*>", "\n", s)
     s = re.sub(r"(?s)<[^>]+>", " ", s)
     s = html.unescape(s)
+    if keep_lines:
+        s = "\n".join(re.sub(r"[ \t\u00a0]+", " ", line).strip() for line in s.splitlines())
+        return re.sub(r"\n{3,}", "\n\n", s).strip()[:limit]
     return re.sub(r"\s+", " ", s).strip()[:limit]

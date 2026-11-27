@@ -191,7 +191,9 @@ def main():
             rejected.append(f"{c.get('source_id')}: source not enabled"); continue
         if not is_take and category not in SCORABLE_CATS:
             rejected.append(f"{sid}: category {category!r}"); continue
-        v = c.get("verification") or {}
+        v = c.get("verification")
+        if not isinstance(v, dict):
+            v = {}
         if is_take:
             lab_ok = s.get("kind") != "lab" or any(p in (item_url or "") for p in s.get("take_paths") or [])
             if s.get("kind") not in TAKE_KINDS or not lab_ok or v.get("status") != "attributed" or not gate.valid_attribution(c, date):
@@ -211,6 +213,8 @@ def main():
             item = item_by_source_url.get((sid, excerpt_url)) if notes.usable_url(excerpt_url) else None
             pages = raw / "pages"
             if is_take:
+                if item:
+                    item = item | {"transcript": s.get("transcript") is True}
                 # the speaker's name next to the quote; the byline counts only for a lab's listed pages or an opted-in source's own person
                 byline_ok = s.get("kind") == "lab" or (s.get("take_byline") is True and quotes.is_source_person(c.get("speaker"), s.get("name")))
                 if excerpt_url != item_url or not quotes.https_link(excerpt_url) or not quotes.matches_item(excerpt, item, pages, c.get("speaker") or "", byline_ok=byline_ok):
@@ -260,12 +264,15 @@ def main():
         c["scorable"] = category != "take"
         deadline = c.get("prediction_deadline") if c["scorable"] else None
         base = dt.date.fromisoformat(deadline) if deadline else today
+        also_seen_in = c.get("also_seen_in")
+        if not isinstance(also_seen_in, list):
+            also_seen_in = []
         drop.append({
             "id": cid, "date": date, "category": c["category"], "claim": c["claim"], "why_it_matters": c.get("why_it_matters"),
             "try_this": None if is_take else c.get("try_this") if v.get("status") in CHECKED or c.get("try_this") == "not recommended: terms risk" else None,
             "source": {"id": s["id"], "name": s["name"], "home_url": s["home_url"], "tier": t["tier"], "trust_mean": t["trust_mean"],
                        "lb10": t["lb10"], "seed": bool(s.get("seed"))},
-            "also_seen_in": [srcs[x]["name"] for x in c.get("also_seen_in", []) if x in srcs and x != s["id"]],
+            "also_seen_in": [srcs[x]["name"] for x in also_seen_in if isinstance(x, str) and x in srcs and x != s["id"]],
             "item_url": c.get("item_url"), "evidence": c["evidence"],
             "verification": {"status": v.get("status", "unverified"), "method": v.get("method", ""), "checked_at": dt.datetime.now().astimezone().isoformat(timespec="minutes"),
                              "provisional": day_no <= trust.PROVISIONAL_DAYS, "t1_audit_sample": False, "audit_verdict": None, "audit_note": None},
