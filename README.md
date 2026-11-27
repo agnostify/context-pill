@@ -13,7 +13,7 @@
 Hosted MCP server, read-only, no key, no signup:
 
 ```
-claude mcp add --transport http context-pill https://contextpill.com/mcp
+claude mcp add --transport http context-pill "https://contextpill.com/mcp?ref=readme"
 ```
 
 Or as a Claude Code plugin (type these inside Claude Code):
@@ -86,13 +86,13 @@ The MCP endpoint is `https://contextpill.com/mcp` (Streamable HTTP, read-only, n
 **Claude Code**
 
 ```
-claude mcp add --transport http context-pill https://contextpill.com/mcp
+claude mcp add --transport http context-pill "https://contextpill.com/mcp?ref=readme"
 ```
 
 **Codex CLI**
 
 ```
-codex mcp add context-pill --url https://contextpill.com/mcp
+codex mcp add context-pill --url "https://contextpill.com/mcp?ref=readme"
 ```
 
 **Cursor** (`~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project)
@@ -100,7 +100,7 @@ codex mcp add context-pill --url https://contextpill.com/mcp
 ```json
 {
   "mcpServers": {
-    "context-pill": { "url": "https://contextpill.com/mcp" }
+    "context-pill": { "url": "https://contextpill.com/mcp?ref=readme" }
   }
 }
 ```
@@ -110,7 +110,7 @@ codex mcp add context-pill --url https://contextpill.com/mcp
 ```json
 {
   "servers": {
-    "context-pill": { "type": "http", "url": "https://contextpill.com/mcp" }
+    "context-pill": { "type": "http", "url": "https://contextpill.com/mcp?ref=readme" }
   }
 }
 ```
